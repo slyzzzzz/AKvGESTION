@@ -213,11 +213,11 @@ tfoot td:not(:first-child){text-align:right;font-family:'DM Mono',monospace;}
       </div>
       <div class="export-panel">
         <h3>Comment utiliser l'outil ?</h3>
-        <p>Pour chaque exercice : lis l'énoncé → construis ton tableau → remplis les champs → clique <strong>🔍 Corriger</strong> pour voir ton score instantanément. Si tu bloques sur la méthode, clique <strong>⬇ Exporter</strong> et envoie le fichier à Claude/GPT — il corrige tout en détail.</p>
+        <p>Pour chaque exercice : lis l'énoncé → construis ton tableau → remplis les champs → clique <strong>🔍 Corriger</strong> pour voir ton score instantanément. Si tu bloques sur la méthode, clique <strong>⬇ Exporter</strong> et envoie le fichier à Claude — il corrige tout en détail.</p>
         <div class="export-steps">
           <div class="export-step"><div class="step-n">1</div><div class="step-t">Tu fais l'exercice et tu cliques Corriger</div></div>
           <div class="export-step"><div class="step-n">2</div><div class="step-t">Si tu bloques → tu exportes le fichier</div></div>
-          <div class="export-step"><div class="step-n">3</div><div class="step-t">Tu envoies à Claude/GPT → correction complète</div></div>
+          <div class="export-step"><div class="step-n">3</div><div class="step-t">Tu envoies à Claude → correction complète</div></div>
         </div>
       </div>
     </div>
@@ -1067,189 +1067,401 @@ function genE10(){
   return DATA.e10;
 }
 
+
+// ==================== BANQUES DE SYNONYMES ====================
+
+function pick(arr){ return arr[Math.abs(rng(0,arr.length,1)) % arr.length]; }
+function shuffle(arr){
+  // Fisher-Yates avec rng
+  const a=[...arr];
+  for(let i=a.length-1;i>0;i--){
+    const j=Math.abs(rng(0,i+1,1))%(i+1);
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+function maybe(prob=0.5){ return Math.abs(rng(0,100,1))%100 < prob*100; }
+
+const SYN = {
+  // E1/E2 — libellés charges
+  achats: ['Achats de marchandises','Coût d\'achat montures et verres','Achats verres correcteurs et montures','Approvisionnements optiques','Achats de produits revendus'],
+  varStock: ['Variation de stocks','Variation de stock de marchandises','Variation des stocks optiques','Variation stock montures/verres'],
+  personnel: ['Charges de personnel','Salaires bruts et cotisations sociales','Rémunération équipe + charges sociales','Frais de personnel','Salaires et traitements + charges patronales'],
+  loyer: ['Loyer et charges locatives','Bail commercial et charges','Loyer commercial + charges de copropriété','Charges locatives et loyer','Loyer du local commercial'],
+  energie: ['Énergie / téléphone','Fluides et communications','Eau, gaz, électricité, téléphone','Charges d\'énergie et télécommunications','Consommables et énergie'],
+  assurance: ['Assurances et abonnements','Primes d\'assurance et cotisations','Honoraires et assurances','Frais d\'assurance et divers','Assurances professionnelles'],
+  dap: ['Dotations aux amortissements','Dotations aux amortissements (DAP)','Amortissements du matériel et agencements','Dotations amortissements exploitation','Charges calculées — amortissements'],
+  chargesFinanc: ['Charges financières','Intérêts sur emprunts','Charges d\'intérêts bancaires','Frais financiers','Intérêts et agios bancaires'],
+  chargesExt: ['Charges externes','Services extérieurs','Frais généraux divers','Charges de fonctionnement externes','Services et fournitures extérieures'],
+  impotsTaxes: ['Impôts et taxes','Taxes et versements assimilés','Cotisations et impôts d\'exploitation','Taxe foncière et CFE','Impôts d\'exploitation'],
+  chargesExcep: ['Charges exceptionnelles','Charges hors exploitation','Pertes exceptionnelles','Charges non récurrentes'],
+  // E1 — lignes optionnelles
+  optFraisDep: ['Frais de déplacement','Frais kilométriques','Indemnités de déplacement'],
+  optFormation: ['Frais de formation','Formation professionnelle continue','Dépenses de formation'],
+  optEntretien: ['Frais d\'entretien et réparations','Entretien matériel optique','Maintenance équipements'],
+  optFournitures: ['Fournitures de bureau','Consommables atelier','Matières consommables'],
+  optHonoraires: ['Honoraires comptable','Frais d\'expertise comptable','Honoraires conseils'],
+  // E3 — objets d'emprunt
+  objetEmprunt: ['un véhicule utilitaire','une tour de prise de mesures','l\'aménagement du nouveau local','du matériel optique de pointe','un réfractomètre automatique et mobilier','l\'acquisition d\'équipements d\'atelier'],
+  // E4 — noms de biens
+  bienA: [
+    {nom:'Réfractomètre automatique', type:'matériel optique'},
+    {nom:'Tour de prise de mesures', type:'équipement de réfraction'},
+    {nom:'Auto-kératomètre', type:'matériel de mesure'},
+    {nom:'Lampe à fente', type:'matériel d\'examen'},
+    {nom:'Véhicule utilitaire', type:'immobilisation corporelle'},
+    {nom:'Mobilier de magasin', type:'agencement'},
+  ],
+  bienB: [
+    {nom:'Aménagement du local', type:'travaux d\'aménagement'},
+    {nom:'Vitrine et présentoirs', type:'matériel commercial'},
+    {nom:'Logiciel de gestion optique', type:'immobilisation incorporelle'},
+    {nom:'Caisse enregistreuse tactile', type:'matériel informatique'},
+    {nom:'Climatisation du local', type:'installation technique'},
+    {nom:'Enseigne lumineuse', type:'matériel publicitaire'},
+  ],
+  // E5 — libellés bilan
+  fondsComm: ['Fonds commercial','Clientèle et achalandage','Fonds de commerce','Droit au bail + clientèle'],
+  materielBilan: ['Matériel et outillage','Équipements optiques','Matériel de réfraction','Immobilisations corporelles — matériel'],
+  agencBilan: ['Agencements et aménagements','Travaux d\'aménagement','Agencements du local','Installations et aménagements'],
+  immobFin: ['Immobilisations financières','Dépôt de garantie','Caution versée au bailleur','Dépôt de garantie loyer'],
+  stocksBilan: ['Stocks de marchandises','Stocks de montures et verres','Stocks optiques','Inventaire des produits en stock'],
+  creancesBilan: ['Créances clients','Créances et comptes rattachés','Clients et comptes rattachés','Créances d\'exploitation'],
+  dispoBilan: ['Disponibilités','Banque et caisse','Trésorerie disponible','Soldes bancaires et caisse'],
+  capitalBilan: ['Capital social','Capital','Capital personnel'],
+  reservesBilan: ['Réserves','Réserves légales et facultatives','Report à nouveau + réserves'],
+  resNetBilan: ['Résultat net','Résultat de l\'exercice','Bénéfice net de l\'exercice'],
+  empruntBilan: ['Emprunts bancaires LT','Dettes financières à long terme','Emprunts et dettes assimilées','Dettes financières'],
+  fournBilan: ['Dettes fournisseurs','Fournisseurs et comptes rattachés','Dettes d\'exploitation fournisseurs'],
+  fiscSocBilan: ['Dettes fiscales et sociales','Dettes envers l\'État et organismes sociaux','Charges à payer fiscales et sociales'],
+  decouvertBilan: ['Découvert bancaire','Concours bancaires courants','Solde créditeur banque'],
+  // E6 — libellés CAF
+  resNetCAF: ['Résultat net comptable','Résultat de l\'exercice','Bénéfice net de l\'exercice'],
+  dapCAF: ['Dotations aux amortissements','DAP — amortissements','Charges calculées — amortissements'],
+  dappCAF: ['Dotations aux provisions','Dotations aux dépréciations et provisions','Provisions pour risques'],
+  reprisesCAF: ['Reprises sur provisions','Reprises sur dépréciations','Reprises de provisions pour risques'],
+  pvCAF: ['Plus-value sur cession d\'immobilisation','Produit de cession d\'actif immobilisé','Plus-value de cession d\'un bien'],
+  vncCAF: ['VNC du bien cédé','Valeur nette comptable du bien cédé','Valeur résiduelle comptable du bien cédé'],
+  // E7 — produits
+  produitPrix: [
+    {nom:'monture en bois éco-responsable', adj:'élégante'},
+    {nom:'lunettes solaires de sport', adj:'sportive'},
+    {nom:'monture titane ultra-légère', adj:'premium'},
+    {nom:'monture acétate haut de gamme', adj:'tendance'},
+    {nom:'monture recyclée éco-conçue', adj:'durable'},
+    {nom:'lunettes anti-lumière bleue', adj:'connectée'},
+  ],
+  // E8 — objets investissement VAN
+  investVAN: [
+    'une tour de prise de mesures numérique',
+    'un réfractomètre automatique de dernière génération',
+    'un véhicule utilitaire pour l\'optique à domicile',
+    'l\'aménagement complet d\'un espace de réfraction',
+    'un système de gestion optique informatisé',
+    'du matériel d\'atelier haute performance',
+  ],
+  // E9 — descriptions zones
+  zoneADesc: ['Hypercentre — forte attractivité, concurrence directe','Centre-ville historique — zone piétonne très fréquentée','Quartier commercial central — fort trafic quotidien'],
+  zoneBDesc: ['Quartiers proches — zone de transit','Zones résidentielles périphériques — clientèle régulière','Quartiers limitrophes — déplacements domicile-travail'],
+  zoneCDesc: ['Périphérie — clientèle occasionnelle','Zones rurales et hameaux éloignés','Communes voisines — déplacements ponctuels'],
+  // E10 — contextes
+  contexteE10: [
+    {metric:'chiffre d\'affaires global', unite:'€'},
+    {metric:'chiffre d\'affaires montures', unite:'€'},
+    {metric:'chiffre d\'affaires verres correcteurs', unite:'€'},
+    {metric:'nombre d\'équipements vendus', unite:'unités'},
+    {metric:'chiffre d\'affaires solaires', unite:'€'},
+  ],
+};
+
+
 // ==================== RENDER FUNCTIONS ====================
 
 function renderE1(d){
-  document.getElementById('e1-ctx').innerHTML = `<strong>Mise en situation :</strong> Pour l'exercice 2025, Optique AkVision a réalisé un chiffre d'affaires HT de <strong>${fmt(d.ca)} €</strong>. Maxime vous remet les données suivantes. Les charges d'énergie sont <strong>${d.pctVar} % variables</strong> et ${100-d.pctVar} % fixes. Le magasin est ouvert <strong>${d.jours} jours</strong> par an.`;
+  // Choisir les libellés
+  const lAchats = pick(SYN.achats);
+  const lVarStock = pick(SYN.varStock);
+  const lPersonnel = pick(SYN.personnel);
+  const lLoyer = pick(SYN.loyer);
+  const lEnergie = pick(SYN.energie);
+  const lAssurance = pick(SYN.assurance);
+  const lDap = pick(SYN.dap);
+  const lChargesFinanc = pick(SYN.chargesFinanc);
+  // Charge mixte : énergie (toujours) mais le libellé varie
+  const pctV = d.pctVar;
+  const mixteLib = `Mixte (${pctV}% var. / ${100-pctV}% fixe)`;
+  // Lignes optionnelles (présentes ou absentes selon tirage)
+  const optLines = [];
+  if(maybe(0.45)) optLines.push({lib:pick(SYN.optEntretien), val:rng(1500,4500,500), nat:'Fixe'});
+  if(maybe(0.35)) optLines.push({lib:pick(SYN.optFournitures), val:rng(800,2500,200), nat:'Variable'});
+  if(maybe(0.35)) optLines.push({lib:pick(SYN.optHonoraires), val:rng(1200,3500,300), nat:'Fixe'});
+  if(maybe(0.3)) optLines.push({lib:pick(SYN.optFraisDep), val:rng(600,2000,200), nat:'Variable'});
+  // Lignes fixes obligatoires
+  const fixedLines = [
+    {lib:lAchats, val:d.achats, nat:'Variable', key:'achats'},
+    {lib:lVarStock, val:d.varStock, nat:'Variable', key:'varStock', signed:true},
+    {lib:lPersonnel, val:d.personnel, nat:'Fixe', key:'personnel'},
+    {lib:lLoyer, val:d.loyer, nat:'Fixe', key:'loyer'},
+    {lib:lEnergie, val:d.energie, nat:mixteLib, key:'energie'},
+    {lib:lAssurance, val:d.assurance, nat:'Fixe', key:'assurance'},
+    {lib:lDap, val:d.dap, nat:'Fixe', key:'dap'},
+    {lib:lChargesFinanc, val:d.chargesFinanc, nat:'Fixe', key:'chargesFinanc'},
+  ];
+  // Mélanger les lignes (sauf achats et varStock qui restent ensemble en tête)
+  const head = fixedLines.slice(0,2);
+  const tail = shuffle([...fixedLines.slice(2), ...optLines]);
+  const allLines = [...head, ...tail];
+  // Contexte : préciser quelle charge est mixte
+  document.getElementById('e1-ctx').innerHTML = `<strong>Mise en situation :</strong> Pour l'exercice 2025, Optique AkVision a réalisé un chiffre d'affaires HT de <strong>${fmt(d.ca)} €</strong>. Maxime vous remet les données suivantes. <em>${lEnergie}</em> est une charge mixte : <strong>${pctV}% variable</strong> et ${100-pctV}% fixe. Le magasin est ouvert <strong>${d.jours} jours</strong> par an.`;
+  const rows = allLines.map(l => {
+    const val = l.signed ? `${l.val>=0?'+':''} ${fmt(Math.abs(l.val))}` : fmt(l.val);
+    return `<tr><td>${l.lib}</td><td>${val}</td><td>${l.nat}</td></tr>`;
+  }).join('');
   document.getElementById('e1-data-table').innerHTML = `
     <thead><tr><th>Élément</th><th>Montant (€ HT)</th><th>Nature</th></tr></thead>
-    <tbody>
-      <tr><td>Achats de marchandises</td><td>${fmt(d.achats)}</td><td>Variable</td></tr>
-      <tr><td>Variation de stock (signe)</td><td>${d.varStock>=0?'+':''} ${fmt(d.varStock)}</td><td>Variable</td></tr>
-      <tr><td>Charges de personnel</td><td>${fmt(d.personnel)}</td><td>Fixe</td></tr>
-      <tr><td>Loyer et charges locatives</td><td>${fmt(d.loyer)}</td><td>Fixe</td></tr>
-      <tr><td>Énergie / téléphone</td><td>${fmt(d.energie)}</td><td>Mixte (${d.pctVar}% var. / ${100-d.pctVar}% fixe)</td></tr>
-      <tr><td>Assurances et abonnements</td><td>${fmt(d.assurance)}</td><td>Fixe</td></tr>
-      <tr><td>Dotations aux amortissements</td><td>${fmt(d.dap)}</td><td>Fixe</td></tr>
-      <tr><td>Charges financières</td><td>${fmt(d.chargesFinanc)}</td><td>Fixe</td></tr>
-    </tbody>`;
+    <tbody>${rows}</tbody>`;
   document.getElementById('e1-q1').innerHTML = `Présentez le <strong>compte de résultat différentiel</strong> en distinguant charges variables et charges fixes. Faites apparaître le CA, les CV, la MSCV, les CF et le résultat.`;
   document.getElementById('e1-q2').innerHTML = `Calculez le <strong>TMCV</strong>, le <strong>seuil de rentabilité en valeur</strong> et le <strong>point mort en jours</strong>. Interprétez en 2 lignes.`;
-  document.getElementById('e1-trap').textContent = `La variation de stock ${d.varStock>=0?'positive (déstockage) augmente':'négative (stockage) réduit'} le coût des marchandises vendues. Les charges d'énergie sont mixtes : ventile-les avant de classer (${d.pctVar}% variable = ${fmt(Math.round(d.energie*d.pctVar/100))} €).`;
+  document.getElementById('e1-trap').textContent = `La variation de stock ${d.varStock>=0?'positive (déstockage) augmente':'négative (stockage) réduit'} le coût des marchandises vendues. La charge "${lEnergie}" est mixte : ventile-les avant de classer (${pctV}% variable = ${fmt(Math.round(d.energie*pctV/100))} €). Attention aux lignes optionnelles : identifie leur nature avant de les classer.`;
 }
 
 function renderE2(d){
-  document.getElementById('e2-ctx').innerHTML = `<strong>Mise en situation :</strong> Voici le compte de résultat 2025 d'Optique AkVision (CA HT : <strong>${fmt(d.ca)} €</strong>). Maxime veut calculer ses SIG et se comparer aux ratios de la profession.`;
+  const lAchats=pick(SYN.achats), lVarStock=pick(SYN.varStock);
+  const lChargesExt=pick(SYN.chargesExt), lImpots=pick(SYN.impotsTaxes);
+  const lPersonnel=pick(SYN.personnel), lDap=pick(SYN.dap);
+  const lChargesFinanc=pick(SYN.chargesFinanc), lChargesExcep=pick(SYN.chargesExcep);
+  // Lignes charges mélangées (sauf achats/varStock en tête)
+  const chargesLines = shuffle([
+    {lib:lChargesExt, val:d.chargesExt},
+    {lib:lImpots, val:d.impotsTaxes},
+    {lib:lPersonnel, val:d.personnel},
+    {lib:lDap, val:d.dap},
+    {lib:lChargesFinanc, val:d.chargesFinanc},
+    {lib:lChargesExcep, val:d.chargesExcep},
+    {lib:'Impôt sur les sociétés (IS)', val:d.is},
+  ]);
+  // Produits (fixes)
+  const varStockFmt = `${d.varStock>=0?'+':''} ${fmt(Math.abs(d.varStock))}`;
+  document.getElementById('e2-ctx').innerHTML = `<strong>Mise en situation :</strong> Voici le compte de résultat 2025 d'Optique AkVision (CA HT : <strong>${fmt(d.ca)} €</strong>). Maxime veut calculer ses SIG et se comparer aux ratios de la profession en région.`;
+  const chargesRows = chargesLines.map(l=>`<tr><td>${l.lib}</td><td>${fmt(l.val)}</td><td></td><td></td></tr>`).join('');
   document.getElementById('e2-data-table').innerHTML = `
     <thead><tr><th>CHARGES</th><th>€</th><th>PRODUITS</th><th>€</th></tr></thead>
     <tbody>
-      <tr><td>Achats de marchandises</td><td>${fmt(d.achats)}</td><td>Ventes de marchandises</td><td>${fmt(d.ca)}</td></tr>
-      <tr><td>Variation de stock (charges)</td><td>${d.varStock>=0?'+':''} ${fmt(d.varStock)}</td><td>Produits financiers</td><td>${fmt(d.prodFinanc)}</td></tr>
-      <tr><td>Charges externes</td><td>${fmt(d.chargesExt)}</td><td>Produits exceptionnels</td><td>${fmt(d.prodExcep)}</td></tr>
-      <tr><td>Impôts et taxes</td><td>${fmt(d.impotsTaxes)}</td><td></td><td></td></tr>
-      <tr><td>Charges de personnel</td><td>${fmt(d.personnel)}</td><td></td><td></td></tr>
-      <tr><td>Dotations amortissements</td><td>${fmt(d.dap)}</td><td></td><td></td></tr>
-      <tr><td>Charges financières</td><td>${fmt(d.chargesFinanc)}</td><td></td><td></td></tr>
-      <tr><td>Charges exceptionnelles</td><td>${fmt(d.chargesExcep)}</td><td></td><td></td></tr>
-      <tr><td>IS</td><td>${fmt(d.is)}</td><td></td><td></td></tr>
+      <tr><td>${lAchats}</td><td>${fmt(d.achats)}</td><td>Ventes de marchandises</td><td>${fmt(d.ca)}</td></tr>
+      <tr><td>${lVarStock}</td><td>${varStockFmt}</td><td>Produits financiers</td><td>${fmt(d.prodFinanc)}</td></tr>
+      ${chargesRows}
+      <tr><td>Produits exceptionnels</td><td></td><td>${fmt(d.prodExcep)}</td><td></td></tr>
     </tbody>
     <tfoot><tr><td>Résultat net</td><td>${fmt(d.resNet)}</td><td></td><td></td></tr></tfoot>`;
-  const tmc = (d.mc/d.ca*100).toFixed(1);
-  const tva = (d.va/d.ca*100).toFixed(1);
-  const tebe = (d.ebe/d.ca*100).toFixed(1);
-  const trcai = (d.rcai/d.ca*100).toFixed(1);
+  const tmc=(d.mc/d.ca*100).toFixed(1), tva=(d.va/d.ca*100).toFixed(1);
+  const tebe=(d.ebe/d.ca*100).toFixed(1), trcai=(d.rcai/d.ca*100).toFixed(1);
+  const regions=['Occitanie','Île-de-France','Auvergne-Rhône-Alpes','PACA','Bretagne','Grand Est'];
+  const region=pick(regions);
   document.getElementById('e2-ratios-table').innerHTML = `
-    <thead><tr><th>Indicateur</th><th>Ratio profession (Occitanie)</th></tr></thead>
+    <thead><tr><th>Indicateur</th><th>Ratio profession (${region})</th></tr></thead>
     <tbody>
-      <tr><td>Taux de marge commerciale</td><td>${(parseFloat(tmc)+rng(-5,5,1)).toFixed(0)} %</td></tr>
-      <tr><td>Taux de valeur ajoutée</td><td>${(parseFloat(tva)+rng(-6,6,1)).toFixed(0)} %</td></tr>
-      <tr><td>Taux d'EBE</td><td>${(parseFloat(tebe)+rng(-5,5,1)).toFixed(0)} %</td></tr>
-      <tr><td>Taux de RCAI</td><td>${(parseFloat(trcai)+rng(-4,4,1)).toFixed(0)} %</td></tr>
+      <tr><td>Taux de marge commerciale</td><td>${Math.max(40,Math.min(80,(parseFloat(tmc)+rng(-6,6,1))))} %</td></tr>
+      <tr><td>Taux de valeur ajoutée</td><td>${Math.max(30,Math.min(70,(parseFloat(tva)+rng(-7,7,1))))} %</td></tr>
+      <tr><td>Taux d'EBE</td><td>${Math.max(10,Math.min(40,(parseFloat(tebe)+rng(-6,6,1))))} %</td></tr>
+      <tr><td>Taux de RCAI</td><td>${Math.max(4,Math.min(20,(parseFloat(trcai)+rng(-4,4,1))))} %</td></tr>
     </tbody>`;
   document.getElementById('e2-q1').innerHTML = `Calculez les SIG suivants en valeur et en % du CA HT : <strong>marge commerciale, valeur ajoutée, EBE, résultat d'exploitation, RCAI</strong>.`;
-  document.getElementById('e2-q2').innerHTML = `<strong>Commentez</strong> les résultats en les comparant aux ratios de la profession. Concluez sur la performance de AkVision en 3 lignes.`;
-  document.getElementById('e2-trap').textContent = `Attention à la variation de stock : si elle est inscrite en charges avec un signe −, c'est un stockage qui réduit le coût des marchandises vendues. Formule MC = Ventes − (Achats + Variation de stock). La VA se calcule MC − Charges externes uniquement (pas le personnel !).`;
+  document.getElementById('e2-q2').innerHTML = `<strong>Commentez</strong> les résultats en les comparant aux ratios de la profession en ${region}. Concluez sur la performance d'AkVision en 3 lignes.`;
+  document.getElementById('e2-trap').textContent = `Attention à la variation de stock "${lVarStock}" : signe − = stockage, réduit le coût des marchandises vendues. Formule MC = Ventes − (${lAchats} + Variation de stock). La VA se calcule MC − Charges externes uniquement (pas le personnel !).`;
 }
 
 function renderE3(d){
-  document.getElementById('e3-ctx').innerHTML = `<strong>Mise en situation :</strong> Maxime contracte un emprunt de <strong>${fmt(d.capital)} €</strong> au taux de <strong>${d.taux} %</strong> sur <strong>${d.duree} ans</strong> avec remboursement par annuités constantes. Première échéance au 31/12/2025. Frais de dossier : ${fmt(d.frais)} €.`;
+  const objet = pick(SYN.objetEmprunt);
+  const modes = ['Annuités constantes','Remboursement par annuités constantes','Mensualités constantes sur la durée'];
+  const modeLabel = pick(modes);
+  document.getElementById('e3-ctx').innerHTML = `<strong>Mise en situation :</strong> Maxime contracte un emprunt de <strong>${fmt(d.capital)} €</strong> pour financer ${objet}. Taux : <strong>${d.taux} %</strong> sur <strong>${d.duree} ans</strong>. Première échéance au 31/12/2025. Frais de dossier : ${fmt(d.frais)} €.`;
+  const params = shuffle([
+    {lib:'Taux d\'intérêt annuel', val:`${d.taux} %`},
+    {lib:'Durée', val:`${d.duree} ans`},
+    {lib:'Frais de dossier', val:`${fmt(d.frais)} €`},
+    {lib:'Mode de remboursement', val:modeLabel},
+  ]);
+  const rows = params.map(p=>`<tr><td>${p.lib}</td><td>${p.val}</td></tr>`).join('');
   document.getElementById('e3-data-table').innerHTML = `
     <thead><tr><th>Paramètre</th><th>Valeur</th></tr></thead>
     <tbody>
       <tr><td>Montant emprunté</td><td>${fmt(d.capital)} €</td></tr>
-      <tr><td>Taux d'intérêt annuel</td><td>${d.taux} %</td></tr>
-      <tr><td>Durée</td><td>${d.duree} ans</td></tr>
-      <tr><td>Frais de dossier</td><td>${fmt(d.frais)} €</td></tr>
-      <tr><td>Mode de remboursement</td><td>Annuités constantes</td></tr>
+      ${rows}
     </tbody>`;
-  document.getElementById('e3-q1').innerHTML = `Calculez l'<strong>annuité constante</strong> (arrondie à l'euro), puis dressez le <strong>tableau d'amortissement complet</strong> sur ${d.duree} ans (colonnes : capital dû début, intérêts, capital remboursé, annuité, capital dû fin).`;
+  document.getElementById('e3-q1').innerHTML = `Calculez l'<strong>annuité constante</strong> (arrondie à l'euro), puis dressez le <strong>tableau d'amortissement complet</strong> sur ${d.duree} ans.`;
   document.getElementById('e3-q2').innerHTML = `Calculez le <strong>coût total de l'emprunt</strong> incluant les frais de dossier. Commentez en 2 lignes.`;
-  document.getElementById('e3-trap').textContent = `L'annuité est constante mais la répartition intérêts/capital change à chaque échéance. La dernière ligne doit laisser capital restant dû = 0. Si ce n'est pas le cas, ajuste la dernière annuité. Les frais de dossier s'ajoutent en dehors du tableau.`;
+  document.getElementById('e3-trap').textContent = `L'annuité est constante mais la répartition intérêts/capital change à chaque échéance. La dernière ligne doit laisser capital restant dû = 0. Les frais de dossier (${fmt(d.frais)} €) s'ajoutent en dehors du tableau.`;
 }
 
 function renderE4(d){
-  document.getElementById('e4-ctx').innerHTML = `<strong>Mise en situation :</strong> Maxime acquiert deux biens. <strong>Bien A</strong> : mis en service le 1er ${d.moisA} 2025 (durée ${d.dureeA} ans, valeur résiduelle 0 €). <strong>Bien B</strong> : mis en service le 15 ${d.moisB} 2025 (durée ${d.dureeB} ans, valeur résiduelle ${fmt(d.vrB)} €). L'exercice comptable coïncide avec l'année civile.`;
+  const bA = pick(SYN.bienA);
+  const bB = pick(SYN.bienB);
+  document.getElementById('e4-ctx').innerHTML = `<strong>Mise en situation :</strong> Optique AkVision acquiert deux immobilisations. <strong>${bA.nom}</strong> (${bA.type}) mis en service le 1er ${d.moisA} 2025, durée ${d.dureeA} ans, sans valeur résiduelle. <strong>${bB.nom}</strong> (${bB.type}) mis en service le 15 ${d.moisB} 2025, durée ${d.dureeB} ans, valeur résiduelle ${fmt(d.vrB)} €.`;
+  const rows = shuffle([
+    {lib:'Coût d\'achat HT', valA:`${fmt(d.coutA)} €`, valB:`${fmt(d.coutB)} €`},
+    {lib:'Date de mise en service', valA:`1er ${d.moisA} 2025`, valB:`15 ${d.moisB} 2025`},
+    {lib:'Durée d\'amortissement', valA:`${d.dureeA} ans`, valB:`${d.dureeB} ans`},
+    {lib:'Valeur résiduelle', valA:'0 €', valB:`${fmt(d.vrB)} €`},
+    {lib:'Mode d\'amortissement', valA:'Linéaire', valB:'Linéaire'},
+  ]);
   document.getElementById('e4-data-table').innerHTML = `
-    <thead><tr><th>Paramètre</th><th>Bien A</th><th>Bien B</th></tr></thead>
-    <tbody>
-      <tr><td>Coût d'achat HT</td><td>${fmt(d.coutA)} €</td><td>${fmt(d.coutB)} €</td></tr>
-      <tr><td>Date mise en service</td><td>1er ${d.moisA} 2025</td><td>15 ${d.moisB} 2025</td></tr>
-      <tr><td>Durée amortissement</td><td>${d.dureeA} ans</td><td>${d.dureeB} ans</td></tr>
-      <tr><td>Valeur résiduelle</td><td>0 €</td><td>${fmt(d.vrB)} €</td></tr>
-      <tr><td>Mode</td><td>Linéaire</td><td>Linéaire</td></tr>
-    </tbody>`;
-  document.getElementById('e4-q1').innerHTML = `Dressez le <strong>plan d'amortissement complet du bien A</strong> avec prorata temporis pour 2025. Colonnes attendues : année, base amortissable, taux, dotation, amortissements cumulés, VNC.`;
-  document.getElementById('e4-q2').innerHTML = `Calculez la <strong>dotation 2025 du bien B</strong> avec prorata temporis (règle : pour un bien mis en service le 15 du mois, retenir le 1er du mois suivant). Justifiez votre calcul.`;
-  document.getElementById('e4-trap').textContent = `Bien B : la valeur résiduelle (${fmt(d.vrB)} €) se déduit de la base amortissable → base = ${fmt(d.coutB)} − ${fmt(d.vrB)} = ${fmt(d.baseB)} €. Pour le bien B mis en service le 15 ${d.moisB}, la règle "mois entier" donne un prorata de ${12-d.moisDebutB} mois (du mois suivant à décembre).`;
+    <thead><tr><th>Paramètre</th><th>${bA.nom}</th><th>${bB.nom}</th></tr></thead>
+    <tbody>${rows.map(r=>`<tr><td>${r.lib}</td><td>${r.valA}</td><td>${r.valB}</td></tr>`).join('')}</tbody>`;
+  document.getElementById('e4-q1').innerHTML = `Dressez le <strong>plan d'amortissement complet du "${bA.nom}"</strong> avec prorata temporis pour 2025. Colonnes : année, base amortissable, taux, dotation, amortissements cumulés, VNC.`;
+  document.getElementById('e4-q2').innerHTML = `Calculez la <strong>dotation 2025 du "${bB.nom}"</strong> avec prorata temporis (règle : pour un bien mis en service le 15 du mois, retenir le 1er du mois suivant). Justifiez votre calcul.`;
+  document.getElementById('e4-trap').textContent = `"${bB.nom}" : la valeur résiduelle (${fmt(d.vrB)} €) se déduit de la base amortissable → base = ${fmt(d.coutB)} − ${fmt(d.vrB)} = ${fmt(d.baseB)} €. Prorata : mis en service le 15 ${d.moisB} → ${12-d.moisDebutB} mois (du mois suivant à décembre).`;
 }
 
 function renderE5(d){
-  document.getElementById('e5-ctx').innerHTML = `<strong>Mise en situation :</strong> Voici le bilan comptable d'Optique AkVision au 31/12/2025. Construisez le bilan fonctionnel et calculez les indicateurs financiers. Les amortissements totaux s'élèvent à <strong>${fmt(d.totalAmts)} €</strong>.`;
+  const lFonds=pick(SYN.fondsComm), lMateriel=pick(SYN.materielBilan);
+  const lAgenc=pick(SYN.agencBilan), lImmobFin=pick(SYN.immobFin);
+  const lStocks=pick(SYN.stocksBilan), lCreances=pick(SYN.creancesBilan);
+  const lDispo=pick(SYN.dispoBilan), lCapital=pick(SYN.capitalBilan);
+  const lReserves=pick(SYN.reservesBilan), lResNet=pick(SYN.resNetBilan);
+  const lEmprunt=pick(SYN.empruntBilan), lFourn=pick(SYN.fournBilan);
+  const lFiscSoc=pick(SYN.fiscSocBilan), lDecouvert=pick(SYN.decouvertBilan);
+  // Mélanger les postes de l'actif (sauf dispo toujours en bas)
+  const actifImmo = shuffle([
+    {lib:lFonds, brut:d.fonds, amt:0, net:d.fonds},
+    {lib:lMateriel, brut:d.materiel, amt:d.amtMateriel, net:d.materiel-d.amtMateriel},
+    {lib:lAgenc, brut:d.agenc, amt:d.amtAgenc, net:d.agenc-d.amtAgenc},
+    {lib:lImmobFin, brut:d.immobFin, amt:0, net:d.immobFin},
+  ]);
+  const actifCirc = shuffle([
+    {lib:lStocks, brut:d.stocks, amt:d.provStocks, net:d.stocks-d.provStocks},
+    {lib:lCreances, brut:d.creances, amt:d.provCreances, net:d.creances-d.provCreances},
+  ]);
+  const actifRows = [...actifImmo, ...actifCirc, {lib:lDispo, brut:d.dispo, amt:0, net:d.dispo}]
+    .map(r=>`<tr><td>${r.lib}</td><td>${fmt(r.brut)}</td><td>${fmt(r.amt)}</td><td>${fmt(r.net)}</td><td></td><td></td></tr>`).join('');
+  // Mélanger passif
+  const passifLines = shuffle([
+    {lib:lCapital, val:d.capital},{lib:lReserves, val:d.reserves},{lib:lResNet, val:d.resNet},
+    {lib:lEmprunt, val:d.emprunt},{lib:lFourn, val:d.detteFourn},
+    {lib:lFiscSoc, val:d.detteFiscSoc},{lib:lDecouvert, val:d.decouvert},
+  ]);
+  document.getElementById('e5-ctx').innerHTML = `<strong>Mise en situation :</strong> Voici le bilan comptable d'Optique AkVision au 31/12/2025. Construisez le bilan fonctionnel et calculez les indicateurs financiers. Les amortissements et provisions totaux s'élèvent à <strong>${fmt(d.totalAmts)} €</strong>.`;
   document.getElementById('e5-data-table').innerHTML = `
     <thead><tr><th>ACTIF</th><th>Brut €</th><th>Amort/Prov €</th><th>Net €</th><th>PASSIF</th><th>Montant €</th></tr></thead>
-    <tbody>
-      <tr><td>Fonds commercial</td><td>${fmt(d.fonds)}</td><td>0</td><td>${fmt(d.fonds)}</td><td>Capital</td><td>${fmt(d.capital)}</td></tr>
-      <tr><td>Matériel</td><td>${fmt(d.materiel)}</td><td>${fmt(d.amtMateriel)}</td><td>${fmt(d.materiel-d.amtMateriel)}</td><td>Réserves</td><td>${fmt(d.reserves)}</td></tr>
-      <tr><td>Agencements</td><td>${fmt(d.agenc)}</td><td>${fmt(d.amtAgenc)}</td><td>${fmt(d.agenc-d.amtAgenc)}</td><td>Résultat net</td><td>${fmt(d.resNet)}</td></tr>
-      <tr><td>Immob. financières</td><td>${fmt(d.immobFin)}</td><td>0</td><td>${fmt(d.immobFin)}</td><td>Emprunts LT</td><td>${fmt(d.emprunt)}</td></tr>
-      <tr><td>Stocks</td><td>${fmt(d.stocks)}</td><td>${fmt(d.provStocks)}</td><td>${fmt(d.stocks-d.provStocks)}</td><td>Dettes fournisseurs</td><td>${fmt(d.detteFourn)}</td></tr>
-      <tr><td>Créances clients</td><td>${fmt(d.creances)}</td><td>${fmt(d.provCreances)}</td><td>${fmt(d.creances-d.provCreances)}</td><td>Dettes fisc. et soc.</td><td>${fmt(d.detteFiscSoc)}</td></tr>
-      <tr><td>Disponibilités</td><td>${fmt(d.dispo)}</td><td>0</td><td>${fmt(d.dispo)}</td><td>Découvert bancaire</td><td>${fmt(d.decouvert)}</td></tr>
-    </tbody>`;
-  document.getElementById('e5-q1').innerHTML = `Établissez le <strong>bilan fonctionnel</strong> au 31/12/2025. Calculez ensuite le <strong>FRNG</strong>, le <strong>BFR</strong> et la <strong>trésorerie nette</strong>. Vérifiez la relation TN = FRNG − BFR.`;
-  document.getElementById('e5-q2').innerHTML = `<strong>Commentez</strong> la situation financière de AkVision à partir des trois indicateurs. La structure est-elle équilibrée ?`;
-  document.getElementById('e5-trap').textContent = `Dans le bilan fonctionnel, tous les postes de l'actif sont pris en valeur BRUTE. Les amortissements cumulés (${fmt(d.totalAmts)} €) rejoignent les ressources stables. Le découvert bancaire va en trésorerie passive, pas dans les passifs circulants.`;
+    <tbody>${actifRows}</tbody>`;
+  // On patch la dernière colonne du passif manuellement
+  const tbl = document.getElementById('e5-data-table');
+  const rows = tbl.querySelectorAll('tbody tr');
+  passifLines.forEach((p,i)=>{ if(rows[i]){ rows[i].cells[4].textContent=p.lib; rows[i].cells[5].textContent=fmt(p.val); }});
+  document.getElementById('e5-q1').innerHTML = `Établissez le <strong>bilan fonctionnel</strong> au 31/12/2025. Calculez le <strong>FRNG</strong>, le <strong>BFR</strong> et la <strong>trésorerie nette</strong>. Vérifiez TN = FRNG − BFR.`;
+  document.getElementById('e5-q2').innerHTML = `<strong>Commentez</strong> la situation financière d'AkVision à partir des trois indicateurs. La structure est-elle équilibrée ?`;
+  document.getElementById('e5-trap').textContent = `Dans le bilan fonctionnel, tous les postes actif sont en valeur BRUTE. Les amortissements (${fmt(d.totalAmts)} €) rejoignent les ressources stables. "${lDecouvert}" va en trésorerie passive, pas dans les passifs circulants.`;
 }
 
 function renderE6(d){
-  document.getElementById('e6-ctx').innerHTML = `<strong>Mise en situation :</strong> Avant de solliciter sa banque pour un investissement de <strong>${fmt(d.invest)} €</strong> dont ${d.pctAuto} % en autofinancement, Maxime veut calculer sa CAF 2025. Il vous communique les éléments suivants.`;
+  const lResNet=pick(SYN.resNetCAF), lDap=pick(SYN.dapCAF);
+  const lDapp=pick(SYN.dappCAF), lReprises=pick(SYN.reprisesCAF);
+  const lPv=pick(SYN.pvCAF), lVnc=pick(SYN.vncCAF);
+  // Mélanger les lignes sauf résultat net (toujours en 1er)
+  const lines = shuffle([
+    {lib:lDap, val:fmt(d.dap), signe:'+'},
+    {lib:lDapp, val:fmt(d.dapp), signe:'+'},
+    {lib:lReprises, val:fmt(d.reprises), signe:'−'},
+    {lib:lPv+' (produit de cession)', val:fmt(d.pvCession), signe:'−'},
+    {lib:lVnc, val:fmt(d.vncCession), signe:'+'},
+  ]);
+  const investObjet = pick(SYN.investVAN);
+  document.getElementById('e6-ctx').innerHTML = `<strong>Mise en situation :</strong> Maxime envisage d'investir <strong>${fmt(d.invest)} €</strong> dans ${investObjet}. Il souhaite financer ${d.pctAuto} % en autofinancement. Calculez sa CAF 2025 à partir des éléments ci-dessous.`;
+  const rows = [
+    `<tr><td>${lResNet}</td><td>${fmt(d.resNet)}</td></tr>`,
+    ...lines.map(l=>`<tr><td>${l.lib}</td><td>${l.val}</td></tr>`)
+  ].join('');
   document.getElementById('e6-data-table').innerHTML = `
     <thead><tr><th>Élément</th><th>Montant (€)</th></tr></thead>
-    <tbody>
-      <tr><td>Résultat net comptable</td><td>${fmt(d.resNet)}</td></tr>
-      <tr><td>Dotations aux amortissements</td><td>${fmt(d.dap)}</td></tr>
-      <tr><td>Dotations aux provisions</td><td>${fmt(d.dapp)}</td></tr>
-      <tr><td>Reprises sur provisions</td><td>${fmt(d.reprises)}</td></tr>
-      <tr><td>Plus-value sur cession d'immobilisation</td><td>${fmt(d.pvCession)}</td></tr>
-      <tr><td>VNC du bien cédé</td><td>${fmt(d.vncCession)}</td></tr>
-    </tbody>`;
-  document.getElementById('e6-q1').innerHTML = `Calculez la <strong>CAF</strong> par la <strong>méthode additive</strong> (à partir du résultat net). Présentez un tableau structuré.`;
+    <tbody>${rows}</tbody>`;
+  document.getElementById('e6-q1').innerHTML = `Calculez la <strong>CAF</strong> par la <strong>méthode additive</strong> (à partir du résultat net). Présentez un tableau structuré avec les signes + et −.`;
   document.getElementById('e6-q2').innerHTML = `La CAF est-elle suffisante pour couvrir l'apport en autofinancement de <strong>${fmt(d.apport)} €</strong> (${d.pctAuto} % de ${fmt(d.invest)} €) ? Justifiez en 2 lignes.`;
-  document.getElementById('e6-trap').textContent = `La plus-value nette à soustraire = PV cession − VNC = ${fmt(d.pvCession)} − ${fmt(d.vncCession)} = ${fmt(d.pvNette)} €. On ne soustrait que la plus-value NETTE car la VNC est déjà dans le résultat (via les dotations antérieures). CAF = Résultat net + DAP + DAPP − Reprises − PV nette.`;
+  document.getElementById('e6-trap').textContent = `Plus-value nette = ${lPv} − ${lVnc} = ${fmt(d.pvCession)} − ${fmt(d.vncCession)} = ${fmt(d.pvNette)} €. On soustrait uniquement la plus-value NETTE. CAF = ${lResNet} + DAP + DAPP − Reprises − PV nette.`;
 }
 
 function renderE7(d){
-  document.getElementById('e7-ctx').innerHTML = `<strong>Mise en situation :</strong> Maxime envisage de lancer une nouvelle monture bois. Il réalise une enquête auprès de <strong>${d.nbRepondants} clients</strong> pour déterminer le prix psychologique. Deux questions : au-dessus de quel prix la trouveriez-vous trop chère ? En dessous de quel prix la trouveriez-vous de mauvaise qualité ?`;
-  let rows = d.prix.map((p,i)=>`<tr><td>${p}</td><td>${d.q1[i]}</td><td>${d.q2[i]}</td></tr>`).join('');
+  const produit = pick(SYN.produitPrix);
+  const nbSondes = d.nbRepondants;
+  document.getElementById('e7-ctx').innerHTML = `<strong>Mise en situation :</strong> Maxime envisage de commercialiser une nouvelle <strong>${produit.nom}</strong>. Pour fixer son prix, il réalise une enquête auprès de <strong>${nbSondes} clients potentiels</strong>. Q1 : Au-dessus de quel prix la jugeriez-vous trop chère ? Q2 : En dessous de quel prix la jugeriez-vous de mauvaise qualité ?`;
+  let rows = d.prix.map((p,i)=>`<tr><td>${p} €</td><td>${d.q1[i]}</td><td>${d.q2[i]}</td></tr>`).join('');
   const tq1=d.q1.reduce((a,b)=>a+b,0), tq2=d.q2.reduce((a,b)=>a+b,0);
   document.getElementById('e7-data-table').innerHTML = `
-    <thead><tr><th>Prix TTC (€)</th><th>Q1 — Trop chère (nb)</th><th>Q2 — Trop bon marché (nb)</th></tr></thead>
+    <thead><tr><th>Prix TTC proposé</th><th>Q1 — Trop chère (nb rép.)</th><th>Q2 — Trop bon marché (nb rép.)</th></tr></thead>
     <tbody>${rows}</tbody>
-    <tfoot><tr><td>Total</td><td>${tq1}</td><td>${tq2}</td></tr></tfoot>`;
-  document.getElementById('e7-q1').innerHTML = `Construisez le <strong>tableau du prix psychologique</strong> avec les colonnes : prix, % Q1, % Q1 cumulé décroissant, % Q2, % Q2 cumulé croissant, % acheteurs potentiels, % non-acheteurs. Déterminez le <strong>prix psychologique optimal</strong>.`;
-  document.getElementById('e7-q2').innerHTML = `Définissez le prix psychologique en 2 lignes et présentez <strong>2 limites</strong> de cette méthode pour Maxime.`;
-  document.getElementById('e7-trap').textContent = `Cumul Q1 : de BAS en HAUT (du prix le plus élevé vers le plus bas — accumule ceux qui trouvent trop cher À CE PRIX OU MOINS). Cumul Q2 : de HAUT en BAS (accumule ceux qui trouvent trop bon marché À CE PRIX OU PLUS). % acheteurs = 100 − %Q1 cumulé − %Q2 cumulé.`;
+    <tfoot><tr><td>Total répondants</td><td>${tq1}</td><td>${tq2}</td></tr></tfoot>`;
+  document.getElementById('e7-q1').innerHTML = `Construisez le <strong>tableau du prix psychologique</strong> (colonnes : prix, % Q1, % Q1 cumulé ↓, % Q2, % Q2 cumulé ↑, % acheteurs potentiels, % non-acheteurs). Déterminez le <strong>prix optimal</strong> pour la "${produit.nom}".`;
+  document.getElementById('e7-q2').innerHTML = `Définissez le prix psychologique en 2 lignes et présentez <strong>2 limites</strong> de cette méthode appliquée à la "${produit.nom}".`;
+  document.getElementById('e7-trap').textContent = `Cumul Q1 : de BAS en HAUT (prix élevé → prix bas). Cumul Q2 : de HAUT en BAS (prix bas → prix élevé). % acheteurs = 100 − %Q1 cumulé − %Q2 cumulé. Le prix optimal est celui qui MAXIMISE ce pourcentage.`;
 }
 
 function renderE8(d){
-  document.getElementById('e8-ctx').innerHTML = `<strong>Mise en situation :</strong> Maxime envisage un investissement de <strong>${fmt(d.invest)} €</strong>. Il estime les FNT prévisionnels sur ${d.duree} ans. La valeur résiduelle en fin de période est de <strong>${fmt(d.vrResid)} €</strong>. Taux d'actualisation : <strong>${d.taux} %</strong>.`;
+  const objet = pick(SYN.investVAN);
   const annees = Array.from({length:d.duree},(_,i)=>2025+i);
-  const coeffsFmt = d.coeffs.map(c=>(Math.round(c*10000)/10000).toFixed(4).replace('.',','));
-  let rows = annees.map((a,i)=>`<tr><td>${a}</td><td>${fmt(d.fnt[i])}${i===d.duree-1?' (dont VR : '+fmt(d.vrResid)+' €)':''}</td><td>1 / (1,0${d.taux})${String.fromCharCode(8304+i+1)} = ${coeffsFmt[i]}</td><td>—</td></tr>`).join('');
+  const coeffsFmt = d.coeffs.map(c=>c.toFixed(4).replace('.',','));
+  const rows = annees.map((a,i)=>`<tr>
+    <td>${a}</td>
+    <td>${fmt(d.fnt[i])}${i===d.duree-1?' (dont VR : '+fmt(d.vrResid)+' €)':''}</td>
+    <td>1 / (1,${String(d.taux/100).replace('0.','0,')})^${i+1} = ${coeffsFmt[i]}</td>
+    <td>—</td>
+  </tr>`).join('');
+  document.getElementById('e8-ctx').innerHTML = `<strong>Mise en situation :</strong> Maxime envisage d'investir <strong>${fmt(d.invest)} €</strong> dans ${objet}. Il estime les flux nets de trésorerie sur <strong>${d.duree} ans</strong>. Valeur résiduelle fin de période : <strong>${fmt(d.vrResid)} €</strong>. Taux d'actualisation retenu : <strong>${d.taux} %</strong>.`;
   document.getElementById('e8-data-table').innerHTML = `
-    <thead><tr><th>Année</th><th>FNT (€)</th><th>Coefficient d'actualisation</th><th>FNT actualisé (€)</th></tr></thead>
+    <thead><tr><th>Année</th><th>FNT (€)</th><th>Coefficient d'actualisation (${d.taux} %)</th><th>FNT actualisé (€)</th></tr></thead>
     <tbody>${rows}</tbody>`;
-  document.getElementById('e8-q1').innerHTML = `Calculez les <strong>FNT actualisés</strong> pour chaque année et complétez le tableau. Calculez la <strong>VAN</strong> de l'investissement.`;
-  document.getElementById('e8-q2').innerHTML = `À partir de la VAN obtenue, <strong>concluez</strong> sur la pertinence de l'investissement. Qu'est-ce qu'une VAN positive/négative signifie concrètement ?`;
-  document.getElementById('e8-trap').textContent = `La valeur résiduelle (${fmt(d.vrResid)} €) est déjà intégrée dans le FNT de la dernière année. VAN = Σ FNT actualisés − Investissement initial (${fmt(d.invest)} €). Si VAN > 0 → investissement rentable. Ne pas oublier de soustraire l'investissement.`;
+  document.getElementById('e8-q1').innerHTML = `Calculez les <strong>FNT actualisés</strong> pour chaque année. Calculez la <strong>VAN</strong> de l'investissement.`;
+  document.getElementById('e8-q2').innerHTML = `Concluez sur la <strong>pertinence de l'investissement</strong> à partir de la VAN. Qu'est-ce qu'une VAN positive signifie concrètement pour Maxime ?`;
+  document.getElementById('e8-trap').textContent = `La valeur résiduelle (${fmt(d.vrResid)} €) est déjà intégrée dans le FNT de la dernière année. VAN = Σ FNT actualisés − Investissement initial (${fmt(d.invest)} €). VAN > 0 → rentable. Ne pas oublier de soustraire l'investissement initial.`;
 }
 
 function renderE9(d){
-  document.getElementById('e9-ctx').innerHTML = `<strong>Mise en situation :</strong> Maxime Verdier envisage d'ouvrir un second point de vente <strong>Optique AkVision</strong> à <strong>${d.ville}</strong>. Avant de se lancer, il souhaite évaluer le potentiel commercial de la zone en analysant sa zone de chalandise divisée en trois sous-zones.`;
+  const descA=pick(SYN.zoneADesc), descB=pick(SYN.zoneBDesc), descC=pick(SYN.zoneCDesc);
+  const zonesLabels=[
+    {prim:'Zone primaire (A)', sec:'Zone secondaire (B)', ter:'Zone tertiaire (C)'},
+    {prim:'Zone 1 — Proximité immédiate', sec:'Zone 2 — Influence élargie', ter:'Zone 3 — Périphérie lointaine'},
+    {prim:'Isochrone 5 min', sec:'Isochrone 15 min', ter:'Isochrone 30 min'},
+  ];
+  const zl = pick(zonesLabels);
+  // Mélanger les infos complémentaires
+  const infos = shuffle([
+    {lib:'Panier moyen par client', val:`${fmt(d.panier)} € TTC`},
+    {lib:'Fréquence de renouvellement de l\'équipement', val:`tous les ${d.freq} an${d.freq>1?'s':''}`},
+    {lib:'Nombre de concurrents recensés dans la zone', val:`${d.concurrents} magasin${d.concurrents>1?'s':''} d'optique`},
+  ]);
+  document.getElementById('e9-ctx').innerHTML = `<strong>Mise en situation :</strong> Maxime Verdier envisage d'ouvrir un second point de vente <strong>Optique AkVision</strong> à <strong>${d.ville}</strong>. Il analyse le potentiel commercial de la zone de chalandise, découpée en trois sous-zones concentriques.`;
   document.getElementById('e9-data-table').innerHTML = `
     <thead><tr><th>Zone</th><th>Population</th><th>Taux de pénétration</th><th>Description</th></tr></thead>
     <tbody>
-      <tr><td><strong>Zone primaire (A)</strong></td><td>${fmt(d.popA)} hab.</td><td>${d.pctA} %</td><td>Hypercentre — forte attractivité, concurrence directe</td></tr>
-      <tr><td><strong>Zone secondaire (B)</strong></td><td>${fmt(d.popB)} hab.</td><td>${d.pctB} %</td><td>Quartiers proches — zone de transit</td></tr>
-      <tr><td><strong>Zone tertiaire (C)</strong></td><td>${fmt(d.popC)} hab.</td><td>${d.pctC} %</td><td>Périphérie — clientèle occasionnelle</td></tr>
+      <tr><td><strong>${zl.prim}</strong></td><td>${fmt(d.popA)} hab.</td><td>${d.pctA} %</td><td>${descA}</td></tr>
+      <tr><td><strong>${zl.sec}</strong></td><td>${fmt(d.popB)} hab.</td><td>${d.pctB} %</td><td>${descB}</td></tr>
+      <tr><td><strong>${zl.ter}</strong></td><td>${fmt(d.popC)} hab.</td><td>${d.pctC} %</td><td>${descC}</td></tr>
     </tbody>`;
   document.getElementById('e9-info-table').innerHTML = `
     <thead><tr><th>Paramètre</th><th>Valeur</th></tr></thead>
-    <tbody>
-      <tr><td>Panier moyen par client</td><td>${fmt(d.panier)} € TTC</td></tr>
-      <tr><td>Fréquence de renouvellement</td><td>tous les ${d.freq} ans</td></tr>
-      <tr><td>Nombre de concurrents dans la zone</td><td>${d.concurrents} magasin(s)</td></tr>
-    </tbody>`;
-  document.getElementById('e9-q1').innerHTML = `Calculez le <strong>nombre de clients potentiels</strong> pour chaque zone (A, B et C). Présentez vos calculs dans un tableau.`;
-  document.getElementById('e9-q2').innerHTML = `Calculez le <strong>chiffre d'affaires potentiel</strong> pour chaque zone puis le <strong>CA potentiel total</strong>.`;
-  document.getElementById('e9-q3').innerHTML = `En tenant compte de la fréquence de renouvellement de <strong>${d.freq} ans</strong>, calculez le <strong>CA annuel prévisionnel</strong> du magasin.`;
-  document.getElementById('e9-q4').innerHTML = `Citez <strong>2 facteurs</strong> pouvant influencer la zone de chalandise. Puis concluez en 2-3 lignes sur l'<strong>attractivité commerciale</strong> de cette implantation.`;
-  document.getElementById('e9-trap').textContent = `Le CA potentiel = clients × panier (sans fréquence) représente le marché théorique global. Le CA ANNUEL = CA potentiel ÷ fréquence de renouvellement. Ne pas confondre les deux. Ici fréquence = ${d.freq} ans donc CA annuel = CA total ÷ ${d.freq}.`;
+    <tbody>${infos.map(i=>`<tr><td>${i.lib}</td><td>${i.val}</td></tr>`).join('')}</tbody>`;
+  document.getElementById('e9-q1').innerHTML = `Calculez le <strong>nombre de clients potentiels</strong> pour chaque zone. Présentez vos calculs.`;
+  document.getElementById('e9-q2').innerHTML = `Calculez le <strong>CA potentiel</strong> de chaque zone et le <strong>CA potentiel total</strong>.`;
+  document.getElementById('e9-q3').innerHTML = `En tenant compte de la fréquence de renouvellement (<strong>${d.freq} an${d.freq>1?'s':''}</strong>), calculez le <strong>CA annuel prévisionnel</strong>.`;
+  document.getElementById('e9-q4').innerHTML = `Citez <strong>2 facteurs</strong> influençant la zone de chalandise. Concluez en 2-3 lignes sur l'<strong>attractivité commerciale</strong> de cette implantation à ${d.ville}.`;
+  document.getElementById('e9-trap').textContent = `CA potentiel brut = clients × panier (marché théorique). CA ANNUEL = CA total ÷ fréquence (${d.freq} ans). Bien distinguer les deux. Ne pas oublier d'appliquer le taux de pénétration à la population de CHAQUE zone.`;
 }
 
 function renderE10(d){
-  const yr1 = d.baseYear, yrN = d.baseYear+d.n-1;
-  document.getElementById('e10-ctx').innerHTML = `<strong>Mise en situation :</strong> Maxime souhaite prévoir le chiffre d'affaires d'Optique AkVision pour <strong>${d.yearPrev}</strong>. Il dispose des données historiques de <strong>${yr1}</strong> à <strong>${yrN}</strong>. Il utilise la méthode des moindres carrés pour ajuster une droite de tendance.`;
+  const ctx10 = pick(SYN.contexteE10);
+  const yr1=d.baseYear, yrN=d.baseYear+d.n-1;
+  // Mélanger ordre des colonnes x² et xy dans l'affichage (pas les calculs)
+  const colsDisplay = maybe(0.5)
+    ? ['x (rang)','y = '+ctx10.metric+' ('+ctx10.unite+')','x²','x·y']
+    : ['Rang x','CA observé ('+ctx10.unite+')','Carré de x','Produit x·y'];
+  document.getElementById('e10-ctx').innerHTML = `<strong>Mise en situation :</strong> Maxime souhaite prévoir le <strong>${ctx10.metric}</strong> d'Optique AkVision pour <strong>${d.yearPrev}</strong>. Il dispose des données de <strong>${yr1}</strong> à <strong>${yrN}</strong> et applique la méthode des moindres carrés.`;
   let rows = d.years.map((y,i)=>`<tr><td>${y}</td><td>${d.xs[i]}</td><td>${fmt(d.ys[i])}</td><td>—</td><td>—</td></tr>`).join('');
   document.getElementById('e10-data-table').innerHTML = `
-    <thead><tr><th>Année</th><th>x (rang)</th><th>y = CA (€)</th><th>x²</th><th>x·y</th></tr></thead>
+    <thead><tr><th>Année</th><th>${colsDisplay[0]}</th><th>${colsDisplay[1]}</th><th>${colsDisplay[2]}</th><th>${colsDisplay[3]}</th></tr></thead>
     <tbody>${rows}</tbody>
-    <tfoot><tr><td>TOTAL</td><td>Σx = ?</td><td>Σy = ?</td><td>Σx² = ?</td><td>Σxy = ?</td></tr></tfoot>`;
-  document.getElementById('e10-q1').innerHTML = `Complétez le tableau en calculant <strong>x²</strong> et <strong>x·y</strong> pour chaque année, puis calculez les totaux <strong>Σx, Σy, Σx², Σxy</strong>.`;
-  document.getElementById('e10-q2').innerHTML = `À partir de vos totaux, calculez les coefficients <strong>a</strong> et <strong>b</strong> de la droite des moindres carrés. Montrez vos calculs.`;
+    <tfoot><tr><td>TOTAL (Σ)</td><td>?</td><td>?</td><td>?</td><td>?</td></tr></tfoot>`;
+  document.getElementById('e10-q1').innerHTML = `Complétez le tableau en calculant <strong>x²</strong> et <strong>x·y</strong> pour chaque année. Calculez <strong>Σx, Σy, Σx², Σxy</strong>.`;
+  document.getElementById('e10-q2').innerHTML = `Calculez les coefficients <strong>a</strong> et <strong>b</strong> de la droite des moindres carrés. Montrez tous vos calculs intermédiaires.`;
   document.getElementById('e10-q3').innerHTML = `Écrivez l'<strong>équation de la droite de tendance</strong> : y = ax + b.`;
-  document.getElementById('e10-q4').innerHTML = `En utilisant cette équation, calculez le <strong>chiffre d'affaires prévisionnel pour ${d.yearPrev}</strong> (x = ${d.xPrev}). Commentez la tendance en 2 lignes.`;
-  document.getElementById('e10-trap').textContent = `Les rangs x commencent à 1 (pas à 0 ni à l'année réelle). x = 1 pour ${yr1}, x = ${d.n} pour ${yrN}, donc x = ${d.xPrev} pour la prévision ${d.yearPrev}. Les formules utilisent n = ${d.n} (nombre d'années, pas le dernier rang).`;
+  document.getElementById('e10-q4').innerHTML = `Calculez le <strong>${ctx10.metric} prévisionnel pour ${d.yearPrev}</strong> (x = ${d.xPrev}). Commentez la tendance observée en 2 lignes.`;
+  document.getElementById('e10-trap').textContent = `Les rangs x commencent à 1 : x=1 pour ${yr1}, x=${d.n} pour ${yrN}, x=${d.xPrev} pour la prévision ${d.yearPrev}. Dans les formules, n = ${d.n} (nombre d'années, pas le dernier rang). Ne pas confondre Σx² et (Σx)².`;
 }
 
 // ==================== TABLE BUILDER ====================
