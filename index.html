@@ -157,7 +157,51 @@ tfoot td:not(:first-child){text-align:right;font-family:'DM Mono',monospace;}
   .export-steps{grid-template-columns:1fr;}.intro-grid{grid-template-columns:1fr;}
   .key-fields{grid-template-columns:1fr;}
 }
+
+/* V6 — NOUVEAUX STYLES */
+.tb-controls-v6{display:flex;gap:6px;align-items:center;margin-bottom:10px;flex-wrap:wrap;}
+.btn-sm-add-col{background:#0e6655;color:#fff;}.btn-sm-add-col:hover{background:#0a5244;}
+.btn-sm-del-col{background:#7d4e00;color:#fff;}.btn-sm-del-col:hover{background:#5c3800;}
+.btn-sm-save{background:#1a5276;color:#fff;}.btn-sm-save:hover{background:#154360;}
+.btn-sm-load{background:#4a235a;color:#fff;}.btn-sm-load:hover{background:#3a1848;}
+.save-badge{font-size:10px;color:#0e6655;font-weight:700;margin-left:6px;display:none;}
+.save-badge.visible{display:inline;}
+/* Question rédaction */
+.q-redac{background:#fff;border:1px solid #c8bfe8;border-radius:8px;padding:14px 18px;margin-top:12px;}
+.q-redac-title{font-size:11px;font-weight:700;color:#4a235a;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;}
+.q-redac-enonce{font-size:13px;color:var(--ink);margin-bottom:10px;line-height:1.6;padding:10px 14px;background:var(--paper-warm);border-left:3px solid #4a235a;border-radius:0 6px 6px 0;}
+.q-redac textarea{width:100%;border:1px solid #c8bfe8;border-radius:6px;padding:9px 12px;font-family:'Barlow',sans-serif;font-size:13px;line-height:1.6;resize:vertical;min-height:90px;background:#fff;color:var(--ink);}
+.q-redac textarea:focus{outline:none;border-color:#4a235a;}
+.q-redac-corr{margin-top:10px;padding:10px 14px;border-radius:6px;font-size:12.5px;display:none;}
+.q-redac-corr.visible{display:block;}
+.q-redac-corr.ok{background:#eafaf1;border:1px solid #a9dfbf;color:#145a32;}
+.q-redac-corr.partial{background:#fef9e7;border:1px solid #f9e79f;color:#7d6608;}
+.q-redac-corr.ko{background:#fadbd8;border:1px solid #f1948a;color:#922b21;}
+.kw-found{display:inline-block;background:#d5f5e3;color:#145a32;border-radius:3px;padding:1px 6px;font-size:11px;font-weight:700;margin:2px;}
+.kw-missing{display:inline-block;background:#fadbd8;color:#922b21;border-radius:3px;padding:1px 6px;font-size:11px;font-weight:700;margin:2px;}
+
 </style>
+
+  <!-- ============ Google Analytics ============ -->
+  <!-- Remplace G-XXXXXXXX par ton vrai ID GA4   -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXX"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-XXXXXXXX');
+
+    // ---- Tracking helper ----
+    function trackEvent(action, category, label){
+      if(typeof gtag === 'function'){
+        gtag('event', action, {
+          event_category: category,
+          event_label: label,
+        });
+      }
+    }
+  </script>
+  <!-- =========================================== -->
 </head>
 <body>
 
@@ -169,6 +213,7 @@ tfoot td:not(:first-child){text-align:right;font-family:'DM Mono',monospace;}
   <div class="header-right">
     <span class="seed-badge">Tirage #<span id="seedDisplay">—</span></span>
     <button class="btn btn-gray" onclick="resetAnswers()">↺ Réinitialiser réponses</button>
+    <button class="btn btn-gold" onclick="saveAllTables()">💾 Tout sauvegarder</button>
     <button class="btn btn-teal" onclick="exportData()">⬇ Exporter mes réponses</button>
     <button class="btn btn-red" onclick="newDraw()">⟳ Nouveau tirage</button>
   </div>
@@ -201,7 +246,7 @@ tfoot td:not(:first-child){text-align:right;font-family:'DM Mono',monospace;}
   <div class="ex-card">
     <div class="ex-inner">
       <div class="ctx">
-        <strong>Magasin fil rouge :</strong> Tous les exercices sont basés sur <strong>Optique AkVision</strong>, LE magasin indépendant. À chaque nouveau tirage, les chiffres changent aléatoirement mais restent cohérents et réalistes.(prochaine MAJ -21H30 03/05/2026 (akvg v5.9.0. à v6.0), merci d'actualiser la page)
+        <strong>Magasin fil rouge :</strong> Tous les exercices sont basés sur <strong>Optique AkVision</strong>, LE magasin indépendant. À chaque nouveau tirage, les chiffres changent aléatoirement mais restent cohérents et réalistes.
       </div>
       <div class="intro-grid">
         <div class="ig-item"><div class="ig-icon">⟳</div><div><strong>Nouveau tirage</strong><span>Régénère tous les chiffres des 10 exercices</span></div></div>
@@ -282,7 +327,18 @@ tfoot td:not(:first-child){text-align:right;font-family:'DM Mono',monospace;}
         <div class="dtitle">Interprétation (2-3 lignes)</div>
         <textarea class="text-answer" id="e1-interp" placeholder="Rédigez votre interprétation ici..."></textarea>
       </div>
-      <button class="corr-btn" onclick="corriger('e1')">🔍 Corriger mes réponses</button>
+            <div class="q-redac">
+        <div class="q-redac-title">❓ Question de rédaction — réponse en 2-4 lignes</div>
+        <div class="q-redac-enonce">Définissez le seuil de rentabilité et expliquez son utilité pour un opticien indépendant.</div>
+        <textarea id="e1-redac" placeholder="Rédigez votre réponse ici..."></textarea>
+        <button class="btn-sm btn-sm-purple" style="margin-top:8px;" onclick="corrigerRedac('e1-redac',["chiffre d"affaires", "charges fixes", "résultat nul", "couvrir", "point mort", "rentabilité", "seuil"],["charges fixes", "résultat", "seuil"])">✏ Vérifier ma réponse</button>
+        <div class="q-redac-corr" id="e1-redac-corr"></div>
+        <details style="margin-top:8px;font-size:12px;color:var(--ink-soft);">
+          <summary style="cursor:pointer;font-weight:600;">Voir la correction type</summary>
+          <p style="margin-top:6px;padding:8px 12px;background:var(--paper-warm);border-radius:6px;">Le SR est le CA à partir duquel l'entreprise couvre l'ensemble de ses charges fixes grâce à la marge sur coût variable. En dessous, l'entreprise est en perte ; au-dessus, elle dégage un bénéfice.</p>
+        </details>
+      </div>
+            <button class="corr-btn" onclick="corriger('e1')">🔍 Corriger mes réponses</button>
       <div class="corr-panel" id="e1-corr"></div>
     </div>
   </div>
@@ -342,7 +398,18 @@ tfoot td:not(:first-child){text-align:right;font-family:'DM Mono',monospace;}
         <div class="ws-section-title">Question 2 — Commentaire comparaison profession</div>
         <textarea class="text-answer" id="e2-interp" placeholder="Comparez vos SIG aux ratios de la profession et concluez sur la situation de AkVision..."></textarea>
       </div>
-      <button class="corr-btn" onclick="corriger('e2')">🔍 Corriger mes réponses</button>
+            <div class="q-redac">
+        <div class="q-redac-title">❓ Question de rédaction — réponse en 2-4 lignes</div>
+        <div class="q-redac-enonce">Expliquez la différence entre la marge commerciale et la valeur ajoutée. Pourquoi ces deux soldes sont-ils importants pour analyser la performance d'un magasin d'optique ?</div>
+        <textarea id="e2-redac" placeholder="Rédigez votre réponse ici..."></textarea>
+        <button class="btn-sm btn-sm-purple" style="margin-top:8px;" onclick="corrigerRedac('e2-redac',["marge commerciale", "valeur ajoutée", "charges externes", "achat", "vente", "richesse", "créée", "performance"],["marge commerciale", "valeur ajoutée", "charges externes"])">✏ Vérifier ma réponse</button>
+        <div class="q-redac-corr" id="e2-redac-corr"></div>
+        <details style="margin-top:8px;font-size:12px;color:var(--ink-soft);">
+          <summary style="cursor:pointer;font-weight:600;">Voir la correction type</summary>
+          <p style="margin-top:6px;padding:8px 12px;background:var(--paper-warm);border-radius:6px;">La marge commerciale = Ventes − Coût d'achat des marchandises vendues. La VA = MC − Charges externes. La VA mesure la richesse créée par l'entreprise elle-même.</p>
+        </details>
+      </div>
+            <button class="corr-btn" onclick="corriger('e2')">🔍 Corriger mes réponses</button>
       <div class="corr-panel" id="e2-corr"></div>
     </div>
   </div>
@@ -403,7 +470,18 @@ tfoot td:not(:first-child){text-align:right;font-family:'DM Mono',monospace;}
         </div>
         <textarea class="text-answer" id="e3-interp" placeholder="Commentez le coût de l'emprunt en 2 lignes..." style="min-height:60px;"></textarea>
       </div>
-      <button class="corr-btn" onclick="corriger('e3')">🔍 Corriger mes réponses</button>
+            <div class="q-redac">
+        <div class="q-redac-title">❓ Question de rédaction — réponse en 2-4 lignes</div>
+        <div class="q-redac-enonce">Quels sont les avantages et inconvénients d'un emprunt à annuités constantes pour financer un investissement dans un magasin d'optique ?</div>
+        <textarea id="e3-redac" placeholder="Rédigez votre réponse ici..."></textarea>
+        <button class="btn-sm btn-sm-purple" style="margin-top:8px;" onclick="corrigerRedac('e3-redac',["annuité", "constante", "prévisibilité", "intérêts", "capital", "remboursement", "taux", "endettement", "cash flow"],["annuité", "constante", "intérêts"])">✏ Vérifier ma réponse</button>
+        <div class="q-redac-corr" id="e3-redac-corr"></div>
+        <details style="margin-top:8px;font-size:12px;color:var(--ink-soft);">
+          <summary style="cursor:pointer;font-weight:600;">Voir la correction type</summary>
+          <p style="margin-top:6px;padding:8px 12px;background:var(--paper-warm);border-radius:6px;">Avantages : mensualités fixes facilitant la gestion de trésorerie, remboursement progressif du capital. Inconvénients : coût total élevé (intérêts), endettement pesant sur la capacité d'emprunt future.</p>
+        </details>
+      </div>
+            <button class="corr-btn" onclick="corriger('e3')">🔍 Corriger mes réponses</button>
       <div class="corr-panel" id="e3-corr"></div>
     </div>
   </div>
@@ -460,7 +538,18 @@ tfoot td:not(:first-child){text-align:right;font-family:'DM Mono',monospace;}
           <div class="kf-item"><label class="kf-label">Dotation 2025 bien B (€)</label><input class="kf-input" id="e4-dot-b" placeholder=""></div>
         </div>
       </div>
-      <button class="corr-btn" onclick="corriger('e4')">🔍 Corriger mes réponses</button>
+            <div class="q-redac">
+        <div class="q-redac-title">❓ Question de rédaction — réponse en 2-4 lignes</div>
+        <div class="q-redac-enonce">Expliquez pourquoi on applique un prorata temporis lors de la première année d'amortissement. Quel est l'impact sur le résultat de l'entreprise ?</div>
+        <textarea id="e4-redac" placeholder="Rédigez votre réponse ici..."></textarea>
+        <button class="btn-sm btn-sm-purple" style="margin-top:8px;" onclick="corrigerRedac('e4-redac',["prorata", "temporis", "mois", "première année", "dotation", "résultat", "charge", "fiscal", "amortissement"],["prorata", "mois", "dotation"])">✏ Vérifier ma réponse</button>
+        <div class="q-redac-corr" id="e4-redac-corr"></div>
+        <details style="margin-top:8px;font-size:12px;color:var(--ink-soft);">
+          <summary style="cursor:pointer;font-weight:600;">Voir la correction type</summary>
+          <p style="margin-top:6px;padding:8px 12px;background:var(--paper-warm);border-radius:6px;">Le prorata temporis permet de ne comptabiliser que la fraction d'amortissement correspondant à la durée d'utilisation réelle sur l'exercice. Il réduit le résultat imposable proportionnellement.</p>
+        </details>
+      </div>
+            <button class="corr-btn" onclick="corriger('e4')">🔍 Corriger mes réponses</button>
       <div class="corr-panel" id="e4-corr"></div>
     </div>
   </div>
@@ -520,7 +609,18 @@ tfoot td:not(:first-child){text-align:right;font-family:'DM Mono',monospace;}
         <div class="ws-section-title">Question 2 — Commentaire situation financière</div>
         <textarea class="text-answer" id="e5-interp" placeholder="Commentez la situation financière de AkVision à partir des trois indicateurs..."></textarea>
       </div>
-      <button class="corr-btn" onclick="corriger('e5')">🔍 Corriger mes réponses</button>
+            <div class="q-redac">
+        <div class="q-redac-title">❓ Question de rédaction — réponse en 2-4 lignes</div>
+        <div class="q-redac-enonce">Qu'est-ce que le FRNG et que signifie un FRNG positif pour la santé financière d'un magasin d'optique ?</div>
+        <textarea id="e5-redac" placeholder="Rédigez votre réponse ici..."></textarea>
+        <button class="btn-sm btn-sm-purple" style="margin-top:8px;" onclick="corrigerRedac('e5-redac',["fonds de roulement", "ressources stables", "emplois stables", "excédent", "financement", "cycle", "exploitation", "équilibre"],["ressources stables", "emplois stables", "excédent"])">✏ Vérifier ma réponse</button>
+        <div class="q-redac-corr" id="e5-redac-corr"></div>
+        <details style="margin-top:8px;font-size:12px;color:var(--ink-soft);">
+          <summary style="cursor:pointer;font-weight:600;">Voir la correction type</summary>
+          <p style="margin-top:6px;padding:8px 12px;background:var(--paper-warm);border-radius:6px;">Le FRNG = Ressources stables − Emplois stables. Un FRNG positif signifie que les ressources stables (capitaux propres + dettes LT) financent l'intégralité des emplois stables ET dégagent un excédent disponible pour le cycle d'exploitation.</p>
+        </details>
+      </div>
+            <button class="corr-btn" onclick="corriger('e5')">🔍 Corriger mes réponses</button>
       <div class="corr-panel" id="e5-corr"></div>
     </div>
   </div>
@@ -575,7 +675,18 @@ tfoot td:not(:first-child){text-align:right;font-family:'DM Mono',monospace;}
         </div>
         <textarea class="text-answer" id="e6-interp" placeholder="Justifiez votre réponse en 2 lignes..." style="min-height:60px;"></textarea>
       </div>
-      <button class="corr-btn" onclick="corriger('e6')">🔍 Corriger mes réponses</button>
+            <div class="q-redac">
+        <div class="q-redac-title">❓ Question de rédaction — réponse en 2-4 lignes</div>
+        <div class="q-redac-enonce">Expliquez pourquoi les dotations aux amortissements sont ajoutées au résultat net pour calculer la CAF.</div>
+        <textarea id="e6-redac" placeholder="Rédigez votre réponse ici..."></textarea>
+        <button class="btn-sm btn-sm-purple" style="margin-top:8px;" onclick="corrigerRedac('e6-redac',["dotation", "amortissement", "charge calculée", "décaissement", "trésorerie", "cash", "capacité", "autofinancement", "non encaissable"],["charge calculée", "décaissement", "autofinancement"])">✏ Vérifier ma réponse</button>
+        <div class="q-redac-corr" id="e6-redac-corr"></div>
+        <details style="margin-top:8px;font-size:12px;color:var(--ink-soft);">
+          <summary style="cursor:pointer;font-weight:600;">Voir la correction type</summary>
+          <p style="margin-top:6px;padding:8px 12px;background:var(--paper-warm);border-radius:6px;">Les dotations aux amortissements sont des charges calculées — elles réduisent le résultat comptable mais ne donnent lieu à aucun décaissement réel. On les réintègre donc pour obtenir la capacité réelle de l'entreprise à générer de la trésorerie.</p>
+        </details>
+      </div>
+            <button class="corr-btn" onclick="corriger('e6')">🔍 Corriger mes réponses</button>
       <div class="corr-panel" id="e6-corr"></div>
     </div>
   </div>
@@ -627,7 +738,18 @@ tfoot td:not(:first-child){text-align:right;font-family:'DM Mono',monospace;}
         <div class="ws-section-title">Question 2 — Définition + 2 limites</div>
         <textarea class="text-answer" id="e7-interp" placeholder="Définissez le prix psychologique et présentez 2 limites de la méthode pour Maxime..."></textarea>
       </div>
-      <button class="corr-btn" onclick="corriger('e7')">🔍 Corriger mes réponses</button>
+            <div class="q-redac">
+        <div class="q-redac-title">❓ Question de rédaction — réponse en 2-4 lignes</div>
+        <div class="q-redac-enonce">Présentez deux limites de la méthode du prix psychologique pour fixer le prix d'une monture dans un magasin d'optique.</div>
+        <textarea id="e7-redac" placeholder="Rédigez votre réponse ici..."></textarea>
+        <button class="btn-sm btn-sm-purple" style="margin-top:8px;" onclick="corrigerRedac('e7-redac',["limite", "coût", "concurrence", "déclaratif", "réel", "échantillon", "représentatif", "psychologique", "acceptabilité"],["limite", "coût", "déclaratif"])">✏ Vérifier ma réponse</button>
+        <div class="q-redac-corr" id="e7-redac-corr"></div>
+        <details style="margin-top:8px;font-size:12px;color:var(--ink-soft);">
+          <summary style="cursor:pointer;font-weight:600;">Voir la correction type</summary>
+          <p style="margin-top:6px;padding:8px 12px;background:var(--paper-warm);border-radius:6px;">1) La méthode ignore les coûts — le prix optimal peut être inférieur au coût de revient. 2) Les réponses sont déclaratives et peuvent différer du comportement réel d'achat. 3) L'échantillon peut ne pas être représentatif de la clientèle réelle.</p>
+        </details>
+      </div>
+            <button class="corr-btn" onclick="corriger('e7')">🔍 Corriger mes réponses</button>
       <div class="corr-panel" id="e7-corr"></div>
     </div>
   </div>
@@ -680,7 +802,18 @@ tfoot td:not(:first-child){text-align:right;font-family:'DM Mono',monospace;}
         <div class="ws-section-title">Question 2 — Conclusion sur la rentabilité</div>
         <textarea class="text-answer" id="e8-interp" placeholder="Concluez sur la pertinence de l'investissement à partir de la VAN obtenue..."></textarea>
       </div>
-      <button class="corr-btn" onclick="corriger('e8')">🔍 Corriger mes réponses</button>
+            <div class="q-redac">
+        <div class="q-redac-title">❓ Question de rédaction — réponse en 2-4 lignes</div>
+        <div class="q-redac-enonce">Qu'est-ce que la VAN et quelle décision prendre si elle est négative ?</div>
+        <textarea id="e8-redac" placeholder="Rédigez votre réponse ici..."></textarea>
+        <button class="btn-sm btn-sm-purple" style="margin-top:8px;" onclick="corrigerRedac('e8-redac',["valeur actuelle nette", "actualisation", "investissement", "rentable", "positif", "négatif", "taux", "flux", "trésorerie"],["valeur actuelle nette", "actualisation", "rentable"])">✏ Vérifier ma réponse</button>
+        <div class="q-redac-corr" id="e8-redac-corr"></div>
+        <details style="margin-top:8px;font-size:12px;color:var(--ink-soft);">
+          <summary style="cursor:pointer;font-weight:600;">Voir la correction type</summary>
+          <p style="margin-top:6px;padding:8px 12px;background:var(--paper-warm);border-radius:6px;">La VAN est la somme des flux nets de trésorerie actualisés diminuée de l'investissement initial. Si VAN > 0 : l'investissement crée de la valeur → décision favorable. Si VAN < 0 : l'investissement détruit de la valeur → on refuse ou on cherche un financement moins coûteux.</p>
+        </details>
+      </div>
+            <button class="corr-btn" onclick="corriger('e8')">🔍 Corriger mes réponses</button>
       <div class="corr-panel" id="e8-corr"></div>
     </div>
   </div>
@@ -692,7 +825,7 @@ tfoot td:not(:first-child){text-align:right;font-family:'DM Mono',monospace;}
     <div class="ex-num">E9</div>
     <div>
       <div class="ex-title">Zone de chalandise</div>
-      <div class="ex-sub">Clients potentiels · CA potentiel par zone · Attractivité</div>
+      <div class="ex-sub">CA potentiel (BTS) · CA prévisionnel (bonus avancé)</div>
     </div>
   </div>
   <div class="ex-card">
@@ -700,16 +833,22 @@ tfoot td:not(:first-child){text-align:right;font-family:'DM Mono',monospace;}
       <div class="ctx" id="e9-ctx"></div>
       <div class="dtitle">Données de la zone de chalandise</div>
       <table id="e9-data-table"></table>
-      <div class="dtitle">Informations complémentaires</div>
+      <div class="dtitle">Données complémentaires — niveau avancé</div>
       <table id="e9-info-table"></table>
-      <div class="formula">Clients potentiels = Population × Taux de pénétration
-CA potentiel = Clients potentiels × Panier moyen / Fréquence de renouvellement</div>
+      <div class="formula">CA potentiel (BTS) = Population × Taux pénétration × Panier moyen
+CA annuel potentiel = CA potentiel ÷ Fréquence de renouvellement
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⭐ BONUS — CA prévisionnel = Pop × Taux pén. × (1 − Taux évasion) × Panier × Coeff. richesse ÷ Fréquence</div>
       <div class="qs">
         <div class="qlbl">Questions</div>
         <div class="q"><div class="qn">1</div><p id="e9-q1"></p></div>
         <div class="q"><div class="qn">2</div><p id="e9-q2"></p></div>
         <div class="q"><div class="qn">3</div><p id="e9-q3"></p></div>
         <div class="q"><div class="qn">4</div><p id="e9-q4"></p></div>
+        <div class="q" style="background:#eaf2ff;border-radius:6px;padding:8px 10px;">
+          <div class="qn" style="background:#1a5276;">⭐</div>
+          <p id="e9-q5"></p>
+        </div>
         <div class="trap" id="e9-trap"></div>
       </div>
     </div>
@@ -720,33 +859,91 @@ CA potentiel = Clients potentiels × Panier moyen / Fréquence de renouvellement
       <button class="btn-sm btn-sm-red" onclick="clearWorkspace('e9')">Effacer</button>
     </div>
     <div class="ws-body">
-      <div class="ws-section">
-        <div class="ws-section-title">Questions 1 & 2 — Tableau de calcul par zone</div>
-        <div class="tb-controls">
-          <label>Lignes :</label>
-          <input type="number" id="e9-rows" value="4" min="2" max="10">
-          <button class="btn-sm btn-sm-purple" onclick="buildTable('e9-tbl','e9-rows',5)">Construire (5 colonnes)</button>
-          <button class="btn-sm btn-sm-gray" onclick="addRow('e9-tbl')">+ Ligne</button>
+
+      <!-- PARTIE BTS -->
+      <div style="background:#eafaf1;border:1px solid #a9dfbf;border-radius:8px;padding:14px 16px;margin-bottom:16px;">
+        <div style="font-size:11px;font-weight:700;color:#145a32;text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;">📋 Partie BTS — Questions 1 à 3</div>
+
+        <div class="ws-section">
+          <div class="ws-section-title">Q1 — Clients potentiels par zone</div>
+          <div class="tb-controls">
+            <label>Lignes :</label>
+            <input type="number" id="e9-rows1" value="4" min="2" max="8">
+            <button class="btn-sm btn-sm-purple" onclick="buildTable('e9-tbl1','e9-rows1',3)">Construire (3 col.)</button>
+            <button class="btn-sm btn-sm-gray" onclick="addRow('e9-tbl1')">+ Ligne</button>
+          </div>
+          <div id="e9-tbl1-wrap"></div>
+          <div class="key-fields" style="margin-top:8px;">
+            <div class="kf-item"><label class="kf-label">Clients zone A</label><input class="kf-input" id="e9-cliA" placeholder=""></div>
+            <div class="kf-item"><label class="kf-label">Clients zone B</label><input class="kf-input" id="e9-cliB" placeholder=""></div>
+            <div class="kf-item"><label class="kf-label">Clients zone C</label><input class="kf-input" id="e9-cliC" placeholder=""></div>
+            <div class="kf-item"><label class="kf-label">Total clients</label><input class="kf-input" id="e9-cliTotal" placeholder=""></div>
+          </div>
         </div>
-        <div id="e9-tbl-wrap"></div>
-      </div>
-      <div class="ws-section">
-        <div class="ws-section-title">Questions 3 & 4 — Résultats clés</div>
-        <div class="key-fields">
-          <div class="kf-item"><label class="kf-label">Clients potentiels zone A</label><input class="kf-input" id="e9-cliA" placeholder=""></div>
-          <div class="kf-item"><label class="kf-label">Clients potentiels zone B</label><input class="kf-input" id="e9-cliB" placeholder=""></div>
-          <div class="kf-item"><label class="kf-label">Clients potentiels zone C</label><input class="kf-input" id="e9-cliC" placeholder=""></div>
-          <div class="kf-item"><label class="kf-label">CA potentiel zone A (€)</label><input class="kf-input" id="e9-caA" placeholder=""></div>
-          <div class="kf-item"><label class="kf-label">CA potentiel zone B (€)</label><input class="kf-input" id="e9-caB" placeholder=""></div>
-          <div class="kf-item"><label class="kf-label">CA potentiel zone C (€)</label><input class="kf-input" id="e9-caC" placeholder=""></div>
-          <div class="kf-item"><label class="kf-label">CA potentiel TOTAL (€)</label><input class="kf-input" id="e9-caTotal" placeholder=""></div>
-          <div class="kf-item"><label class="kf-label">CA annuel avec fréquence (€)</label><input class="kf-input" id="e9-caAnnuel" placeholder=""></div>
+
+        <div class="ws-section">
+          <div class="ws-section-title">Q2 — CA potentiel par zone</div>
+          <div class="tb-controls">
+            <label>Lignes :</label>
+            <input type="number" id="e9-rows2" value="4" min="2" max="8">
+            <button class="btn-sm btn-sm-purple" onclick="buildTable('e9-tbl2','e9-rows2',3)">Construire (3 col.)</button>
+            <button class="btn-sm btn-sm-gray" onclick="addRow('e9-tbl2')">+ Ligne</button>
+          </div>
+          <div id="e9-tbl2-wrap"></div>
+          <div class="key-fields" style="margin-top:8px;">
+            <div class="kf-item"><label class="kf-label">CA potentiel zone A (€)</label><input class="kf-input" id="e9-caPotA" placeholder=""></div>
+            <div class="kf-item"><label class="kf-label">CA potentiel zone B (€)</label><input class="kf-input" id="e9-caPotB" placeholder=""></div>
+            <div class="kf-item"><label class="kf-label">CA potentiel zone C (€)</label><input class="kf-input" id="e9-caPotC" placeholder=""></div>
+            <div class="kf-item"><label class="kf-label">CA potentiel TOTAL (€)</label><input class="kf-input" id="e9-caPotTotal" placeholder=""></div>
+          </div>
+        </div>
+
+        <div class="ws-section">
+          <div class="ws-section-title">Q3 — CA annuel potentiel (avec fréquence)</div>
+          <div class="key-fields">
+            <div class="kf-item"><label class="kf-label">CA annuel zone A (€)</label><input class="kf-input" id="e9-caAnnuelA" placeholder=""></div>
+            <div class="kf-item"><label class="kf-label">CA annuel zone B (€)</label><input class="kf-input" id="e9-caAnnuelB" placeholder=""></div>
+            <div class="kf-item"><label class="kf-label">CA annuel zone C (€)</label><input class="kf-input" id="e9-caAnnuelC" placeholder=""></div>
+            <div class="kf-item"><label class="kf-label">CA annuel TOTAL (€)</label><input class="kf-input" id="e9-caAnnuelTotal" placeholder=""></div>
+          </div>
         </div>
       </div>
+
+      <!-- PARTIE RÉDACTION -->
       <div class="ws-section">
-        <div class="ws-section-title">Question 4 — Facteurs et conclusion</div>
-        <textarea class="text-answer" id="e9-interp" placeholder="Citez 2 facteurs influençant la zone de chalandise et concluez sur l'attractivité commerciale du magasin (2-3 lignes)..."></textarea>
+        <div class="ws-section-title">Q4 — Analyse de la zone de chalandise</div>
+        <textarea class="text-answer" id="e9-interp" placeholder="Analysez la zone, identifiez les zones les plus attractives et citez 2 facteurs influençant la zone de chalandise..."></textarea>
       </div>
+
+      <!-- PARTIE BONUS -->
+      <div style="background:#eaf2ff;border:1px solid #a9cce3;border-radius:8px;padding:14px 16px;margin-top:12px;">
+        <div style="font-size:11px;font-weight:700;color:#1a5276;text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;">⭐ Bonus — CA prévisionnel (niveau avancé)</div>
+        <div class="ws-section">
+          <div class="ws-section-title">Q5 — CA prévisionnel par zone</div>
+          <div class="tb-controls">
+            <label>Lignes :</label>
+            <input type="number" id="e9-rows5" value="4" min="2" max="8">
+            <button class="btn-sm btn-sm-purple" onclick="buildTable('e9-tbl5','e9-rows5',3)">Construire (3 col.)</button>
+            <button class="btn-sm btn-sm-gray" onclick="addRow('e9-tbl5')">+ Ligne</button>
+          </div>
+          <div id="e9-tbl5-wrap"></div>
+          <div class="key-fields" style="margin-top:8px;">
+            <div class="kf-item"><label class="kf-label">CA prévisionnel zone A (€)</label><input class="kf-input" id="e9-caPrevA" placeholder=""></div>
+            <div class="kf-item"><label class="kf-label">CA prévisionnel zone B (€)</label><input class="kf-input" id="e9-caPrevB" placeholder=""></div>
+            <div class="kf-item"><label class="kf-label">CA prévisionnel zone C (€)</label><input class="kf-input" id="e9-caPrevC" placeholder=""></div>
+            <div class="kf-item"><label class="kf-label">CA prévisionnel TOTAL (€)</label><input class="kf-input" id="e9-caPrevTotal" placeholder=""></div>
+          </div>
+        </div>
+        <div class="ws-section">
+          <div class="ws-section-title">Synthèse — Potentiel vs Prévisionnel</div>
+          <div class="key-fields">
+            <div class="kf-item"><label class="kf-label">CA annuel potentiel (€)</label><input class="kf-input" id="e9-synthPot" placeholder="= Q3 total"></div>
+            <div class="kf-item"><label class="kf-label">CA prévisionnel (€)</label><input class="kf-input" id="e9-synthPrev" placeholder="= Q5 total"></div>
+            <div class="kf-item"><label class="kf-label">Écart (€)</label><input class="kf-input" id="e9-ecart" placeholder="Potentiel − Prévisionnel"></div>
+          </div>
+        </div>
+      </div>
+
       <button class="corr-btn" onclick="corriger('e9')">🔍 Corriger mes réponses</button>
       <div class="corr-panel" id="e9-corr"></div>
     </div>
@@ -823,7 +1020,18 @@ b = (Σy − a·Σx) / n
         </div>
         <textarea class="text-answer" id="e10-interp" placeholder="Commentez la tendance observée et la fiabilité de la prévision en 2 lignes..." style="min-height:60px;"></textarea>
       </div>
-      <button class="corr-btn" onclick="corriger('e10')">🔍 Corriger mes réponses</button>
+            <div class="q-redac">
+        <div class="q-redac-title">❓ Question de rédaction — réponse en 2-4 lignes</div>
+        <div class="q-redac-enonce">Expliquez ce que représente le coefficient "a" dans l'équation de la droite des moindres carrés y = ax + b. Que signifie-t-il concrètement pour un magasin d'optique ?</div>
+        <textarea id="e10-redac" placeholder="Rédigez votre réponse ici..."></textarea>
+        <button class="btn-sm btn-sm-purple" style="margin-top:8px;" onclick="corrigerRedac('e10-redac',["pente", "tendance", "croissance", "augmentation", "annuelle", "évolution", "coefficient", "progression", "baisse"],["pente", "tendance", "annuelle"])">✏ Vérifier ma réponse</button>
+        <div class="q-redac-corr" id="e10-redac-corr"></div>
+        <details style="margin-top:8px;font-size:12px;color:var(--ink-soft);">
+          <summary style="cursor:pointer;font-weight:600;">Voir la correction type</summary>
+          <p style="margin-top:6px;padding:8px 12px;background:var(--paper-warm);border-radius:6px;">Le coefficient "a" représente la pente de la droite de tendance — c'est l'évolution moyenne du CA par période (par an ici). Si a > 0 : tendance à la hausse. Si a < 0 : tendance à la baisse. Concrètement, il indique de combien le CA augmente (ou diminue) en moyenne chaque année.</p>
+        </details>
+      </div>
+            <button class="corr-btn" onclick="corriger('e10')">🔍 Corriger mes réponses</button>
       <div class="corr-panel" id="e10-corr"></div>
     </div>
   </div>
@@ -934,28 +1142,101 @@ function genE4(){
 }
 
 function genE5(){
-  const fonds = rng(30000,80000,5000);
+  // ============================================================
+  // GÉNÉRATEUR ÉQUILIBRÉ — garantit TN = FRNG − BFR
+  // et Total Actif (brut) = Total Passif
+  // ============================================================
+
+  // 1. ACTIF IMMOBILISÉ (emplois stables — valeurs brutes)
+  const fonds    = rng(30000,80000,5000);
   const materiel = rng(20000,60000,5000);
-  const amtMateriel = Math.round(materiel*rng(30,70,5)/100);
-  const agenc = rng(10000,25000,1000);
-  const amtAgenc = Math.round(agenc*rng(20,60,5)/100);
+  const agenc    = rng(10000,25000,1000);
   const immobFin = rng(2000,6000,500);
-  const stocks = rng(30000,70000,2000);
-  const provStocks = rng(500,2500,500);
+
+  // Amortissements
+  const amtMateriel  = Math.round(materiel * rng(30,70,5)/100 / 500)*500;
+  const amtAgenc     = Math.round(agenc    * rng(20,60,5)/100 / 500)*500;
+
+  // 2. ACTIF CIRCULANT (valeurs brutes)
+  const stocks   = rng(30000,70000,2000);
   const creances = rng(10000,30000,1000);
+
+  // Provisions
+  const provStocks   = rng(500,2500,500);
   const provCreances = rng(0,1000,200);
+
+  // 3. TRÉSORERIE ACTIVE
   const dispo = rng(5000,20000,1000);
-  const capital = rng(20000,60000,5000);
-  const reserves = rng(10000,40000,1000);
-  const resNet = rng(15000,40000,1000);
-  const emprunt = rng(20000,60000,5000);
-  const detteFourn = rng(15000,35000,1000);
-  const detteFiscSoc = rng(6000,18000,1000);
+
+  // 4. TRÉSORERIE PASSIVE
   const decouvert = rng(0,8000,500);
+
+  // Total amortissements/provisions (rejoignent ressources stables)
   const totalAmts = amtMateriel + amtAgenc + provStocks + provCreances;
+
+  // 5. CALCULS FONCTIONNELS
+  const es = fonds + materiel + agenc + immobFin;          // Emplois stables (brut)
+  const ac = stocks + creances;                             // Actifs circulants (brut)
+  const ta = dispo;                                         // Trésorerie active
+  const tp = decouvert;                                     // Trésorerie passive
+
+  // TN voulu = TA − TP
+  const tn = ta - tp;
+
+  // BFR choisi librement
+  const detteFourn   = rng(15000,35000,1000);
+  const detteFiscSoc = rng(6000,18000,1000);
+  const pc = detteFourn + detteFiscSoc;                    // Passifs circulants
+  const bfr = ac - pc;                                      // BFR réel
+
+  // FRNG contraint : FRNG = TN + BFR (garantit TN = FRNG − BFR)
+  const frng = tn + bfr;
+
+  // RS contraint : RS = ES + FRNG (garantit FRNG = RS − ES)
+  // RS = capital + réserves + résultat + emprunt + totalAmts
+  // On génère capital, réserves, emprunt librement
+  // puis on CALCULE resNet exactement (sans arrondi) pour garantir l'équilibre
+  const capital    = rng(20000,60000,5000);
+  const reserves   = rng(10000,40000,1000);
+  const emprunt_init = rng(20000,60000,5000);
+  const rsNeeded   = es + frng;
+
+  // resNet EXACT — pas d'arrondi pour préserver TN = FRNG − BFR
+  let emprunt = emprunt_init;
+  let resNet  = rsNeeded - capital - reserves - emprunt - totalAmts;
+
+  // Si resNet trop petit → réduire l'emprunt
+  if(resNet < 1000){
+    const manque = 1000 - resNet;
+    emprunt = Math.max(5000, emprunt - Math.ceil(manque/1000)*1000);
+    resNet  = rsNeeded - capital - reserves - emprunt - totalAmts;
+  }
+  // Si toujours trop petit → augmenter capital
+  if(resNet < 1000){
+    resNet = 1000; // cas extrême rare
+  }
+
+  // RS calculé exactement
+  const rs = capital + reserves + resNet + emprunt + totalAmts;
+
+  // Totaux bilan
   const actifBrut = fonds+materiel+agenc+immobFin+stocks+creances+dispo;
-  const actifNet = actifBrut - totalAmts;
-  DATA.e5 = {fonds,materiel,amtMateriel,agenc,amtAgenc,immobFin,stocks,provStocks,creances,provCreances,dispo,capital,reserves,resNet,emprunt,detteFourn,detteFiscSoc,decouvert,totalAmts,actifBrut,actifNet};
+  const actifNet  = actifBrut - totalAmts;
+
+  // Vérifications internes (debug)
+  const frngCheck = rs - es;
+  const tnCheck   = frngCheck - bfr;
+  // console.log('E5 check — FRNG:', frngCheck, 'BFR:', bfr, 'TN:', tnCheck, 'dispo−décou:', tn);
+
+  DATA.e5 = {
+    fonds,materiel,amtMateriel,agenc,amtAgenc,immobFin,
+    stocks,provStocks,creances,provCreances,dispo,
+    capital,reserves,resNet,emprunt,
+    detteFourn,detteFiscSoc,decouvert,
+    totalAmts,actifBrut,actifNet,
+    // Valeurs fonctionnelles pré-calculées (pour correction)
+    es,rs,ac,pc,bfr,frng,tn
+  };
   return DATA.e5;
 }
 
@@ -1011,32 +1292,70 @@ function genE8(){
 }
 
 function genE9(){
-  const villes = ['Montpellier','Lyon','Bordeaux','Nantes','Strasbourg','Rennes','Marseille','Toulouse'];
-  const ville = villes[rng(0,villes.length,1)];
-  const popA = rng(8000,20000,500);
-  const popB = rng(12000,30000,500);
-  const popC = rng(20000,50000,1000);
-  const pctA = rng(55,75,5); // taux pénétration zone A (%)
-  const pctB = rng(35,55,5);
-  const pctC = rng(15,30,5);
-  const panier = rng(300,600,20);
-  const freq = [1.5,2,2.5,3][rng(0,4,1)]; // fréquence de renouvellement en années
-  const concurrents = rng(1,5,1);
-  // clients potentiels
+  const villes = ['Montpellier','Lyon','Bordeaux','Nantes','Strasbourg','Rennes','Marseille','Toulouse','Grenoble','Dijon','Angers','Reims'];
+  const ville = pick(villes);
+  const panier = rng(320,580,20);
+  const freq   = [1.5,2,2.5,3][Math.abs(rng(0,4,1))%4];
+
+  // Zone A — Proximité : forte pénétration, faible évasion, richesse élevée
+  const popA  = rng(8000,20000,500);
+  const pctA  = rng(60,80,5);
+  const evasA = rng(5,15,1);
+  const richA = [1.2,1.3,1.4,1.5][Math.abs(rng(0,4,1))%4];
+  const concA = rng(1,3,1);
+
+  // Zone B — Intermédiaire
+  const popB  = rng(12000,30000,500);
+  const pctB  = rng(35,55,5);
+  const evasB = rng(15,30,1);
+  const richB = [0.9,1.0,1.1,1.2][Math.abs(rng(0,4,1))%4];
+  const concB = rng(2,5,1);
+
+  // Zone C — Périphérie : faible pénétration, forte évasion, richesse basse
+  const popC  = rng(20000,50000,1000);
+  const pctC  = rng(10,25,5);
+  const evasC = rng(30,50,1);
+  const richC = [0.7,0.8,0.9,1.0][Math.abs(rng(0,4,1))%4];
+  const concC = rng(4,8,1);
+
+  // === CALCULS BTS ===
+  // Clients potentiels = Population × taux pénétration
   const cliA = Math.round(popA * pctA/100);
   const cliB = Math.round(popB * pctB/100);
   const cliC = Math.round(popC * pctC/100);
-  // CA potentiel (sans fréquence = achat unique)
-  const caA = Math.round(cliA * panier);
-  const caB = Math.round(cliB * panier);
-  const caC = Math.round(cliC * panier);
-  const caTotal = caA + caB + caC;
-  // CA annuel avec fréquence
-  const caAnnuel = Math.round(caTotal / freq);
-  DATA.e9 = {ville,popA,popB,popC,pctA,pctB,pctC,panier,freq,concurrents,cliA,cliB,cliC,caA,caB,caC,caTotal,caAnnuel};
+  const cliTotal = cliA + cliB + cliC;
+
+  // CA potentiel zone = Clients × panier (marché brut sans fréquence)
+  const caPotA = Math.round(cliA * panier);
+  const caPotB = Math.round(cliB * panier);
+  const caPotC = Math.round(cliC * panier);
+  const caPotTotal = caPotA + caPotB + caPotC;
+
+  // CA annuel potentiel = CA potentiel ÷ fréquence
+  const caAnnuelA = Math.round(caPotA / freq);
+  const caAnnuelB = Math.round(caPotB / freq);
+  const caAnnuelC = Math.round(caPotC / freq);
+  const caAnnuelTotal = caAnnuelA + caAnnuelB + caAnnuelC;
+
+  // === BONUS AVANCÉ ===
+  // CA prévisionnel = Pop × taux_pen × (1−évasion) × panier × richesse ÷ fréquence
+  const caPrevA = Math.round(popA * pctA/100 * (1-evasA/100) * panier * richA / freq);
+  const caPrevB = Math.round(popB * pctB/100 * (1-evasB/100) * panier * richB / freq);
+  const caPrevC = Math.round(popC * pctC/100 * (1-evasC/100) * panier * richC / freq);
+  const caPrevTotal = caPrevA + caPrevB + caPrevC;
+
+  DATA.e9 = {
+    ville, panier, freq,
+    popA, pctA, evasA, richA, concA,
+    popB, pctB, evasB, richB, concB,
+    popC, pctC, evasC, richC, concC,
+    cliA, cliB, cliC, cliTotal,
+    caPotA, caPotB, caPotC, caPotTotal,
+    caAnnuelA, caAnnuelB, caAnnuelC, caAnnuelTotal,
+    caPrevA, caPrevB, caPrevC, caPrevTotal,
+  };
   return DATA.e9;
 }
-
 function genE10(){
   const baseYear = rng(2016,2020,1);
   const n = rng(5,7,1);
@@ -1302,7 +1621,7 @@ function renderE4(d){
     {lib:'Date de mise en service', valA:`1er ${d.moisA} 2025`, valB:`15 ${d.moisB} 2025`},
     {lib:'Durée d\'amortissement', valA:`${d.dureeA} ans`, valB:`${d.dureeB} ans`},
     {lib:'Valeur résiduelle', valA:'0 €', valB:`${fmt(d.vrB)} €`},
-    {lib:'Mode d\'amortissement', valA:'Linéaire', valB:'Linéaire'},
+
   ]);
   document.getElementById('e4-data-table').innerHTML = `
     <thead><tr><th>Paramètre</th><th>${bA.nom}</th><th>${bB.nom}</th></tr></thead>
@@ -1413,35 +1732,67 @@ function renderE8(d){
 }
 
 function renderE9(d){
-  const descA=pick(SYN.zoneADesc), descB=pick(SYN.zoneBDesc), descC=pick(SYN.zoneCDesc);
   const zonesLabels=[
     {prim:'Zone primaire (A)', sec:'Zone secondaire (B)', ter:'Zone tertiaire (C)'},
     {prim:'Zone 1 — Proximité immédiate', sec:'Zone 2 — Influence élargie', ter:'Zone 3 — Périphérie lointaine'},
     {prim:'Isochrone 5 min', sec:'Isochrone 15 min', ter:'Isochrone 30 min'},
   ];
   const zl = pick(zonesLabels);
-  // Mélanger les infos complémentaires
-  const infos = shuffle([
-    {lib:'Panier moyen par client', val:`${fmt(d.panier)} € TTC`},
-    {lib:'Fréquence de renouvellement de l\'équipement', val:`tous les ${d.freq} an${d.freq>1?'s':''}`},
-    {lib:'Nombre de concurrents recensés dans la zone', val:`${d.concurrents} magasin${d.concurrents>1?'s':''} d'optique`},
-  ]);
-  document.getElementById('e9-ctx').innerHTML = `<strong>Mise en situation :</strong> Maxime Verdier envisage d'ouvrir un second point de vente <strong>Optique AkVision</strong> à <strong>${d.ville}</strong>. Il analyse le potentiel commercial de la zone de chalandise, découpée en trois sous-zones concentriques.`;
+  document.getElementById('e9-ctx').innerHTML = `<strong>Mise en situation :</strong> Maxime Verdier envisage d'ouvrir un second point de vente <strong>Optique AkVision</strong> à <strong>${d.ville}</strong>. Il analyse le potentiel commercial de sa zone de chalandise, découpée en trois sous-zones concentriques.`;
+
+  // Tableau principal — données BTS
   document.getElementById('e9-data-table').innerHTML = `
-    <thead><tr><th>Zone</th><th>Population</th><th>Taux de pénétration</th><th>Description</th></tr></thead>
+    <thead>
+      <tr>
+        <th>Zone</th><th>Population</th><th>Taux de pénétration</th>
+        <th>Panier moyen</th><th>Fréquence renouvellement</th>
+      </tr>
+    </thead>
     <tbody>
-      <tr><td><strong>${zl.prim}</strong></td><td>${fmt(d.popA)} hab.</td><td>${d.pctA} %</td><td>${descA}</td></tr>
-      <tr><td><strong>${zl.sec}</strong></td><td>${fmt(d.popB)} hab.</td><td>${d.pctB} %</td><td>${descB}</td></tr>
-      <tr><td><strong>${zl.ter}</strong></td><td>${fmt(d.popC)} hab.</td><td>${d.pctC} %</td><td>${descC}</td></tr>
+      <tr><td><strong>${zl.prim}</strong></td><td>${fmt(d.popA)} hab.</td><td>${d.pctA} %</td><td rowspan="3">${fmt(d.panier)} € TTC</td><td rowspan="3">tous les ${d.freq} an${d.freq>1?'s':''}</td></tr>
+      <tr><td><strong>${zl.sec}</strong></td><td>${fmt(d.popB)} hab.</td><td>${d.pctB} %</td></tr>
+      <tr><td><strong>${zl.ter}</strong></td><td>${fmt(d.popC)} hab.</td><td>${d.pctC} %</td></tr>
     </tbody>`;
+
+  // Tableau bonus — données avancées
   document.getElementById('e9-info-table').innerHTML = `
-    <thead><tr><th>Paramètre</th><th>Valeur</th></tr></thead>
-    <tbody>${infos.map(i=>`<tr><td>${i.lib}</td><td>${i.val}</td></tr>`).join('')}</tbody>`;
-  document.getElementById('e9-q1').innerHTML = `Calculez le <strong>nombre de clients potentiels</strong> pour chaque zone. Présentez vos calculs.`;
-  document.getElementById('e9-q2').innerHTML = `Calculez le <strong>CA potentiel</strong> de chaque zone et le <strong>CA potentiel total</strong>.`;
-  document.getElementById('e9-q3').innerHTML = `En tenant compte de la fréquence de renouvellement (<strong>${d.freq} an${d.freq>1?'s':''}</strong>), calculez le <strong>CA annuel prévisionnel</strong>.`;
-  document.getElementById('e9-q4').innerHTML = `Citez <strong>2 facteurs</strong> influençant la zone de chalandise. Concluez en 2-3 lignes sur l'<strong>attractivité commerciale</strong> de cette implantation à ${d.ville}.`;
-  document.getElementById('e9-trap').textContent = `CA potentiel brut = clients × panier (marché théorique). CA ANNUEL = CA total ÷ fréquence (${d.freq} ans). Bien distinguer les deux. Ne pas oublier d'appliquer le taux de pénétration à la population de CHAQUE zone.`;
+    <thead>
+      <tr><th colspan="5" style="background:#1a5276;text-align:center;">⭐ Données BONUS — Niveau avancé</th></tr>
+      <tr><th>Zone</th><th>Taux d'évasion</th><th>Coeff. richesse</th><th>Concurrents</th><th>Interprétation</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>${zl.prim}</strong></td><td>${d.evasA} %</td><td>${d.richA.toFixed(1)}</td><td>${d.concA}</td>
+        <td style="font-size:11px;color:#145a32;">Forte attractivité</td>
+      </tr>
+      <tr>
+        <td><strong>${zl.sec}</strong></td><td>${d.evasB} %</td><td>${d.richB.toFixed(1)}</td><td>${d.concB}</td>
+        <td style="font-size:11px;color:#7d6608;">Attractivité moyenne</td>
+      </tr>
+      <tr>
+        <td><strong>${zl.ter}</strong></td><td>${d.evasC} %</td><td>${d.richC.toFixed(1)}</td><td>${d.concC}</td>
+        <td style="font-size:11px;color:#922b21;">Faible attractivité</td>
+      </tr>
+    </tbody>`;
+
+  // Questions
+  document.getElementById('e9-q1').innerHTML =
+    `<strong>[BTS]</strong> Calculez le <strong>nombre de clients potentiels</strong> pour chaque zone et le total.<br>
+     <em style="font-size:12px;color:#7d4e00;">Formule : Clients = Population × Taux de pénétration</em>`;
+  document.getElementById('e9-q2').innerHTML =
+    `<strong>[BTS]</strong> Calculez le <strong>CA potentiel</strong> pour chaque zone et le CA potentiel total.<br>
+     <em style="font-size:12px;color:#7d4e00;">Formule : CA potentiel zone = Clients potentiels × Panier moyen</em>`;
+  document.getElementById('e9-q3').innerHTML =
+    `<strong>[BTS]</strong> Calculez le <strong>CA annuel potentiel</strong> en tenant compte de la fréquence de renouvellement (${d.freq} ans).<br>
+     <em style="font-size:12px;color:#7d4e00;">Formule : CA annuel = CA potentiel total ÷ Fréquence</em>`;
+  document.getElementById('e9-q4').innerHTML =
+    `<strong>[Rédaction]</strong> Analysez la zone de chalandise de ${d.ville}. Identifiez les zones les plus attractives et citez 2 facteurs pouvant influencer cette zone.`;
+  document.getElementById('e9-q5').innerHTML =
+    `<strong>[BONUS — Niveau avancé]</strong> En utilisant les données bonus, calculez le <strong>CA prévisionnel</strong> par zone et le total. Comparez au CA annuel potentiel et expliquez l'écart.<br>
+     <em style="font-size:12px;color:#1a5276;">Formule : CA prévisionnel = Pop × Taux pén. × (1 − Taux évasion) × Panier × Coeff. richesse ÷ Fréquence</em>`;
+  document.getElementById('e9-trap').textContent =
+    `BTS : CA potentiel = clients × panier (sans fréquence). CA annuel = CA potentiel ÷ fréquence. 
+BONUS : CA prévisionnel intègre l'évasion (clients captés par la concurrence) et le coeff. de richesse (pouvoir d'achat local). Le CA prévisionnel est toujours < CA annuel potentiel.`;
 }
 
 function renderE10(d){
@@ -1473,18 +1824,94 @@ function makeDeleteCell(tr){
   return td;
 }
 
+
+
+function fmtInput(inp){
+  const raw=inp.value.replace(/\s/g,'').replace(',','.');
+  const n=parseFloat(raw);
+  if(!isNaN(n)){ inp.value=n.toLocaleString('fr-FR',{maximumFractionDigits:2}); }
+}
+
+function attachFormat(inp, isFirst){
+  if(isFirst){ inp.dataset.numeric='false'; return; }
+  inp.addEventListener('blur',()=>fmtInput(inp));
+  inp.addEventListener('input',()=>{
+    const v=inp.value.replace(/\s/g,'');
+    if(/^-?[\d]{4,}$/.test(v)){
+      const n=parseInt(v);
+      inp.value=n.toLocaleString('fr-FR');
+      try{ inp.setSelectionRange(inp.value.length,inp.value.length); }catch(e){}
+    }
+  });
+}
+
+function makeAddColBtn(tbl){
+  const btn=document.createElement('button');
+  btn.className='btn-sm btn-sm-add-col';
+  btn.textContent='+ Colonne';
+  btn.onclick=()=>{
+    const hrow=tbl.tHead.rows[0];
+    const th=document.createElement('th');
+    const inp=document.createElement('input');
+    inp.type='text'; inp.value='Colonne'; inp.placeholder='En-tête...';
+    th.appendChild(inp);
+    hrow.insertBefore(th, hrow.cells[hrow.cells.length-1]);
+    Array.from(tbl.tBodies[0].rows).forEach(r=>{
+      const td=r.insertCell(r.cells.length-1);
+      const i2=document.createElement('input');
+      i2.type='text'; i2.placeholder='0';
+      attachFormat(i2,false);
+      td.appendChild(i2);
+    });
+  };
+  return btn;
+}
+
+function makeDelColBtn(tbl){
+  const btn=document.createElement('button');
+  btn.className='btn-sm btn-sm-del-col';
+  btn.textContent='− Colonne';
+  btn.onclick=()=>{
+    const cols=tbl.rows[0].cells.length-1;
+    if(cols<=1)return;
+    Array.from(tbl.rows).forEach(r=>{
+      if(r.cells.length>1) r.deleteCell(r.cells.length-2);
+    });
+  };
+  return btn;
+}
+
 function buildTable(id, rowsInputId, nbCols){
   const nb = parseInt(document.getElementById(rowsInputId).value)||5;
   const wrap = document.getElementById(id+'-wrap');
-  const defaultHeaders = {
-    2:['Éléments','Montant (€)'],
-    4:['Éléments','Charges variables (€)','Charges fixes (€)','Total (€)'],
-    6:['Année','Capital dû début (€)','Intérêts (€)','Capital remb. (€)','Annuité (€)','Capital dû fin (€)'],
-    8:['Prix (€)','% Q1','% Q1 cum. ↓','% Q2','% Q2 cum. ↑','% Acheteurs','% Non-ach.','Vérif.'],
-  };
-  const headers = defaultHeaders[nbCols] || Array.from({length:nbCols},(_,i)=>`Colonne ${i+1}`);
+  // Récupérer en-têtes existants si le tableau existe déjà (nouveau tirage)
+  const existingTbl = document.getElementById(id);
+  const savedHeaders = [];
+  const savedRowLabels = [];
+  if(existingTbl){
+    Array.from(existingTbl.tHead.rows[0].cells).forEach((th,i)=>{
+      if(i < existingTbl.rows[0].cells.length-1){
+        const inp = th.querySelector('input');
+        if(inp) savedHeaders.push(inp.value);
+      }
+    });
+    Array.from(existingTbl.tBodies[0].rows).forEach(r=>{
+      const firstInp = r.cells[0]?.querySelector('input');
+      savedRowLabels.push(firstInp?firstInp.value:'');
+    });
+  }
 
-  // Build table via DOM for clean delete button handling
+  const defaultHeaders = {
+    2:['Libellé','Montant (€)'],
+    4:['Libellé','Colonne 2','Colonne 3','Colonne 4'],
+    5:['Libellé','Colonne 2','Colonne 3','Colonne 4','Colonne 5'],
+    6:['Libellé','Colonne 2','Colonne 3','Colonne 4','Colonne 5','Colonne 6'],
+    8:['Libellé','Colonne 2','Colonne 3','Colonne 4','Colonne 5','Colonne 6','Colonne 7','Colonne 8'],
+  };
+  // Utiliser en-têtes sauvegardés si disponibles
+  const defH = defaultHeaders[nbCols] || Array.from({length:nbCols},(_,i)=>i===0?'Libellé':`Colonne ${i+1}`);
+  const headers = savedHeaders.length===nbCols ? savedHeaders : defH;
+
   const tbl = document.createElement('table');
   tbl.className = 'editable-table';
   tbl.id = id;
@@ -1494,12 +1921,13 @@ function buildTable(id, rowsInputId, nbCols){
   const hrow = thead.insertRow();
   headers.forEach(h=>{
     const th = document.createElement('th');
-    th.innerHTML = `<input type="text" value="${h}" placeholder="En-tête...">`;
+    const inp = document.createElement('input');
+    inp.type='text'; inp.value=h; inp.placeholder='En-tête...';
+    th.appendChild(inp);
     hrow.appendChild(th);
   });
-  // empty th for delete col
   const thDel = document.createElement('th');
-  thDel.style.cssText='width:22px;background:#4a235a;';
+  thDel.style.cssText='width:22px;background:#3a1848;';
   hrow.appendChild(thDel);
 
   // tbody
@@ -1508,31 +1936,128 @@ function buildTable(id, rowsInputId, nbCols){
     const tr = tbody.insertRow();
     for(let c=0;c<nbCols;c++){
       const td = tr.insertCell();
-      td.innerHTML = `<input type="text" placeholder="${c===0?'Libellé...':'0'}">`;
+      const inp = document.createElement('input');
+      inp.type='text';
+      if(c===0){
+        inp.placeholder='Libellé...';
+        inp.style.fontFamily="'Barlow',sans-serif";
+        inp.style.textAlign='left';
+        // Restaurer libellé si existait
+        if(savedRowLabels[r]) inp.value=savedRowLabels[r];
+      } else {
+        inp.placeholder='0';
+        attachFormat(inp,false);
+      }
+      td.appendChild(inp);
     }
-    tr.appendChild(makeDeleteCell(tr));
+    tr.appendChild(makeDeleteCell());
   }
 
   wrap.innerHTML = '';
+  // Barre d'outils colonnes
+  const colBar = document.createElement('div');
+  colBar.className='tb-controls-v6';
+  colBar.style.marginBottom='6px';
+  colBar.appendChild(makeAddColBtn(tbl));
+  colBar.appendChild(makeDelColBtn(tbl));
+  // Boutons save/load
+  const saveBtn=document.createElement('button');
+  saveBtn.className='btn-sm btn-sm-save';
+  saveBtn.textContent='💾 Sauvegarder';
+  const saveBadge=document.createElement('span');
+  saveBadge.className='save-badge';
+  saveBadge.textContent='✓ Sauvegardé';
+  saveBtn.onclick=()=>{ saveTable(id); saveBadge.classList.add('visible'); setTimeout(()=>saveBadge.classList.remove('visible'),2000); };
+  const loadBtn=document.createElement('button');
+  loadBtn.className='btn-sm btn-sm-load';
+  loadBtn.textContent='📂 Charger';
+  loadBtn.onclick=()=>loadTable(id,tbl);
+  colBar.appendChild(saveBtn);
+  colBar.appendChild(saveBadge);
+  colBar.appendChild(loadBtn);
+  wrap.appendChild(colBar);
   wrap.appendChild(tbl);
+
   const addBtn = document.createElement('button');
   addBtn.className = 'add-row-btn';
   addBtn.textContent = '+ Ajouter une ligne';
   addBtn.onclick = ()=>addRow(id);
   wrap.appendChild(addBtn);
+
+  // Restaurer depuis localStorage si dispo
+  loadTable(id, tbl);
 }
 
 function addRow(id){
   const tbl = document.getElementById(id);
   if(!tbl) return;
-  // nb cols = header cells - 1 (delete col)
   const nb = tbl.rows[0].cells.length - 1;
   const tr = tbl.tBodies[0].insertRow();
   for(let c=0;c<nb;c++){
     const td = tr.insertCell();
-    td.innerHTML = `<input type="text" placeholder="${c===0?'Libellé...':'0'}">`;
+    const inp = document.createElement('input');
+    inp.type='text';
+    if(c===0){ inp.placeholder='Libellé...'; inp.style.fontFamily="'Barlow',sans-serif"; inp.style.textAlign='left'; }
+    else { inp.placeholder='0'; attachFormat(inp,false); }
+    td.appendChild(inp);
   }
-  tr.appendChild(makeDeleteCell(tr));
+  tr.appendChild(makeDeleteCell());
+}
+
+// ==================== SAVE / LOAD localStorage ====================
+
+function saveTable(id){
+  const tbl=document.getElementById(id);
+  if(!tbl) return;
+  const data={headers:[],rows:[]};
+  Array.from(tbl.tHead.rows[0].cells).forEach((th,i)=>{
+    if(i<tbl.rows[0].cells.length-1) data.headers.push(th.querySelector('input')?.value||'');
+  });
+  Array.from(tbl.tBodies[0].rows).forEach(r=>{
+    const row=[];
+    Array.from(r.cells).forEach((td,i)=>{
+      if(i<r.cells.length-1) row.push(td.querySelector('input')?.value||'');
+    });
+    data.rows.push(row);
+  });
+  try{ localStorage.setItem('bts_tbl_'+id, JSON.stringify(data)); }catch(e){}
+}
+
+function loadTable(id, tbl){
+  try{
+    const raw=localStorage.getItem('bts_tbl_'+id);
+    if(!raw) return;
+    const data=JSON.parse(raw);
+    const t=tbl||document.getElementById(id);
+    if(!t) return;
+    // Restaurer en-têtes
+    if(data.headers){
+      Array.from(t.tHead.rows[0].cells).forEach((th,i)=>{
+        if(i<data.headers.length){
+          const inp=th.querySelector('input');
+          if(inp) inp.value=data.headers[i];
+        }
+      });
+    }
+    // Restaurer valeurs
+    if(data.rows){
+      const bodyRows=Array.from(t.tBodies[0].rows);
+      data.rows.forEach((row,ri)=>{
+        if(ri<bodyRows.length){
+          Array.from(bodyRows[ri].cells).forEach((td,ci)=>{
+            if(ci<row.length){
+              const inp=td.querySelector('input');
+              if(inp) inp.value=row[ci];
+            }
+          });
+        }
+      });
+    }
+  }catch(e){}
+}
+
+function saveAllTables(){
+  document.querySelectorAll('.editable-table').forEach(t=>{ if(t.id) saveTable(t.id); });
 }
 
 // ==================== CORRECTION ENGINE ====================
@@ -1570,6 +2095,8 @@ function renderPanel(eid, rows, score, total){
   const panel = document.getElementById(eid+'-corr');
   if(!panel) return;
   const pct = total>0 ? Math.round(score/total*100) : 0;
+  // Tracking correction
+  trackEvent('corriger', 'Exercice', eid.toUpperCase() + ' — ' + score + '/' + total + ' (' + pct + '%)');
   const color = pct>=80?'#0e6655':pct>=50?'#b7950b':'#c0392b';
   panel.className = 'corr-panel visible';
   panel.innerHTML = `
@@ -1640,11 +2167,10 @@ function corriger(eid){
   }
   else if(eid==='e5' && d.e5){
     const e=d.e5;
-    const es=e.fonds+e.materiel+e.agenc+e.immobFin;
-    const rs=e.capital+e.reserves+e.resNet+e.emprunt+e.totalAmts;
-    const ac=e.stocks+e.creances;
-    const pc=e.detteFourn+e.detteFiscSoc;
-    const frng=rs-es, bfr=ac-pc, tn=e.dispo-e.decouvert;
+    // Utiliser les valeurs pré-calculées par genE5 (garanties cohérentes)
+    const es=e.es, rs=e.rs, ac=e.ac, pc=e.pc;
+    const frng=e.frng, bfr=e.bfr, tn=e.tn;
+
     chk('Ressources stables', 'e5-rs', rs, Math.max(50,rs*0.005));
     chk('Emplois stables', 'e5-es', es, Math.max(50,es*0.005));
     chk('FRNG', 'e5-frng', frng, Math.max(50,Math.abs(frng)*0.01));
@@ -1652,6 +2178,34 @@ function corriger(eid){
     chk('Passifs circulants', 'e5-pc', pc, Math.max(50,pc*0.005));
     chk('BFR', 'e5-bfr', bfr, Math.max(50,Math.abs(bfr)*0.01));
     chk('Trésorerie nette', 'e5-tn', tn, Math.max(20,Math.abs(tn)*0.01));
+
+    // ============================================================
+    // VÉRIFICATION DE COHÉRENCE — TN = FRNG − BFR
+    // ============================================================
+    const userFRNG = parseNum(document.getElementById('e5-frng')?.value||'');
+    const userBFR  = parseNum(document.getElementById('e5-bfr')?.value||'');
+    const userTN   = parseNum(document.getElementById('e5-tn')?.value||'');
+
+    if(userFRNG!==null && userBFR!==null && userTN!==null){
+      const tnCalc = userFRNG - userBFR;
+      const ecart  = Math.abs(tnCalc - userTN);
+      if(ecart > 10){
+        rows += `<div class="corr-row" style="background:#fdf2f2;border-radius:6px;padding:8px 12px;margin-top:6px;">
+          <span class="corr-icon corr-ko">⚠️</span>
+          <span class="corr-label" style="color:#922b21;font-weight:600;">Incohérence détectée — FRNG − BFR ≠ TN</span>
+          <span class="corr-user" style="color:#922b21;">${userFRNG.toLocaleString('fr-FR')} − ${userBFR.toLocaleString('fr-FR')} = ${tnCalc.toLocaleString('fr-FR')} ≠ ${userTN.toLocaleString('fr-FR')}</span>
+        </div>
+        <div style="font-size:12px;color:#7d4e00;background:#fff8e1;border-radius:6px;padding:8px 12px;margin-top:4px;">
+          💡 Vérifie le classement de tes postes. La relation TN = FRNG − BFR doit toujours être vérifiée.
+        </div>`;
+      } else {
+        rows += `<div class="corr-row" style="background:#eafaf1;border-radius:6px;padding:8px 12px;margin-top:6px;">
+          <span class="corr-icon corr-ok">✅</span>
+          <span class="corr-label" style="color:#145a32;font-weight:600;">Cohérence vérifiée — TN = FRNG − BFR</span>
+          <span class="corr-expected">${userFRNG.toLocaleString('fr-FR')} − ${userBFR.toLocaleString('fr-FR')} = ${tnCalc.toLocaleString('fr-FR')} ✓</span>
+        </div>`;
+      }
+    }
   }
   else if(eid==='e6' && d.e6){
     const e=d.e6;
@@ -1679,16 +2233,45 @@ function corriger(eid){
     chk('Investissement initial', 'e8-invest', e.invest, 1);
     chk('VAN', 'e8-van', e.van, Math.max(50,Math.abs(e.van)*0.02));
   }
-  else if(eid==='e9' && d.e9){
+    else if(eid==='e9' && d.e9){
     const e=d.e9;
-    chk('Clients potentiels zone A', 'e9-cliA', e.cliA, Math.max(2,e.cliA*0.01));
-    chk('Clients potentiels zone B', 'e9-cliB', e.cliB, Math.max(2,e.cliB*0.01));
-    chk('Clients potentiels zone C', 'e9-cliC', e.cliC, Math.max(2,e.cliC*0.01));
-    chk('CA potentiel zone A', 'e9-caA', e.caA, Math.max(50,e.caA*0.01));
-    chk('CA potentiel zone B', 'e9-caB', e.caB, Math.max(50,e.caB*0.01));
-    chk('CA potentiel zone C', 'e9-caC', e.caC, Math.max(50,e.caC*0.01));
-    chk('CA potentiel TOTAL', 'e9-caTotal', e.caTotal, Math.max(100,e.caTotal*0.01));
-    chk('CA annuel avec fréquence', 'e9-caAnnuel', e.caAnnuel, Math.max(100,e.caAnnuel*0.01));
+    const tol=(v)=>Math.max(50,Math.abs(v)*0.015);
+
+    // === PARTIE BTS ===
+    rows += `<div style="font-size:11px;font-weight:700;color:#145a32;text-transform:uppercase;letter-spacing:1px;margin:8px 0 4px;">📋 Partie BTS</div>`;
+    chk('Clients zone A', 'e9-cliA', e.cliA, Math.max(2,e.cliA*0.01));
+    chk('Clients zone B', 'e9-cliB', e.cliB, Math.max(2,e.cliB*0.01));
+    chk('Clients zone C', 'e9-cliC', e.cliC, Math.max(2,e.cliC*0.01));
+    chk('Total clients', 'e9-cliTotal', e.cliTotal, Math.max(5,e.cliTotal*0.01));
+    chk('CA potentiel zone A', 'e9-caPotA', e.caPotA, tol(e.caPotA));
+    chk('CA potentiel zone B', 'e9-caPotB', e.caPotB, tol(e.caPotB));
+    chk('CA potentiel zone C', 'e9-caPotC', e.caPotC, tol(e.caPotC));
+    chk('CA potentiel TOTAL', 'e9-caPotTotal', e.caPotTotal, tol(e.caPotTotal));
+    chk('CA annuel zone A', 'e9-caAnnuelA', e.caAnnuelA, tol(e.caAnnuelA));
+    chk('CA annuel zone B', 'e9-caAnnuelB', e.caAnnuelB, tol(e.caAnnuelB));
+    chk('CA annuel zone C', 'e9-caAnnuelC', e.caAnnuelC, tol(e.caAnnuelC));
+    chk('CA annuel TOTAL', 'e9-caAnnuelTotal', e.caAnnuelTotal, tol(e.caAnnuelTotal));
+    chk('CA annuel (synthèse)', 'e9-synthPot', e.caAnnuelTotal, tol(e.caAnnuelTotal));
+
+    // === PARTIE BONUS ===
+    rows += `<div style="font-size:11px;font-weight:700;color:#1a5276;text-transform:uppercase;letter-spacing:1px;margin:12px 0 4px;">⭐ Bonus — CA prévisionnel</div>`;
+    chk('CA prévisionnel zone A', 'e9-caPrevA', e.caPrevA, tol(e.caPrevA));
+    chk('CA prévisionnel zone B', 'e9-caPrevB', e.caPrevB, tol(e.caPrevB));
+    chk('CA prévisionnel zone C', 'e9-caPrevC', e.caPrevC, tol(e.caPrevC));
+    chk('CA prévisionnel TOTAL', 'e9-caPrevTotal', e.caPrevTotal, tol(e.caPrevTotal));
+    chk('CA prévisionnel (synthèse)', 'e9-synthPrev', e.caPrevTotal, tol(e.caPrevTotal));
+    const ecart = e.caAnnuelTotal - e.caPrevTotal;
+    chk('Écart potentiel − prévisionnel', 'e9-ecart', ecart, tol(ecart));
+
+    // Message synthèse
+    const pctEcart = Math.round((1 - e.caPrevTotal/e.caAnnuelTotal)*100);
+    rows += `<div style="margin-top:10px;padding:10px 14px;background:#eaf2ff;border-radius:6px;font-size:12px;color:#1a5276;border:1px solid #a9cce3;">
+      📊 <strong>Synthèse :</strong><br>
+      • CA annuel potentiel (BTS) : <strong>${Math.round(e.caAnnuelTotal).toLocaleString('fr-FR')} €</strong><br>
+      • CA prévisionnel (ajusté) : <strong>${Math.round(e.caPrevTotal).toLocaleString('fr-FR')} €</strong><br>
+      • Le CA prévisionnel représente <strong>${100-pctEcart}%</strong> du CA potentiel — 
+        l'évasion et le coefficient de richesse réduisent le potentiel de <strong>${pctEcart}%</strong>.
+    </div>`;
   }
   else if(eid==='e10' && d.e10){
     const e=d.e10;
@@ -1712,10 +2295,20 @@ function corriger(eid){
 function clearWorkspace(id){
   const ws = document.querySelector(`#${id} .workspace`);
   if(!ws) return;
-  ws.querySelectorAll('input[type=text],input:not([type]),textarea').forEach(el=>el.value='');
-  ws.querySelectorAll('.editable-table tbody').forEach(tb=>{
-    while(tb.rows.length>0) tb.deleteRow(0);
+  // Effacer seulement les valeurs numériques (pas les en-têtes ni libellés)
+  ws.querySelectorAll('.editable-table tbody tr').forEach(tr=>{
+    Array.from(tr.cells).forEach((td,ci)=>{
+      if(ci===0) return; // garder libellé col 1
+      const inp=td.querySelector('input');
+      if(inp && td.className!=='del-cell') inp.value='';
+    });
   });
+  // Effacer les champs résultats clés et textareas
+  ws.querySelectorAll('.kf-input').forEach(el=>el.value='');
+  ws.querySelectorAll('textarea').forEach(el=>el.value='');
+  // Effacer les panneaux de correction
+  ws.querySelectorAll('.corr-panel').forEach(p=>{p.className='corr-panel';p.innerHTML='';});
+  ws.querySelectorAll('.q-redac-corr').forEach(p=>{p.className='q-redac-corr';p.innerHTML='';});
 }
 
 function resetAnswers(){
@@ -1797,6 +2390,8 @@ function exportData(){
   a.href = url;
   a.download = `BTS_OL_Gestion_Tirage_${exportObj.meta.tirage}_${new Date().toISOString().slice(0,10)}.json`;
   a.click();
+  // Tracking export
+  trackEvent('export', 'Actions', 'Export JSON — Tirage #' + exportObj.meta.tirage);
   URL.revokeObjectURL(url);
 
   // feedback
@@ -1815,6 +2410,8 @@ function showSection(id, btn){
   document.getElementById(id).classList.add('active');
   btn.classList.add('active');
   window.scrollTo({top:0,behavior:'smooth'});
+  // Tracking section
+  trackEvent('view_section', 'Navigation', id.toUpperCase());
 }
 
 // ==================== INIT ====================
@@ -1823,8 +2420,25 @@ function newDraw(){
   initSeed();
   const r = document.querySelector('.btn-red .spin');
   if(r){ r.style.transform='rotate(360deg)'; setTimeout(()=>r.style.transform='',500); }
+  // Tracking nouveau tirage
+  trackEvent('nouveau_tirage', 'Actions', 'Seed #' + (SEED % 10000));
   renderAll();
-  resetAnswers();
+  // On efface seulement les valeurs numériques, pas les en-têtes ni libellés
+  ['e1','e2','e3','e4','e5','e6','e7','e8','e9','e10'].forEach(id=>{
+    const ws = document.querySelector(`#${id} .workspace`);
+    if(!ws) return;
+    ws.querySelectorAll('.editable-table tbody tr').forEach(tr=>{
+      Array.from(tr.cells).forEach((td,ci)=>{
+        if(ci===0) return;
+        const inp=td.querySelector('input');
+        if(inp && td.className!=='del-cell') inp.value='';
+      });
+    });
+    ws.querySelectorAll('.kf-input').forEach(el=>el.value='');
+    ws.querySelectorAll('textarea').forEach(el=>el.value='');
+    ws.querySelectorAll('.corr-panel').forEach(p=>{p.className='corr-panel';p.innerHTML='';});
+    ws.querySelectorAll('.q-redac-corr').forEach(p=>{p.className='q-redac-corr';p.innerHTML='';});
+  });
 }
 
 function renderAll(){
@@ -1843,8 +2457,76 @@ function renderAll(){
 // update regen button to have spin icon
 document.addEventListener('DOMContentLoaded',()=>{
   document.querySelector('.btn-red').innerHTML = '<span class="spin">⟳</span> Nouveau tirage';
+  // Formatage temps réel sur tous les kf-input
+  document.querySelectorAll('.kf-input').forEach(inp=>{
+    inp.addEventListener('input',()=>{
+      const v=inp.value.replace(/\s/g,'');
+      if(/^-?[\d]{4,}$/.test(v)){
+        const n=parseInt(v);
+        const pos=inp.selectionStart;
+        inp.value=n.toLocaleString('fr-FR');
+        // Essayer de repositionner le curseur
+        try{ inp.setSelectionRange(inp.value.length,inp.value.length); }catch(e){}
+      }
+    });
+    inp.addEventListener('blur',()=>{
+      const raw=inp.value.replace(/\s/g,'').replace(',','.');
+      const n=parseFloat(raw);
+      if(!isNaN(n)) inp.value=n.toLocaleString('fr-FR',{maximumFractionDigits:2});
+    });
+  });
   newDraw();
+  // Sauvegarder auto toutes les 30s
+  setInterval(saveAllTables, 30000);
 });
+
+// ==================== CORRECTION RÉDIGÉE (mots-clés) ====================
+
+function corrigerRedac(textareaId, keywords, required){
+  const ta = document.getElementById(textareaId);
+  const panel = document.getElementById(textareaId+'-corr');
+  if(!ta||!panel) return;
+  const reponse = ta.value.toLowerCase().trim();
+  if(!reponse){ 
+    panel.className='q-redac-corr visible ko';
+    panel.innerHTML='❌ Tu n\'as pas encore rédigé ta réponse.';
+    return;
+  }
+  // Vérifier mots-clés
+  const found=[], missing=[];
+  keywords.forEach(kw=>{
+    if(reponse.includes(kw.toLowerCase())) found.push(kw);
+    else missing.push(kw);
+  });
+  // Vérifier requis
+  const missingReq = required.filter(r=>!reponse.includes(r.toLowerCase()));
+  const score = found.length;
+  const total = keywords.length;
+  const pct = Math.round(score/total*100);
+  // Classe selon score
+  let cls='ko', icon='❌';
+  if(pct>=80){cls='ok';icon='✅';}
+  else if(pct>=50){cls='partial';icon='⚠️';}
+  panel.className=`q-redac-corr visible ${cls}`;
+  const foundHtml = found.map(k=>`<span class="kw-found">✓ ${k}</span>`).join('');
+  const missingHtml = missing.map(k=>`<span class="kw-missing">✗ ${k}</span>`).join('');
+  // Message indicatif tolérance
+  let html=`
+    <div style="font-size:10px;color:#7d6608;background:#fffde7;border-radius:4px;padding:3px 8px;margin-bottom:8px;display:inline-block;">
+      ℹ️ Correction indicative — basée sur mots-clés (tolérance aux fautes de frappe)
+    </div><br>
+    <strong>${icon} Score indicatif : ${score}/${total} mots importants trouvés (${pct}%)</strong><br>`;
+  if(foundHtml) html+=`<div style="margin-top:8px;"><span style="font-size:11px;font-weight:700;color:#145a32;">✓ Mots trouvés :</span><br>${foundHtml}</div>`;
+  if(missingHtml) html+=`<div style="margin-top:6px;"><span style="font-size:11px;font-weight:700;color:#922b21;">✗ Mots manquants :</span><br>${missingHtml}</div>`;
+  if(missingReq.length>0) html+=`<div style="margin-top:8px;padding:6px 10px;background:#fadbd8;border-radius:5px;font-size:11px;color:#922b21;">
+    ⚠️ <strong>Éléments indispensables non détectés :</strong> ${missingReq.join(', ')}<br>
+    <em>Ces notions sont attendues dans toute réponse BTS correcte.</em>
+  </div>`;
+  if(pct>=80) html+=`<div style="margin-top:8px;font-size:11px;color:#145a32;">🎯 Bonne réponse ! Consulte la correction type ci-dessous pour affiner la formulation.</div>`;
+  else if(pct>=50) html+=`<div style="margin-top:8px;font-size:11px;color:#7d6608;">⚠️ Réponse partielle — complète avec les mots-clés manquants puis consulte la correction type.</div>`;
+  else html+=`<div style="margin-top:8px;font-size:11px;color:#922b21;">❌ Réponse insuffisante — relis le cours puis réessaie avant de consulter la correction.</div>`;
+  panel.innerHTML=html;
+}
 </script>
 </body>
 </html>
