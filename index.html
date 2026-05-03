@@ -1,0 +1,1150 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BTS OL — Générateur Gestion v2</title>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=DM+Mono:wght@400;500&family=Barlow:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#1a1a2e;--ink-soft:#3d3d5c;--paper:#faf9f6;--paper-warm:#f4f1eb;
+  --accent:#c0392b;--gold:#b7950b;--teal:#0e6655;--teal-light:#e8f5f2;
+  --border:#d5cfc5;--green:#145a32;--green-light:#eafaf1;--blue:#1a5276;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Barlow',sans-serif;background:var(--paper);color:var(--ink);font-size:15px;line-height:1.7;}
+
+/* HEADER */
+.header{background:var(--ink);color:var(--paper);padding:22px 40px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;}
+.header-left .lbl{font-size:10px;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-bottom:3px;}
+.header-left h1{font-family:'Libre Baskerville',serif;font-size:20px;font-weight:700;}
+.header-left h1 span{color:#e74c3c;}
+.header-right{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+.seed-badge{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:4px;padding:4px 10px;font-family:'DM Mono',monospace;font-size:11px;color:rgba(255,255,255,0.55);}
+.btn{display:flex;align-items:center;gap:7px;border:none;border-radius:6px;padding:9px 18px;font-family:'Barlow',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all 0.18s;letter-spacing:0.3px;}
+.btn-red{background:#e74c3c;color:#fff;}.btn-red:hover{background:#c0392b;}
+.btn-teal{background:var(--teal);color:#fff;}.btn-teal:hover{background:#0a5244;}
+.btn-gold{background:var(--gold);color:#fff;}.btn-gold:hover{background:#9a7d0a;}
+.btn-gray{background:#555;color:#fff;}.btn-gray:hover{background:#333;}
+
+/* NAV */
+.nav-bar{background:var(--paper-warm);border-bottom:1px solid var(--border);padding:0 40px;display:flex;gap:2px;overflow-x:auto;position:sticky;top:0;z-index:100;}
+.nav-btn{padding:10px 13px;font-size:10px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:var(--ink-soft);background:none;border:none;border-bottom:3px solid transparent;cursor:pointer;white-space:nowrap;transition:all 0.15s;font-family:'Barlow',sans-serif;}
+.nav-btn:hover{color:var(--accent);}
+.nav-btn.active{color:var(--accent);border-bottom-color:var(--accent);}
+
+/* MAIN */
+.main{max-width:900px;margin:0 auto;padding:28px 28px 80px;}
+.section{display:none;animation:fadeIn 0.22s ease;}
+.section.active{display:block;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(5px);}to{opacity:1;transform:none;}}
+
+/* EXERCISE */
+.ex-header{display:flex;align-items:flex-start;gap:12px;margin-bottom:16px;}
+.ex-num{background:var(--ink);color:#fff;font-family:'DM Mono',monospace;font-size:11px;padding:4px 10px;border-radius:4px;white-space:nowrap;margin-top:3px;}
+.ex-title{font-family:'Libre Baskerville',serif;font-size:18px;font-weight:700;margin-bottom:2px;}
+.ex-sub{font-size:12px;color:var(--ink-soft);}
+.ex-card{background:#fff;border:1px solid var(--border);border-radius:8px;margin-bottom:8px;overflow:hidden;}
+.ex-inner{padding:22px 26px;}
+
+.ctx{background:var(--paper-warm);border-left:3px solid var(--gold);border-radius:0 6px 6px 0;padding:12px 16px;margin-bottom:16px;font-size:13.5px;line-height:1.7;}
+.ctx strong{color:var(--gold);font-weight:600;}
+.dtitle{font-size:10px;letter-spacing:2px;text-transform:uppercase;font-weight:700;color:var(--ink-soft);margin-bottom:7px;margin-top:12px;}
+
+table{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:10px;}
+thead th{background:var(--ink);color:#fff;padding:7px 10px;text-align:left;font-weight:600;font-size:11px;}
+thead th:not(:first-child){text-align:right;}
+tbody td{padding:6px 10px;border-bottom:1px solid var(--border);}
+tbody td:not(:first-child){text-align:right;font-family:'DM Mono',monospace;font-size:12px;}
+tbody tr:nth-child(even){background:var(--paper-warm);}
+tfoot td{padding:7px 10px;background:#2c3e50;color:#fff;font-weight:600;font-size:12px;}
+tfoot td:not(:first-child){text-align:right;font-family:'DM Mono',monospace;}
+
+.qs{margin-top:16px;border-top:1px solid var(--border);padding-top:12px;}
+.qlbl{font-size:10px;letter-spacing:2px;text-transform:uppercase;font-weight:700;color:var(--accent);margin-bottom:8px;}
+.q{display:flex;gap:9px;margin-bottom:8px;align-items:flex-start;}
+.qn{background:var(--accent);color:#fff;width:19px;height:19px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;margin-top:3px;}
+.q p{font-size:13px;line-height:1.6;}
+.trap{background:#fff8f0;border-left:3px solid #f0a500;border-radius:0 6px 6px 0;padding:9px 13px;margin-top:10px;font-size:12px;color:#7d4e00;}
+.trap::before{content:'⚠ Piège BTS — ';font-weight:700;}
+
+/* WORKSPACE */
+.workspace{background:#f8f6ff;border:1px solid #c8bfe8;border-radius:8px;margin-top:10px;overflow:hidden;}
+.ws-header{background:#4a235a;color:#fff;padding:10px 18px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;}
+.ws-title{font-size:12px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;}
+.ws-body{padding:16px 18px;}
+.ws-section{margin-bottom:18px;}
+.ws-section-title{font-size:11px;font-weight:700;color:#4a235a;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;padding-bottom:5px;border-bottom:1px solid #c8bfe8;}
+
+/* TABLE BUILDER */
+.tb-controls{display:flex;gap:8px;align-items:center;margin-bottom:10px;flex-wrap:wrap;}
+.tb-controls label{font-size:12px;color:var(--ink-soft);}
+.tb-controls input[type=number]{width:60px;padding:4px 8px;border:1px solid var(--border);border-radius:4px;font-family:'DM Mono',monospace;font-size:13px;background:#fff;}
+.tb-controls select{padding:4px 8px;border:1px solid var(--border);border-radius:4px;font-size:12px;background:#fff;font-family:'Barlow',sans-serif;}
+.btn-sm{padding:5px 12px;font-size:11px;font-weight:700;border:none;border-radius:4px;cursor:pointer;font-family:'Barlow',sans-serif;transition:all 0.15s;}
+.btn-sm-purple{background:#4a235a;color:#fff;}.btn-sm-purple:hover{background:#3a1848;}
+.btn-sm-red{background:#c0392b;color:#fff;}.btn-sm-red:hover{background:#a93226;}
+.btn-sm-gray{background:#888;color:#fff;}.btn-sm-gray:hover{background:#555;}
+
+.editable-table{width:100%;border-collapse:collapse;margin-bottom:8px;}
+.editable-table th{background:#4a235a;color:#fff;padding:0;}
+.editable-table th input{background:transparent;border:none;color:#fff;font-family:'Barlow',sans-serif;font-size:12px;font-weight:700;width:100%;padding:7px 9px;text-align:center;outline:none;}
+.editable-table th input::placeholder{color:rgba(255,255,255,0.5);}
+.editable-table td{padding:0;border:1px solid #c8bfe8;}
+.editable-table td input{border:none;width:100%;padding:6px 8px;font-family:'DM Mono',monospace;font-size:12px;background:transparent;outline:none;color:var(--ink);text-align:right;}
+.editable-table td:first-child input{text-align:left;font-family:'Barlow',sans-serif;}
+.editable-table td input:focus{background:#fffbf0;}
+.editable-table tr:nth-child(even) td{background:#f5f0ff;}
+.editable-table tr:nth-child(even) td input{background:transparent;}
+.add-row-btn{font-size:11px;color:#4a235a;background:none;border:1px dashed #c8bfe8;border-radius:4px;padding:4px 12px;cursor:pointer;width:100%;margin-top:4px;font-family:'Barlow',sans-serif;font-weight:600;}
+.add-row-btn:hover{background:#f5f0ff;}
+
+/* TEXT ANSWERS */
+.text-answer{width:100%;border:1px solid #c8bfe8;border-radius:6px;padding:10px 12px;font-family:'Barlow',sans-serif;font-size:13px;line-height:1.6;resize:vertical;min-height:80px;background:#fff;color:var(--ink);}
+.text-answer:focus{outline:none;border-color:#4a235a;}
+.key-fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px;margin-bottom:10px;}
+.kf-item{display:flex;flex-direction:column;gap:3px;}
+.kf-label{font-size:11px;font-weight:600;color:var(--ink-soft);}
+.kf-input{border:1px solid #c8bfe8;border-radius:5px;padding:7px 10px;font-family:'DM Mono',monospace;font-size:13px;background:#fff;color:var(--ink);}
+.kf-input:focus{outline:none;border-color:#4a235a;}
+
+/* EXPORT PANEL */
+.export-panel{background:#fff;border:2px solid var(--teal);border-radius:8px;padding:20px 24px;margin-top:24px;}
+.export-panel h3{font-family:'Libre Baskerville',serif;font-size:16px;color:var(--teal);margin-bottom:8px;}
+.export-panel p{font-size:13px;color:var(--ink-soft);margin-bottom:14px;line-height:1.6;}
+.export-steps{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px;}
+.export-step{background:var(--teal-light);border:1px solid #a8d5c8;border-radius:6px;padding:10px 12px;text-align:center;}
+.export-step .step-n{font-size:18px;font-weight:700;color:var(--teal);font-family:'DM Mono',monospace;}
+.export-step .step-t{font-size:11px;color:var(--teal);font-weight:600;margin-top:3px;}
+
+/* INTRO GRID */
+.intro-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:20px 0;}
+.ig-item{background:#fff;border:1px solid var(--border);border-radius:8px;padding:12px 16px;display:flex;gap:10px;align-items:flex-start;}
+.ig-icon{font-size:18px;flex-shrink:0;margin-top:2px;}
+.ig-item strong{display:block;font-size:12px;font-weight:700;margin-bottom:1px;}
+.ig-item span{font-size:11px;color:var(--ink-soft);}
+
+.formula{background:var(--ink);color:#a8e6cf;font-family:'DM Mono',monospace;font-size:12px;padding:9px 14px;border-radius:6px;margin:8px 0;line-height:1.9;}
+
+@media(max-width:650px){
+  .header{padding:16px 16px;}.nav-bar{padding:0 8px;}.main{padding:16px 12px 60px;}
+  .ex-inner{padding:14px 14px;}.ws-body{padding:12px 12px;}
+  .export-steps{grid-template-columns:1fr;}.intro-grid{grid-template-columns:1fr;}
+  .key-fields{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <div class="lbl">BTS Opticien-Lunetier — U3 Gestion</div>
+    <h1>Générateur <span>Entraînement</span> Gestion</h1>
+  </div>
+  <div class="header-right">
+    <span class="seed-badge">Tirage #<span id="seedDisplay">—</span></span>
+    <button class="btn btn-gray" onclick="resetAnswers()">↺ Réinitialiser réponses</button>
+    <button class="btn btn-teal" onclick="exportData()">⬇ Exporter mes réponses</button>
+    <button class="btn btn-red" onclick="newDraw()">⟳ Nouveau tirage</button>
+  </div>
+</div>
+
+<nav class="nav-bar">
+  <button class="nav-btn active" onclick="showSection('intro',this)">Accueil</button>
+  <button class="nav-btn" onclick="showSection('e1',this)">E1 · SR</button>
+  <button class="nav-btn" onclick="showSection('e2',this)">E2 · SIG</button>
+  <button class="nav-btn" onclick="showSection('e3',this)">E3 · Emprunt</button>
+  <button class="nav-btn" onclick="showSection('e4',this)">E4 · Amortis.</button>
+  <button class="nav-btn" onclick="showSection('e5',this)">E5 · FRNG/BFR</button>
+  <button class="nav-btn" onclick="showSection('e6',this)">E6 · CAF</button>
+  <button class="nav-btn" onclick="showSection('e7',this)">E7 · Prix psy.</button>
+  <button class="nav-btn" onclick="showSection('e8',this)">E8 · VAN</button>
+</nav>
+
+<div class="main">
+
+<!-- INTRO -->
+<div class="section active" id="intro">
+  <div class="ex-header">
+    <div class="ex-title-block">
+      <div class="ex-title">Bienvenue — Comment ça marche ?</div>
+      <div class="ex-sub">Lis bien avant de commencer</div>
+    </div>
+  </div>
+  <div class="ex-card">
+    <div class="ex-inner">
+      <div class="ctx">
+        <strong>Magasin fil rouge :</strong> Tous les exercices sont basés sur <strong>Optique Lensvision</strong>, un magasin fictif indépendant. À chaque nouveau tirage, les chiffres changent aléatoirement mais restent cohérents et réalistes.
+      </div>
+      <div class="intro-grid">
+        <div class="ig-item"><div class="ig-icon">⟳</div><div><strong>Nouveau tirage</strong><span>Régénère tous les chiffres de tous les exercices</span></div></div>
+        <div class="ig-item"><div class="ig-icon">📝</div><div><strong>Zone de travail</strong><span>Construis tes tableaux, saisis tes résultats</span></div></div>
+        <div class="ig-item"><div class="ig-icon">↺</div><div><strong>Réinitialiser</strong><span>Efface tes réponses, garde les mêmes données</span></div></div>
+        <div class="ig-item"><div class="ig-icon">⬇</div><div><strong>Exporter</strong><span>Génère un fichier avec tes réponses + l'exercice complet, envoie-le à Claude pour correction</span></div></div>
+      </div>
+      <div class="export-panel">
+        <h3>Le circuit d'entraînement</h3>
+        <p>Remplis les exercices qui t'intéressent, puis exporte et envoie le fichier dans cette conversation. Je corrige tout : méthode, chiffres, barème, conseils.</p>
+        <div class="export-steps">
+          <div class="export-step"><div class="step-n">1</div><div class="step-t">Tu remplis les tableaux ici</div></div>
+          <div class="export-step"><div class="step-n">2</div><div class="step-t">Tu exportes le fichier</div></div>
+          <div class="export-step"><div class="step-n">3</div><div class="step-t">Tu m'envoies → je corrige</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- E1 — SEUIL DE RENTABILITÉ -->
+<div class="section" id="e1">
+  <div class="ex-header">
+    <div class="ex-num">E1</div>
+    <div>
+      <div class="ex-title">Seuil de rentabilité</div>
+      <div class="ex-sub">TMCV · SR en valeur · Point mort</div>
+    </div>
+  </div>
+  <div class="ex-card">
+    <div class="ex-inner">
+      <div class="ctx" id="e1-ctx"></div>
+      <div class="dtitle">Données annuelles</div>
+      <table id="e1-data-table"></table>
+      <div class="qs">
+        <div class="qlbl">Questions</div>
+        <div class="q"><div class="qn">1</div><p id="e1-q1"></p></div>
+        <div class="q"><div class="qn">2</div><p id="e1-q2"></p></div>
+        <div class="trap" id="e1-trap"></div>
+      </div>
+    </div>
+  </div>
+  <div class="workspace">
+    <div class="ws-header">
+      <span class="ws-title">✏ Zone de travail — E1</span>
+      <button class="btn-sm btn-sm-red" onclick="clearWorkspace('e1')">Effacer</button>
+    </div>
+    <div class="ws-body">
+      <div class="ws-section">
+        <div class="ws-section-title">Question 1 — Compte de résultat différentiel</div>
+        <div class="tb-controls">
+          <label>Lignes :</label>
+          <input type="number" id="e1-rows" value="6" min="2" max="20">
+          <button class="btn-sm btn-sm-purple" onclick="buildTable('e1-tbl','e1-rows',4)">Construire le tableau</button>
+          <button class="btn-sm btn-sm-gray" onclick="addRow('e1-tbl')">+ Ligne</button>
+        </div>
+        <div id="e1-tbl-wrap"></div>
+      </div>
+      <div class="ws-section">
+        <div class="ws-section-title">Question 1 — Résultats clés</div>
+        <div class="key-fields">
+          <div class="kf-item"><label class="kf-label">Total charges variables (€)</label><input class="kf-input" id="e1-cv" placeholder="ex: 145 000"></div>
+          <div class="kf-item"><label class="kf-label">Total charges fixes (€)</label><input class="kf-input" id="e1-cf" placeholder="ex: 132 000"></div>
+          <div class="kf-item"><label class="kf-label">MSCV (€)</label><input class="kf-input" id="e1-mscv" placeholder="ex: 210 000"></div>
+          <div class="kf-item"><label class="kf-label">TMCV (%)</label><input class="kf-input" id="e1-tmcv" placeholder="ex: 58,3"></div>
+          <div class="kf-item"><label class="kf-label">Résultat (€)</label><input class="kf-input" id="e1-res" placeholder="ex: 28 000"></div>
+        </div>
+      </div>
+      <div class="ws-section">
+        <div class="ws-section-title">Question 2 — SR et point mort</div>
+        <div class="key-fields">
+          <div class="kf-item"><label class="kf-label">Seuil de rentabilité (€)</label><input class="kf-input" id="e1-sr" placeholder="ex: 226 000"></div>
+          <div class="kf-item"><label class="kf-label">Point mort (jours)</label><input class="kf-input" id="e1-pm" placeholder="ex: 178"></div>
+          <div class="kf-item"><label class="kf-label">Marge de sécurité (€)</label><input class="kf-input" id="e1-ms" placeholder="ex: 134 000"></div>
+        </div>
+        <div class="dtitle">Interprétation (2-3 lignes)</div>
+        <textarea class="text-answer" id="e1-interp" placeholder="Rédigez votre interprétation ici..."></textarea>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- E2 — SIG -->
+<div class="section" id="e2">
+  <div class="ex-header">
+    <div class="ex-num">E2</div>
+    <div>
+      <div class="ex-title">Soldes intermédiaires de gestion (SIG)</div>
+      <div class="ex-sub">Marge commerciale · VA · EBE · RCAI</div>
+    </div>
+  </div>
+  <div class="ex-card">
+    <div class="ex-inner">
+      <div class="ctx" id="e2-ctx"></div>
+      <div class="dtitle">Compte de résultat</div>
+      <table id="e2-data-table"></table>
+      <div class="dtitle">Ratios de la profession</div>
+      <table id="e2-ratios-table"></table>
+      <div class="qs">
+        <div class="qlbl">Questions</div>
+        <div class="q"><div class="qn">1</div><p id="e2-q1"></p></div>
+        <div class="q"><div class="qn">2</div><p id="e2-q2"></p></div>
+        <div class="trap" id="e2-trap"></div>
+      </div>
+    </div>
+  </div>
+  <div class="workspace">
+    <div class="ws-header">
+      <span class="ws-title">✏ Zone de travail — E2</span>
+      <button class="btn-sm btn-sm-red" onclick="clearWorkspace('e2')">Effacer</button>
+    </div>
+    <div class="ws-body">
+      <div class="ws-section">
+        <div class="ws-section-title">Question 1 — Tableau des SIG</div>
+        <div class="tb-controls">
+          <label>Lignes :</label>
+          <input type="number" id="e2-rows" value="5" min="2" max="15">
+          <button class="btn-sm btn-sm-purple" onclick="buildTable('e2-tbl','e2-rows',4)">Construire</button>
+          <button class="btn-sm btn-sm-gray" onclick="addRow('e2-tbl')">+ Ligne</button>
+        </div>
+        <div id="e2-tbl-wrap"></div>
+      </div>
+      <div class="ws-section">
+        <div class="ws-section-title">Question 1 — Résultats clés</div>
+        <div class="key-fields">
+          <div class="kf-item"><label class="kf-label">Marge commerciale (€)</label><input class="kf-input" id="e2-mc" placeholder=""></div>
+          <div class="kf-item"><label class="kf-label">Taux de marge comm. (%)</label><input class="kf-input" id="e2-tmc" placeholder=""></div>
+          <div class="kf-item"><label class="kf-label">Valeur ajoutée (€)</label><input class="kf-input" id="e2-va" placeholder=""></div>
+          <div class="kf-item"><label class="kf-label">EBE (€)</label><input class="kf-input" id="e2-ebe" placeholder=""></div>
+          <div class="kf-item"><label class="kf-label">RCAI (€)</label><input class="kf-input" id="e2-rcai" placeholder=""></div>
+        </div>
+      </div>
+      <div class="ws-section">
+        <div class="ws-section-title">Question 2 — Commentaire comparaison profession</div>
+        <textarea class="text-answer" id="e2-interp" placeholder="Comparez vos SIG aux ratios de la profession et concluez sur la situation de Lensvision..."></textarea>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- E3 — EMPRUNT -->
+<div class="section" id="e3">
+  <div class="ex-header">
+    <div class="ex-num">E3</div>
+    <div>
+      <div class="ex-title">Tableau d'amortissement de l'emprunt</div>
+      <div class="ex-sub">Annuités constantes · Coût total</div>
+    </div>
+  </div>
+  <div class="ex-card">
+    <div class="ex-inner">
+      <div class="ctx" id="e3-ctx"></div>
+      <div class="dtitle">Caractéristiques de l'emprunt</div>
+      <table id="e3-data-table"></table>
+      <div class="formula">Annuité = C₀ × i / [1 − (1 + i)⁻ⁿ]</div>
+      <div class="qs">
+        <div class="qlbl">Questions</div>
+        <div class="q"><div class="qn">1</div><p id="e3-q1"></p></div>
+        <div class="q"><div class="qn">2</div><p id="e3-q2"></p></div>
+        <div class="trap" id="e3-trap"></div>
+      </div>
+    </div>
+  </div>
+  <div class="workspace">
+    <div class="ws-header">
+      <span class="ws-title">✏ Zone de travail — E3</span>
+      <button class="btn-sm btn-sm-red" onclick="clearWorkspace('e3')">Effacer</button>
+    </div>
+    <div class="ws-body">
+      <div class="ws-section">
+        <div class="ws-section-title">Calcul de l'annuité</div>
+        <textarea class="text-answer" id="e3-annuity-calc" placeholder="Montrez votre calcul de l'annuité constante ici..." style="min-height:60px;"></textarea>
+        <div class="key-fields" style="margin-top:10px;">
+          <div class="kf-item"><label class="kf-label">Annuité constante (€)</label><input class="kf-input" id="e3-annuity" placeholder="ex: 9 968"></div>
+        </div>
+      </div>
+      <div class="ws-section">
+        <div class="ws-section-title">Question 1 — Tableau d'amortissement de l'emprunt</div>
+        <div class="tb-controls">
+          <label>Années :</label>
+          <input type="number" id="e3-rows" value="5" min="2" max="10">
+          <button class="btn-sm btn-sm-purple" onclick="buildTable('e3-tbl','e3-rows',6)">Construire (6 colonnes)</button>
+          <button class="btn-sm btn-sm-gray" onclick="addRow('e3-tbl')">+ Ligne</button>
+        </div>
+        <div id="e3-tbl-wrap"></div>
+      </div>
+      <div class="ws-section">
+        <div class="ws-section-title">Question 2 — Coût total</div>
+        <div class="key-fields">
+          <div class="kf-item"><label class="kf-label">Total intérêts (€)</label><input class="kf-input" id="e3-ints" placeholder=""></div>
+          <div class="kf-item"><label class="kf-label">Frais de dossier (€)</label><input class="kf-input" id="e3-fees" placeholder=""></div>
+          <div class="kf-item"><label class="kf-label">Coût total emprunt (€)</label><input class="kf-input" id="e3-cout" placeholder=""></div>
+        </div>
+        <textarea class="text-answer" id="e3-interp" placeholder="Commentez le coût de l'emprunt en 2 lignes..." style="min-height:60px;"></textarea>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- E4 — AMORTISSEMENT -->
+<div class="section" id="e4">
+  <div class="ex-header">
+    <div class="ex-num">E4</div>
+    <div>
+      <div class="ex-title">Plan d'amortissement linéaire</div>
+      <div class="ex-sub">Prorata temporis · Valeur résiduelle</div>
+    </div>
+  </div>
+  <div class="ex-card">
+    <div class="ex-inner">
+      <div class="ctx" id="e4-ctx"></div>
+      <div class="dtitle">Caractéristiques des immobilisations</div>
+      <table id="e4-data-table"></table>
+      <div class="qs">
+        <div class="qlbl">Questions</div>
+        <div class="q"><div class="qn">1</div><p id="e4-q1"></p></div>
+        <div class="q"><div class="qn">2</div><p id="e4-q2"></p></div>
+        <div class="trap" id="e4-trap"></div>
+      </div>
+    </div>
+  </div>
+  <div class="workspace">
+    <div class="ws-header">
+      <span class="ws-title">✏ Zone de travail — E4</span>
+      <button class="btn-sm btn-sm-red" onclick="clearWorkspace('e4')">Effacer</button>
+    </div>
+    <div class="ws-body">
+      <div class="ws-section">
+        <div class="ws-section-title">Question 1 — Plan d'amortissement bien A</div>
+        <div class="tb-controls">
+          <label>Années :</label>
+          <input type="number" id="e4-rows" value="6" min="2" max="10">
+          <button class="btn-sm btn-sm-purple" onclick="buildTable('e4-tbl','e4-rows',6)">Construire (6 colonnes)</button>
+          <button class="btn-sm btn-sm-gray" onclick="addRow('e4-tbl')">+ Ligne</button>
+        </div>
+        <div id="e4-tbl-wrap"></div>
+        <div class="key-fields" style="margin-top:10px;">
+          <div class="kf-item"><label class="kf-label">Base amortissable bien A (€)</label><input class="kf-input" id="e4-base-a" placeholder=""></div>
+          <div class="kf-item"><label class="kf-label">Taux (%)</label><input class="kf-input" id="e4-taux-a" placeholder=""></div>
+          <div class="kf-item"><label class="kf-label">Dotation 2025 bien A (€)</label><input class="kf-input" id="e4-dot-a" placeholder=""></div>
+        </div>
+      </div>
+      <div class="ws-section">
+        <div class="ws-section-title">Question 2 — Dotation 2025 bien B</div>
+        <textarea class="text-answer" id="e4-calc-b" placeholder="Montrez le calcul détaillé de la dotation 2025 pour le bien B (avec prorata)..." style="min-height:70px;"></textarea>
+        <div class="key-fields" style="margin-top:8px;">
+          <div class="kf-item"><label class="kf-label">Base amortissable bien B (€)</label><input class="kf-input" id="e4-base-b" placeholder=""></div>
+          <div class="kf-item"><label class="kf-label">Dotation 2025 bien B (€)</label><input class="kf-input" id="e4-dot-b" placeholder=""></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- E5 — FRNG BFR -->
+<div class="section" id="e5">
+  <div class="ex-header">
+    <div class="ex-num">E5</div>
+    <div>
+      <div class="ex-title">Bilan fonctionnel — FRNG · BFR · TN</div>
+      <div class="ex-sub">Reclassement · Indicateurs · Commentaire</div>
+    </div>
+  </div>
+  <div class="ex-card">
+    <div class="ex-inner">
+      <div class="ctx" id="e5-ctx"></div>
+      <div class="dtitle">Bilan comptable au 31/12</div>
+      <table id="e5-data-table"></table>
+      <div class="qs">
+        <div class="qlbl">Questions</div>
+        <div class="q"><div class="qn">1</div><p id="e5-q1"></p></div>
+        <div class="q"><div class="qn">2</div><p id="e5-q2"></p></div>
+        <div class="trap" id="e5-trap"></div>
+      </div>
+    </div>
+  </div>
+  <div class="workspace">
+    <div class="ws-header">
+      <span class="ws-title">✏ Zone de travail — E5</span>
+      <button class="btn-sm btn-sm-red" onclick="clearWorkspace('e5')">Effacer</button>
+    </div>
+    <div class="ws-body">
+      <div class="ws-section">
+        <div class="ws-section-title">Question 1 — Bilan fonctionnel</div>
+        <div class="tb-controls">
+          <label>Lignes :</label>
+          <input type="number" id="e5-rows" value="8" min="2" max="20">
+          <button class="btn-sm btn-sm-purple" onclick="buildTable('e5-tbl','e5-rows',4)">Construire (4 colonnes)</button>
+          <button class="btn-sm btn-sm-gray" onclick="addRow('e5-tbl')">+ Ligne</button>
+        </div>
+        <div id="e5-tbl-wrap"></div>
+      </div>
+      <div class="ws-section">
+        <div class="ws-section-title">Question 1 — Calcul FRNG / BFR / TN</div>
+        <div class="key-fields">
+          <div class="kf-item"><label class="kf-label">Ressources stables (€)</label><input class="kf-input" id="e5-rs" placeholder=""></div>
+          <div class="kf-item"><label class="kf-label">Emplois stables (€)</label><input class="kf-input" id="e5-es" placeholder=""></div>
+          <div class="kf-item"><label class="kf-label">FRNG (€)</label><input class="kf-input" id="e5-frng" placeholder=""></div>
+          <div class="kf-item"><label class="kf-label">Actifs circulants (€)</label><input class="kf-input" id="e5-ac" placeholder=""></div>
+          <div class="kf-item"><label class="kf-label">Passifs circulants (€)</label><input class="kf-input" id="e5-pc" placeholder=""></div>
+          <div class="kf-item"><label class="kf-label">BFR (€)</label><input class="kf-input" id="e5-bfr" placeholder=""></div>
+          <div class="kf-item"><label class="kf-label">Trésorerie nette (€)</label><input class="kf-input" id="e5-tn" placeholder=""></div>
+        </div>
+      </div>
+      <div class="ws-section">
+        <div class="ws-section-title">Question 2 — Commentaire situation financière</div>
+        <textarea class="text-answer" id="e5-interp" placeholder="Commentez la situation financière de Lensvision à partir des trois indicateurs..."></textarea>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- E6 — CAF -->
+<div class="section" id="e6">
+  <div class="ex-header">
+    <div class="ex-num">E6</div>
+    <div>
+      <div class="ex-title">Capacité d'autofinancement (CAF)</div>
+      <div class="ex-sub">Méthode additive · Analyse</div>
+    </div>
+  </div>
+  <div class="ex-card">
+    <div class="ex-inner">
+      <div class="ctx" id="e6-ctx"></div>
+      <div class="dtitle">Données du compte de résultat</div>
+      <table id="e6-data-table"></table>
+      <div class="qs">
+        <div class="qlbl">Questions</div>
+        <div class="q"><div class="qn">1</div><p id="e6-q1"></p></div>
+        <div class="q"><div class="qn">2</div><p id="e6-q2"></p></div>
+        <div class="trap" id="e6-trap"></div>
+      </div>
+    </div>
+  </div>
+  <div class="workspace">
+    <div class="ws-header">
+      <span class="ws-title">✏ Zone de travail — E6</span>
+      <button class="btn-sm btn-sm-red" onclick="clearWorkspace('e6')">Effacer</button>
+    </div>
+    <div class="ws-body">
+      <div class="ws-section">
+        <div class="ws-section-title">Question 1 — Calcul de la CAF (méthode additive)</div>
+        <div class="tb-controls">
+          <label>Lignes :</label>
+          <input type="number" id="e6-rows" value="6" min="2" max="12">
+          <button class="btn-sm btn-sm-purple" onclick="buildTable('e6-tbl','e6-rows',2)">Construire (2 colonnes)</button>
+          <button class="btn-sm btn-sm-gray" onclick="addRow('e6-tbl')">+ Ligne</button>
+        </div>
+        <div id="e6-tbl-wrap"></div>
+        <div class="key-fields" style="margin-top:10px;">
+          <div class="kf-item"><label class="kf-label">CAF totale (€)</label><input class="kf-input" id="e6-caf" placeholder=""></div>
+        </div>
+      </div>
+      <div class="ws-section">
+        <div class="ws-section-title">Question 2 — Analyse capacité de financement</div>
+        <div class="key-fields">
+          <div class="kf-item"><label class="kf-label">Apport auto-financé souhaité (€)</label><input class="kf-input" id="e6-apport" placeholder=""></div>
+          <div class="kf-item"><label class="kf-label">CAF suffisante ? (oui/non)</label><input class="kf-input" id="e6-ok" placeholder="oui / non"></div>
+        </div>
+        <textarea class="text-answer" id="e6-interp" placeholder="Justifiez votre réponse en 2 lignes..." style="min-height:60px;"></textarea>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- E7 — PRIX PSY -->
+<div class="section" id="e7">
+  <div class="ex-header">
+    <div class="ex-num">E7</div>
+    <div>
+      <div class="ex-title">Prix psychologique</div>
+      <div class="ex-sub">Tableau cumulatif · Prix d'acceptabilité · Limites</div>
+    </div>
+  </div>
+  <div class="ex-card">
+    <div class="ex-inner">
+      <div class="ctx" id="e7-ctx"></div>
+      <div class="dtitle">Résultats de l'enquête</div>
+      <table id="e7-data-table"></table>
+      <div class="qs">
+        <div class="qlbl">Questions</div>
+        <div class="q"><div class="qn">1</div><p id="e7-q1"></p></div>
+        <div class="q"><div class="qn">2</div><p id="e7-q2"></p></div>
+        <div class="trap" id="e7-trap"></div>
+      </div>
+    </div>
+  </div>
+  <div class="workspace">
+    <div class="ws-header">
+      <span class="ws-title">✏ Zone de travail — E7</span>
+      <button class="btn-sm btn-sm-red" onclick="clearWorkspace('e7')">Effacer</button>
+    </div>
+    <div class="ws-body">
+      <div class="ws-section">
+        <div class="ws-section-title">Question 1 — Tableau du prix psychologique (8 colonnes)</div>
+        <div class="tb-controls">
+          <label>Lignes :</label>
+          <input type="number" id="e7-rows" value="8" min="2" max="15">
+          <button class="btn-sm btn-sm-purple" onclick="buildTable('e7-tbl','e7-rows',8)">Construire (8 colonnes)</button>
+          <button class="btn-sm btn-sm-gray" onclick="addRow('e7-tbl')">+ Ligne</button>
+        </div>
+        <div id="e7-tbl-wrap"></div>
+        <div class="key-fields" style="margin-top:10px;">
+          <div class="kf-item"><label class="kf-label">Prix psychologique optimal (€)</label><input class="kf-input" id="e7-prix" placeholder=""></div>
+          <div class="kf-item"><label class="kf-label">% acheteurs potentiels max</label><input class="kf-input" id="e7-pct" placeholder="ex: 47 %"></div>
+        </div>
+      </div>
+      <div class="ws-section">
+        <div class="ws-section-title">Question 2 — Définition + 2 limites</div>
+        <textarea class="text-answer" id="e7-interp" placeholder="Définissez le prix psychologique et présentez 2 limites de la méthode pour Maxime..."></textarea>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- E8 — VAN -->
+<div class="section" id="e8">
+  <div class="ex-header">
+    <div class="ex-num">E8</div>
+    <div>
+      <div class="ex-title">Flux de trésorerie + VAN</div>
+      <div class="ex-sub">Actualisation · Décision d'investissement</div>
+    </div>
+  </div>
+  <div class="ex-card">
+    <div class="ex-inner">
+      <div class="ctx" id="e8-ctx"></div>
+      <div class="dtitle">Flux nets de trésorerie prévisionnels</div>
+      <table id="e8-data-table"></table>
+      <div class="qs">
+        <div class="qlbl">Questions</div>
+        <div class="q"><div class="qn">1</div><p id="e8-q1"></p></div>
+        <div class="q"><div class="qn">2</div><p id="e8-q2"></p></div>
+        <div class="trap" id="e8-trap"></div>
+      </div>
+    </div>
+  </div>
+  <div class="workspace">
+    <div class="ws-header">
+      <span class="ws-title">✏ Zone de travail — E8</span>
+      <button class="btn-sm btn-sm-red" onclick="clearWorkspace('e8')">Effacer</button>
+    </div>
+    <div class="ws-body">
+      <div class="ws-section">
+        <div class="ws-section-title">Question 1 — Tableau FNT actualisés</div>
+        <div class="tb-controls">
+          <label>Années :</label>
+          <input type="number" id="e8-rows" value="5" min="2" max="10">
+          <button class="btn-sm btn-sm-purple" onclick="buildTable('e8-tbl','e8-rows',4)">Construire (4 colonnes)</button>
+          <button class="btn-sm btn-sm-gray" onclick="addRow('e8-tbl')">+ Ligne</button>
+        </div>
+        <div id="e8-tbl-wrap"></div>
+        <div class="key-fields" style="margin-top:10px;">
+          <div class="kf-item"><label class="kf-label">Σ FNT actualisés (€)</label><input class="kf-input" id="e8-sigma" placeholder=""></div>
+          <div class="kf-item"><label class="kf-label">Investissement initial (€)</label><input class="kf-input" id="e8-invest" placeholder=""></div>
+          <div class="kf-item"><label class="kf-label">VAN (€)</label><input class="kf-input" id="e8-van" placeholder=""></div>
+        </div>
+      </div>
+      <div class="ws-section">
+        <div class="ws-section-title">Question 2 — Conclusion sur la rentabilité</div>
+        <textarea class="text-answer" id="e8-interp" placeholder="Concluez sur la pertinence de l'investissement à partir de la VAN obtenue..."></textarea>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /main -->
+
+<script>
+// ==================== RANDOM ENGINE ====================
+let SEED = 0;
+let DATA = {};
+
+function rng(min,max,step=1){
+  // simple deterministic-ish random based on SEED
+  SEED = (SEED * 1664525 + 1013904223) & 0xffffffff;
+  const r = Math.abs(SEED) / 0x7fffffff;
+  const val = min + Math.floor(r * (max - min) / step) * step;
+  return val;
+}
+
+function fmt(n){ return Math.round(n).toLocaleString('fr-FR'); }
+function fmtPct(n){ return n.toFixed(1).replace('.',',') + ' %'; }
+
+function initSeed(){
+  SEED = Math.floor(Math.random() * 999999);
+  document.getElementById('seedDisplay').textContent = SEED % 10000;
+}
+
+// ==================== DATA GENERATORS ====================
+
+function genE1(){
+  const ca = rng(300000, 550000, 10000);
+  const achats = Math.round(ca * rng(30,40,1)/100 / 1000)*1000;
+  const varStock = rng(-5000,8000,1000);
+  const personnel = Math.round(ca * rng(22,28,1)/100 / 1000)*1000;
+  const loyer = rng(14000,24000,1000);
+  const energie = rng(7000,12000,500);
+  const pctVar = rng(30,50,5);
+  const assurance = rng(3000,6000,500);
+  const dap = rng(8000,16000,500);
+  const chargesFinanc = rng(1500,4000,500);
+  const jours = rng(280,320,10);
+  const cv = achats - varStock + Math.round(energie*pctVar/100);
+  const cf = personnel + loyer + Math.round(energie*(100-pctVar)/100) + assurance + dap + chargesFinanc;
+  const mscv = ca - cv;
+  const tmcv = mscv/ca;
+  const sr = Math.round(cf/tmcv);
+  const pm = Math.round(sr/ca*jours);
+  DATA.e1 = {ca,achats,varStock,personnel,loyer,energie,pctVar,assurance,dap,chargesFinanc,jours,cv,cf,mscv,tmcv,sr,pm};
+  return DATA.e1;
+}
+
+function genE2(){
+  const ca = rng(320000,520000,10000);
+  const achats = Math.round(ca*rng(32,42,1)/100/1000)*1000;
+  const varStock = rng(-4000,6000,1000);
+  const chargesExt = Math.round(ca*rng(8,14,1)/100/1000)*1000;
+  const impotsTaxes = rng(3000,6000,500);
+  const personnel = Math.round(ca*rng(22,30,1)/100/1000)*1000;
+  const dap = rng(8000,18000,500);
+  const chargesFinanc = rng(1500,5000,500);
+  const prodFinanc = rng(400,1200,100);
+  const chargesExcep = rng(500,2000,100);
+  const prodExcep = rng(0,3000,500);
+  const mc = ca - (achats + varStock);
+  const va = mc - chargesExt;
+  const ebe = va - impotsTaxes - personnel;
+  const reExpl = ebe - dap;
+  const rcai = reExpl + prodFinanc - chargesFinanc;
+  const is = Math.max(0,Math.round(rcai*0.15));
+  const resNet = rcai + prodExcep - chargesExcep - is;
+  DATA.e2 = {ca,achats,varStock,chargesExt,impotsTaxes,personnel,dap,chargesFinanc,prodFinanc,chargesExcep,prodExcep,is,resNet,mc,va,ebe,reExpl,rcai};
+  return DATA.e2;
+}
+
+function genE3(){
+  const capital = rng(30000,80000,5000);
+  const taux = [2.5,3,3.5,4,4.5][rng(0,5,1)];
+  const duree = rng(3,7,1);
+  const frais = rng(200,600,50);
+  const annuity = capital * (taux/100) / (1 - Math.pow(1+(taux/100),-duree));
+  DATA.e3 = {capital,taux,duree,frais,annuity:Math.round(annuity)};
+  return DATA.e3;
+}
+
+function genE4(){
+  const coutA = rng(12000,30000,1000);
+  const dureeA = rng(4,8,1);
+  const moisDebutA = rng(2,9,1);
+  const moisNames = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre'];
+  const moisA = moisNames[moisDebutA-1];
+  const prorataMoisA = 12 - moisDebutA + 1;
+  const tauxA = 100/dureeA;
+  const dotA1 = Math.round(coutA * tauxA/100 * prorataMoisA/12);
+
+  const coutB = rng(15000,40000,1000);
+  const vrB = rng(1000,5000,500);
+  const dureeB = rng(3,6,1);
+  const moisDebutB = rng(1,8,1);
+  const moisB = moisNames[moisDebutB-1];
+  const prorataMoisB = 12 - moisDebutB + 1;
+  const baseB = coutB - vrB;
+  const tauxB = 100/dureeB;
+  const dotB1 = Math.round(baseB * tauxB/100 * prorataMoisB/12);
+
+  DATA.e4 = {coutA,dureeA,moisA,moisDebutA,prorataMoisA,tauxA,dotA1,coutB,vrB,dureeB,moisB,moisDebutB,prorataMoisB,baseB,tauxB,dotB1};
+  return DATA.e4;
+}
+
+function genE5(){
+  const fonds = rng(30000,80000,5000);
+  const materiel = rng(20000,60000,5000);
+  const amtMateriel = Math.round(materiel*rng(30,70,5)/100);
+  const agenc = rng(10000,25000,1000);
+  const amtAgenc = Math.round(agenc*rng(20,60,5)/100);
+  const immobFin = rng(2000,6000,500);
+  const stocks = rng(30000,70000,2000);
+  const provStocks = rng(500,2500,500);
+  const creances = rng(10000,30000,1000);
+  const provCreances = rng(0,1000,200);
+  const dispo = rng(5000,20000,1000);
+  const capital = rng(20000,60000,5000);
+  const reserves = rng(10000,40000,1000);
+  const resNet = rng(15000,40000,1000);
+  const emprunt = rng(20000,60000,5000);
+  const detteFourn = rng(15000,35000,1000);
+  const detteFiscSoc = rng(6000,18000,1000);
+  const decouvert = rng(0,8000,500);
+  const totalAmts = amtMateriel + amtAgenc + provStocks + provCreances;
+  const actifBrut = fonds+materiel+agenc+immobFin+stocks+creances+dispo;
+  const actifNet = actifBrut - totalAmts;
+  DATA.e5 = {fonds,materiel,amtMateriel,agenc,amtAgenc,immobFin,stocks,provStocks,creances,provCreances,dispo,capital,reserves,resNet,emprunt,detteFourn,detteFiscSoc,decouvert,totalAmts,actifBrut,actifNet};
+  return DATA.e5;
+}
+
+function genE6(){
+  const resNet = rng(18000,45000,1000);
+  const dap = rng(8000,20000,500);
+  const dapp = rng(500,3000,500);
+  const reprises = rng(200,1200,200);
+  const pvCession = rng(0,4000,500);
+  const vncCession = rng(0,2000,200);
+  const pvNette = pvCession - vncCession;
+  const caf = resNet + dap + dapp - reprises - pvNette;
+  const invest = rng(30000,80000,5000);
+  const pctAuto = rng(30,50,5);
+  const apport = Math.round(invest * pctAuto/100);
+  DATA.e6 = {resNet,dap,dapp,reprises,pvCession,vncCession,pvNette,caf,invest,pctAuto,apport};
+  return DATA.e6;
+}
+
+function genE7(){
+  const nbRepondants = rng(150,300,50);
+  const prix = [80,110,140,170,200,230,260,290];
+  // generate realistic Q1 (ascending) and Q2 (descending) distributions
+  const q1Raw = [0,0,rng(5,15,1),rng(15,30,1),rng(30,55,1),rng(40,70,1),rng(30,50,1),rng(10,25,1)];
+  const q2Raw = [rng(30,60,1),rng(30,55,1),rng(20,40,1),rng(15,35,1),rng(10,25,1),rng(3,15,1),rng(0,8,1),0];
+  // normalize to nbRepondants
+  const sumQ1 = q1Raw.reduce((a,b)=>a+b,0);
+  const sumQ2 = q2Raw.reduce((a,b)=>a+b,0);
+  const q1 = q1Raw.map(v=>Math.round(v/sumQ1*nbRepondants));
+  const q2 = q2Raw.map(v=>Math.round(v/sumQ2*nbRepondants));
+  // fix totals
+  q1[q1.length-1] += nbRepondants - q1.reduce((a,b)=>a+b,0);
+  q2[0] += nbRepondants - q2.reduce((a,b)=>a+b,0);
+  DATA.e7 = {nbRepondants,prix,q1,q2};
+  return DATA.e7;
+}
+
+function genE8(){
+  const invest = rng(15000,40000,1000);
+  const taux = [5,6,7,8][rng(0,4,1)];
+  const duree = rng(4,6,1);
+  const fnt = [];
+  for(let i=0;i<duree-1;i++) fnt.push(rng(4000,12000,500));
+  const vrResid = rng(500,3000,500);
+  const lastFnt = rng(4000,10000,500);
+  fnt.push(lastFnt + vrResid);
+  const coeffs = fnt.map((_,i)=>Math.pow(1+(taux/100),-(i+1)));
+  const fntAct = fnt.map((f,i)=>Math.round(f*coeffs[i]));
+  const sigma = fntAct.reduce((a,b)=>a+b,0);
+  const van = sigma - invest;
+  DATA.e8 = {invest,taux,duree,fnt,vrResid,coeffs,fntAct,sigma,van};
+  return DATA.e8;
+}
+
+// ==================== RENDER FUNCTIONS ====================
+
+function renderE1(d){
+  document.getElementById('e1-ctx').innerHTML = `<strong>Mise en situation :</strong> Pour l'exercice 2025, Optique Lensvision a réalisé un chiffre d'affaires HT de <strong>${fmt(d.ca)} €</strong>. Maxime vous remet les données suivantes. Les charges d'énergie sont <strong>${d.pctVar} % variables</strong> et ${100-d.pctVar} % fixes. Le magasin est ouvert <strong>${d.jours} jours</strong> par an.`;
+  document.getElementById('e1-data-table').innerHTML = `
+    <thead><tr><th>Élément</th><th>Montant (€ HT)</th><th>Nature</th></tr></thead>
+    <tbody>
+      <tr><td>Achats de marchandises</td><td>${fmt(d.achats)}</td><td>Variable</td></tr>
+      <tr><td>Variation de stock (signe)</td><td>${d.varStock>=0?'+':''} ${fmt(d.varStock)}</td><td>Variable</td></tr>
+      <tr><td>Charges de personnel</td><td>${fmt(d.personnel)}</td><td>Fixe</td></tr>
+      <tr><td>Loyer et charges locatives</td><td>${fmt(d.loyer)}</td><td>Fixe</td></tr>
+      <tr><td>Énergie / téléphone</td><td>${fmt(d.energie)}</td><td>Mixte (${d.pctVar}% var. / ${100-d.pctVar}% fixe)</td></tr>
+      <tr><td>Assurances et abonnements</td><td>${fmt(d.assurance)}</td><td>Fixe</td></tr>
+      <tr><td>Dotations aux amortissements</td><td>${fmt(d.dap)}</td><td>Fixe</td></tr>
+      <tr><td>Charges financières</td><td>${fmt(d.chargesFinanc)}</td><td>Fixe</td></tr>
+    </tbody>`;
+  document.getElementById('e1-q1').innerHTML = `Présentez le <strong>compte de résultat différentiel</strong> en distinguant charges variables et charges fixes. Faites apparaître le CA, les CV, la MSCV, les CF et le résultat.`;
+  document.getElementById('e1-q2').innerHTML = `Calculez le <strong>TMCV</strong>, le <strong>seuil de rentabilité en valeur</strong> et le <strong>point mort en jours</strong>. Interprétez en 2 lignes.`;
+  document.getElementById('e1-trap').textContent = `La variation de stock ${d.varStock>=0?'positive (déstockage) augmente':'négative (stockage) réduit'} le coût des marchandises vendues. Les charges d'énergie sont mixtes : ventile-les avant de classer (${d.pctVar}% variable = ${fmt(Math.round(d.energie*d.pctVar/100))} €).`;
+}
+
+function renderE2(d){
+  document.getElementById('e2-ctx').innerHTML = `<strong>Mise en situation :</strong> Voici le compte de résultat 2025 d'Optique Lensvision (CA HT : <strong>${fmt(d.ca)} €</strong>). Maxime veut calculer ses SIG et se comparer aux ratios de la profession.`;
+  document.getElementById('e2-data-table').innerHTML = `
+    <thead><tr><th>CHARGES</th><th>€</th><th>PRODUITS</th><th>€</th></tr></thead>
+    <tbody>
+      <tr><td>Achats de marchandises</td><td>${fmt(d.achats)}</td><td>Ventes de marchandises</td><td>${fmt(d.ca)}</td></tr>
+      <tr><td>Variation de stock (charges)</td><td>${d.varStock>=0?'+':''} ${fmt(d.varStock)}</td><td>Produits financiers</td><td>${fmt(d.prodFinanc)}</td></tr>
+      <tr><td>Charges externes</td><td>${fmt(d.chargesExt)}</td><td>Produits exceptionnels</td><td>${fmt(d.prodExcep)}</td></tr>
+      <tr><td>Impôts et taxes</td><td>${fmt(d.impotsTaxes)}</td><td></td><td></td></tr>
+      <tr><td>Charges de personnel</td><td>${fmt(d.personnel)}</td><td></td><td></td></tr>
+      <tr><td>Dotations amortissements</td><td>${fmt(d.dap)}</td><td></td><td></td></tr>
+      <tr><td>Charges financières</td><td>${fmt(d.chargesFinanc)}</td><td></td><td></td></tr>
+      <tr><td>Charges exceptionnelles</td><td>${fmt(d.chargesExcep)}</td><td></td><td></td></tr>
+      <tr><td>IS</td><td>${fmt(d.is)}</td><td></td><td></td></tr>
+    </tbody>
+    <tfoot><tr><td>Résultat net</td><td>${fmt(d.resNet)}</td><td></td><td></td></tr></tfoot>`;
+  const tmc = (d.mc/d.ca*100).toFixed(1);
+  const tva = (d.va/d.ca*100).toFixed(1);
+  const tebe = (d.ebe/d.ca*100).toFixed(1);
+  const trcai = (d.rcai/d.ca*100).toFixed(1);
+  document.getElementById('e2-ratios-table').innerHTML = `
+    <thead><tr><th>Indicateur</th><th>Ratio profession (Occitanie)</th></tr></thead>
+    <tbody>
+      <tr><td>Taux de marge commerciale</td><td>${(parseFloat(tmc)+rng(-5,5,1)).toFixed(0)} %</td></tr>
+      <tr><td>Taux de valeur ajoutée</td><td>${(parseFloat(tva)+rng(-6,6,1)).toFixed(0)} %</td></tr>
+      <tr><td>Taux d'EBE</td><td>${(parseFloat(tebe)+rng(-5,5,1)).toFixed(0)} %</td></tr>
+      <tr><td>Taux de RCAI</td><td>${(parseFloat(trcai)+rng(-4,4,1)).toFixed(0)} %</td></tr>
+    </tbody>`;
+  document.getElementById('e2-q1').innerHTML = `Calculez les SIG suivants en valeur et en % du CA HT : <strong>marge commerciale, valeur ajoutée, EBE, résultat d'exploitation, RCAI</strong>.`;
+  document.getElementById('e2-q2').innerHTML = `<strong>Commentez</strong> les résultats en les comparant aux ratios de la profession. Concluez sur la performance de Lensvision en 3 lignes.`;
+  document.getElementById('e2-trap').textContent = `Attention à la variation de stock : si elle est inscrite en charges avec un signe −, c'est un stockage qui réduit le coût des marchandises vendues. Formule MC = Ventes − (Achats + Variation de stock). La VA se calcule MC − Charges externes uniquement (pas le personnel !).`;
+}
+
+function renderE3(d){
+  document.getElementById('e3-ctx').innerHTML = `<strong>Mise en situation :</strong> Maxime contracte un emprunt de <strong>${fmt(d.capital)} €</strong> au taux de <strong>${d.taux} %</strong> sur <strong>${d.duree} ans</strong> avec remboursement par annuités constantes. Première échéance au 31/12/2025. Frais de dossier : ${fmt(d.frais)} €.`;
+  document.getElementById('e3-data-table').innerHTML = `
+    <thead><tr><th>Paramètre</th><th>Valeur</th></tr></thead>
+    <tbody>
+      <tr><td>Montant emprunté</td><td>${fmt(d.capital)} €</td></tr>
+      <tr><td>Taux d'intérêt annuel</td><td>${d.taux} %</td></tr>
+      <tr><td>Durée</td><td>${d.duree} ans</td></tr>
+      <tr><td>Frais de dossier</td><td>${fmt(d.frais)} €</td></tr>
+      <tr><td>Mode de remboursement</td><td>Annuités constantes</td></tr>
+    </tbody>`;
+  document.getElementById('e3-q1').innerHTML = `Calculez l'<strong>annuité constante</strong> (arrondie à l'euro), puis dressez le <strong>tableau d'amortissement complet</strong> sur ${d.duree} ans (colonnes : capital dû début, intérêts, capital remboursé, annuité, capital dû fin).`;
+  document.getElementById('e3-q2').innerHTML = `Calculez le <strong>coût total de l'emprunt</strong> incluant les frais de dossier. Commentez en 2 lignes.`;
+  document.getElementById('e3-trap').textContent = `L'annuité est constante mais la répartition intérêts/capital change à chaque échéance. La dernière ligne doit laisser capital restant dû = 0. Si ce n'est pas le cas, ajuste la dernière annuité. Les frais de dossier s'ajoutent en dehors du tableau.`;
+}
+
+function renderE4(d){
+  document.getElementById('e4-ctx').innerHTML = `<strong>Mise en situation :</strong> Maxime acquiert deux biens. <strong>Bien A</strong> : mis en service le 1er ${d.moisA} 2025 (durée ${d.dureeA} ans, valeur résiduelle 0 €). <strong>Bien B</strong> : mis en service le 15 ${d.moisB} 2025 (durée ${d.dureeB} ans, valeur résiduelle ${fmt(d.vrB)} €). L'exercice comptable coïncide avec l'année civile.`;
+  document.getElementById('e4-data-table').innerHTML = `
+    <thead><tr><th>Paramètre</th><th>Bien A</th><th>Bien B</th></tr></thead>
+    <tbody>
+      <tr><td>Coût d'achat HT</td><td>${fmt(d.coutA)} €</td><td>${fmt(d.coutB)} €</td></tr>
+      <tr><td>Date mise en service</td><td>1er ${d.moisA} 2025</td><td>15 ${d.moisB} 2025</td></tr>
+      <tr><td>Durée amortissement</td><td>${d.dureeA} ans</td><td>${d.dureeB} ans</td></tr>
+      <tr><td>Valeur résiduelle</td><td>0 €</td><td>${fmt(d.vrB)} €</td></tr>
+      <tr><td>Mode</td><td>Linéaire</td><td>Linéaire</td></tr>
+    </tbody>`;
+  document.getElementById('e4-q1').innerHTML = `Dressez le <strong>plan d'amortissement complet du bien A</strong> avec prorata temporis pour 2025. Colonnes attendues : année, base amortissable, taux, dotation, amortissements cumulés, VNC.`;
+  document.getElementById('e4-q2').innerHTML = `Calculez la <strong>dotation 2025 du bien B</strong> avec prorata temporis (règle : pour un bien mis en service le 15 du mois, retenir le 1er du mois suivant). Justifiez votre calcul.`;
+  document.getElementById('e4-trap').textContent = `Bien B : la valeur résiduelle (${fmt(d.vrB)} €) se déduit de la base amortissable → base = ${fmt(d.coutB)} − ${fmt(d.vrB)} = ${fmt(d.baseB)} €. Pour le bien B mis en service le 15 ${d.moisB}, la règle "mois entier" donne un prorata de ${12-d.moisDebutB} mois (du mois suivant à décembre).`;
+}
+
+function renderE5(d){
+  document.getElementById('e5-ctx').innerHTML = `<strong>Mise en situation :</strong> Voici le bilan comptable d'Optique Lensvision au 31/12/2025. Construisez le bilan fonctionnel et calculez les indicateurs financiers. Les amortissements totaux s'élèvent à <strong>${fmt(d.totalAmts)} €</strong>.`;
+  document.getElementById('e5-data-table').innerHTML = `
+    <thead><tr><th>ACTIF</th><th>Brut €</th><th>Amort/Prov €</th><th>Net €</th><th>PASSIF</th><th>Montant €</th></tr></thead>
+    <tbody>
+      <tr><td>Fonds commercial</td><td>${fmt(d.fonds)}</td><td>0</td><td>${fmt(d.fonds)}</td><td>Capital</td><td>${fmt(d.capital)}</td></tr>
+      <tr><td>Matériel</td><td>${fmt(d.materiel)}</td><td>${fmt(d.amtMateriel)}</td><td>${fmt(d.materiel-d.amtMateriel)}</td><td>Réserves</td><td>${fmt(d.reserves)}</td></tr>
+      <tr><td>Agencements</td><td>${fmt(d.agenc)}</td><td>${fmt(d.amtAgenc)}</td><td>${fmt(d.agenc-d.amtAgenc)}</td><td>Résultat net</td><td>${fmt(d.resNet)}</td></tr>
+      <tr><td>Immob. financières</td><td>${fmt(d.immobFin)}</td><td>0</td><td>${fmt(d.immobFin)}</td><td>Emprunts LT</td><td>${fmt(d.emprunt)}</td></tr>
+      <tr><td>Stocks</td><td>${fmt(d.stocks)}</td><td>${fmt(d.provStocks)}</td><td>${fmt(d.stocks-d.provStocks)}</td><td>Dettes fournisseurs</td><td>${fmt(d.detteFourn)}</td></tr>
+      <tr><td>Créances clients</td><td>${fmt(d.creances)}</td><td>${fmt(d.provCreances)}</td><td>${fmt(d.creances-d.provCreances)}</td><td>Dettes fisc. et soc.</td><td>${fmt(d.detteFiscSoc)}</td></tr>
+      <tr><td>Disponibilités</td><td>${fmt(d.dispo)}</td><td>0</td><td>${fmt(d.dispo)}</td><td>Découvert bancaire</td><td>${fmt(d.decouvert)}</td></tr>
+    </tbody>`;
+  document.getElementById('e5-q1').innerHTML = `Établissez le <strong>bilan fonctionnel</strong> au 31/12/2025. Calculez ensuite le <strong>FRNG</strong>, le <strong>BFR</strong> et la <strong>trésorerie nette</strong>. Vérifiez la relation TN = FRNG − BFR.`;
+  document.getElementById('e5-q2').innerHTML = `<strong>Commentez</strong> la situation financière de Lensvision à partir des trois indicateurs. La structure est-elle équilibrée ?`;
+  document.getElementById('e5-trap').textContent = `Dans le bilan fonctionnel, tous les postes de l'actif sont pris en valeur BRUTE. Les amortissements cumulés (${fmt(d.totalAmts)} €) rejoignent les ressources stables. Le découvert bancaire va en trésorerie passive, pas dans les passifs circulants.`;
+}
+
+function renderE6(d){
+  document.getElementById('e6-ctx').innerHTML = `<strong>Mise en situation :</strong> Avant de solliciter sa banque pour un investissement de <strong>${fmt(d.invest)} €</strong> dont ${d.pctAuto} % en autofinancement, Maxime veut calculer sa CAF 2025. Il vous communique les éléments suivants.`;
+  document.getElementById('e6-data-table').innerHTML = `
+    <thead><tr><th>Élément</th><th>Montant (€)</th></tr></thead>
+    <tbody>
+      <tr><td>Résultat net comptable</td><td>${fmt(d.resNet)}</td></tr>
+      <tr><td>Dotations aux amortissements</td><td>${fmt(d.dap)}</td></tr>
+      <tr><td>Dotations aux provisions</td><td>${fmt(d.dapp)}</td></tr>
+      <tr><td>Reprises sur provisions</td><td>${fmt(d.reprises)}</td></tr>
+      <tr><td>Plus-value sur cession d'immobilisation</td><td>${fmt(d.pvCession)}</td></tr>
+      <tr><td>VNC du bien cédé</td><td>${fmt(d.vncCession)}</td></tr>
+    </tbody>`;
+  document.getElementById('e6-q1').innerHTML = `Calculez la <strong>CAF</strong> par la <strong>méthode additive</strong> (à partir du résultat net). Présentez un tableau structuré.`;
+  document.getElementById('e6-q2').innerHTML = `La CAF est-elle suffisante pour couvrir l'apport en autofinancement de <strong>${fmt(d.apport)} €</strong> (${d.pctAuto} % de ${fmt(d.invest)} €) ? Justifiez en 2 lignes.`;
+  document.getElementById('e6-trap').textContent = `La plus-value nette à soustraire = PV cession − VNC = ${fmt(d.pvCession)} − ${fmt(d.vncCession)} = ${fmt(d.pvNette)} €. On ne soustrait que la plus-value NETTE car la VNC est déjà dans le résultat (via les dotations antérieures). CAF = Résultat net + DAP + DAPP − Reprises − PV nette.`;
+}
+
+function renderE7(d){
+  document.getElementById('e7-ctx').innerHTML = `<strong>Mise en situation :</strong> Maxime envisage de lancer une nouvelle monture bois. Il réalise une enquête auprès de <strong>${d.nbRepondants} clients</strong> pour déterminer le prix psychologique. Deux questions : au-dessus de quel prix la trouveriez-vous trop chère ? En dessous de quel prix la trouveriez-vous de mauvaise qualité ?`;
+  let rows = d.prix.map((p,i)=>`<tr><td>${p}</td><td>${d.q1[i]}</td><td>${d.q2[i]}</td></tr>`).join('');
+  const tq1=d.q1.reduce((a,b)=>a+b,0), tq2=d.q2.reduce((a,b)=>a+b,0);
+  document.getElementById('e7-data-table').innerHTML = `
+    <thead><tr><th>Prix TTC (€)</th><th>Q1 — Trop chère (nb)</th><th>Q2 — Trop bon marché (nb)</th></tr></thead>
+    <tbody>${rows}</tbody>
+    <tfoot><tr><td>Total</td><td>${tq1}</td><td>${tq2}</td></tr></tfoot>`;
+  document.getElementById('e7-q1').innerHTML = `Construisez le <strong>tableau du prix psychologique</strong> avec les colonnes : prix, % Q1, % Q1 cumulé décroissant, % Q2, % Q2 cumulé croissant, % acheteurs potentiels, % non-acheteurs. Déterminez le <strong>prix psychologique optimal</strong>.`;
+  document.getElementById('e7-q2').innerHTML = `Définissez le prix psychologique en 2 lignes et présentez <strong>2 limites</strong> de cette méthode pour Maxime.`;
+  document.getElementById('e7-trap').textContent = `Cumul Q1 : de BAS en HAUT (du prix le plus élevé vers le plus bas — accumule ceux qui trouvent trop cher À CE PRIX OU MOINS). Cumul Q2 : de HAUT en BAS (accumule ceux qui trouvent trop bon marché À CE PRIX OU PLUS). % acheteurs = 100 − %Q1 cumulé − %Q2 cumulé.`;
+}
+
+function renderE8(d){
+  document.getElementById('e8-ctx').innerHTML = `<strong>Mise en situation :</strong> Maxime envisage un investissement de <strong>${fmt(d.invest)} €</strong>. Il estime les FNT prévisionnels sur ${d.duree} ans. La valeur résiduelle en fin de période est de <strong>${fmt(d.vrResid)} €</strong>. Taux d'actualisation : <strong>${d.taux} %</strong>.`;
+  const annees = Array.from({length:d.duree},(_,i)=>2025+i);
+  const coeffsFmt = d.coeffs.map(c=>(Math.round(c*10000)/10000).toFixed(4).replace('.',','));
+  let rows = annees.map((a,i)=>`<tr><td>${a}</td><td>${fmt(d.fnt[i])}${i===d.duree-1?' (dont VR : '+fmt(d.vrResid)+' €)':''}</td><td>1 / (1,0${d.taux})${String.fromCharCode(8304+i+1)} = ${coeffsFmt[i]}</td><td>—</td></tr>`).join('');
+  document.getElementById('e8-data-table').innerHTML = `
+    <thead><tr><th>Année</th><th>FNT (€)</th><th>Coefficient d'actualisation</th><th>FNT actualisé (€)</th></tr></thead>
+    <tbody>${rows}</tbody>`;
+  document.getElementById('e8-q1').innerHTML = `Calculez les <strong>FNT actualisés</strong> pour chaque année et complétez le tableau. Calculez la <strong>VAN</strong> de l'investissement.`;
+  document.getElementById('e8-q2').innerHTML = `À partir de la VAN obtenue, <strong>concluez</strong> sur la pertinence de l'investissement. Qu'est-ce qu'une VAN positive/négative signifie concrètement ?`;
+  document.getElementById('e8-trap').textContent = `La valeur résiduelle (${fmt(d.vrResid)} €) est déjà intégrée dans le FNT de la dernière année. VAN = Σ FNT actualisés − Investissement initial (${fmt(d.invest)} €). Si VAN > 0 → investissement rentable. Ne pas oublier de soustraire l'investissement.`;
+}
+
+// ==================== TABLE BUILDER ====================
+
+function buildTable(id, rowsInputId, nbCols){
+  const nb = parseInt(document.getElementById(rowsInputId).value)||5;
+  const wrap = document.getElementById(id+'-wrap');
+  const defaultHeaders = {
+    2:['Éléments','Montant (€)'],
+    4:['Éléments','Charges variables (€)','Charges fixes (€)','Total (€)'],
+    6:['Année','Capital dû début (€)','Intérêts (€)','Capital remb. (€)','Annuité (€)','Capital dû fin (€)'],
+    8:['Prix (€)','% Q1','% Q1 cum. ↓','% Q2','% Q2 cum. ↑','% Acheteurs','% Non-ach.','Vérif.'],
+  };
+  const headers = defaultHeaders[nbCols] || Array.from({length:nbCols},(_,i)=>`Colonne ${i+1}`);
+
+  let html = `<table class="editable-table" id="${id}">`;
+  html += '<thead><tr>';
+  for(let h of headers){
+    html += `<th><input type="text" value="${h}" placeholder="En-tête..."></th>`;
+  }
+  html += '</tr></thead><tbody>';
+  for(let r=0;r<nb;r++){
+    html += '<tr>';
+    for(let c=0;c<nbCols;c++) html += `<td><input type="text" placeholder="${c===0?'Libellé...':'0'}"></td>`;
+    html += '</tr>';
+  }
+  html += '</tbody></table>';
+  html += `<button class="add-row-btn" onclick="addRow('${id}')">+ Ajouter une ligne</button>`;
+  wrap.innerHTML = html;
+}
+
+function addRow(id){
+  const tbl = document.getElementById(id);
+  if(!tbl) return;
+  const nb = tbl.rows[0].cells.length;
+  const tr = tbl.tBodies[0].insertRow();
+  for(let c=0;c<nb;c++){
+    const td = tr.insertCell();
+    td.innerHTML = `<input type="text" placeholder="${c===0?'Libellé...':'0'}">`;
+  }
+}
+
+// ==================== WORKSPACE UTILS ====================
+
+function clearWorkspace(id){
+  const ws = document.querySelector(`#${id} .workspace`);
+  if(!ws) return;
+  ws.querySelectorAll('input[type=text],input:not([type]),textarea').forEach(el=>el.value='');
+  ws.querySelectorAll('.editable-table tbody').forEach(tb=>{
+    while(tb.rows.length>0) tb.deleteRow(0);
+  });
+}
+
+function resetAnswers(){
+  ['e1','e2','e3','e4','e5','e6','e7','e8'].forEach(clearWorkspace);
+}
+
+// ==================== EXPORT ====================
+
+function exportData(){
+  const exercises = {};
+  ['e1','e2','e3','e4','e5','e6','e7','e8'].forEach(id=>{
+    const el = document.getElementById(id);
+    if(!el) return;
+    const ex = { exercice:id.toUpperCase(), contexte:'', questions:[], tables:[], champs:{}, interpretations:{} };
+
+    // context
+    const ctx = el.querySelector('[id$="-ctx"]');
+    if(ctx) ex.contexte = ctx.innerText.trim();
+
+    // questions
+    el.querySelectorAll('.q p').forEach((q,i)=>{ ex.questions.push({num:i+1, texte:q.innerText.trim()}); });
+
+    // trap
+    const trap = el.querySelector('.trap');
+    if(trap) ex.piege = trap.innerText.trim();
+
+    // data tables (énoncé)
+    el.querySelectorAll('table:not(.editable-table)').forEach((t,ti)=>{
+      const rows = [];
+      t.querySelectorAll('tr').forEach(tr=>{
+        const cells = [];
+        tr.querySelectorAll('th,td').forEach(td=>cells.push(td.innerText.trim()));
+        if(cells.some(c=>c)) rows.push(cells);
+      });
+      ex.tables.push({type:'enonce',index:ti,rows});
+    });
+
+    // editable tables (réponses)
+    el.querySelectorAll('.editable-table').forEach((t,ti)=>{
+      const rows = [];
+      t.querySelectorAll('tr').forEach(tr=>{
+        const cells = [];
+        tr.querySelectorAll('input').forEach(inp=>cells.push(inp.value.trim()));
+        if(cells.some(c=>c)) rows.push(cells);
+      });
+      ex.tables.push({type:'reponse',index:ti,rows});
+    });
+
+    // key fields
+    el.querySelectorAll('.kf-input').forEach(inp=>{
+      const lbl = inp.closest('.kf-item')?.querySelector('.kf-label')?.innerText||inp.id;
+      ex.champs[lbl] = inp.value.trim();
+    });
+
+    // textareas
+    el.querySelectorAll('textarea').forEach(ta=>{
+      ex.interpretations[ta.id||'texte'] = ta.value.trim();
+    });
+
+    exercises[id] = ex;
+  });
+
+  const exportObj = {
+    meta:{
+      titre:'BTS OL — Entraînement Gestion',
+      tirage: document.getElementById('seedDisplay').textContent,
+      date: new Date().toLocaleDateString('fr-FR'),
+      heure: new Date().toLocaleTimeString('fr-FR'),
+      note:'Ce fichier contient toutes les données des exercices + les réponses saisies. Envoie-le à Claude pour correction complète.'
+    },
+    donnees_brutes: DATA,
+    exercices: exercises
+  };
+
+  const json = JSON.stringify(exportObj, null, 2);
+  const blob = new Blob([json], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `BTS_OL_Gestion_Tirage_${exportObj.meta.tirage}_${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+
+  // feedback
+  const btn = document.querySelector('.btn-teal');
+  const orig = btn.innerHTML;
+  btn.innerHTML = '✓ Exporté !';
+  btn.style.background='#145a32';
+  setTimeout(()=>{btn.innerHTML=orig;btn.style.background='';},2500);
+}
+
+// ==================== NAVIGATION ====================
+
+function showSection(id, btn){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ==================== INIT ====================
+
+function newDraw(){
+  initSeed();
+  const r = document.querySelector('.btn-red .spin');
+  if(r){ r.style.transform='rotate(360deg)'; setTimeout(()=>r.style.transform='',500); }
+  renderAll();
+  resetAnswers();
+}
+
+function renderAll(){
+  renderE1(genE1());
+  renderE2(genE2());
+  renderE3(genE3());
+  renderE4(genE4());
+  renderE5(genE5());
+  renderE6(genE6());
+  renderE7(genE7());
+  renderE8(genE8());
+}
+
+// update regen button to have spin icon
+document.addEventListener('DOMContentLoaded',()=>{
+  document.querySelector('.btn-red').innerHTML = '<span class="spin">⟳</span> Nouveau tirage';
+  newDraw();
+});
+</script>
+</body>
+</html>
