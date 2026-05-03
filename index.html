@@ -1,6 +1,14 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-5MXVGPS2');</script>
+<!-- End Google Tag Manager -->
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>BTS OL — Générateur Gestion v2</title>
@@ -181,29 +189,24 @@ tfoot td:not(:first-child){text-align:right;font-family:'DM Mono',monospace;}
 .kw-missing{display:inline-block;background:#fadbd8;color:#922b21;border-radius:3px;padding:1px 6px;font-size:11px;font-weight:700;margin:2px;}
 
 </style>
-
-  <!-- ============ Google Analytics ============ -->
-  <!-- Remplace G-XXXXXXXX par ton vrai ID GA4   -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXX"></script>
   <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-XXXXXXXX');
-
-    // ---- Tracking helper ----
+    // ---- Tracking helper — GTM dataLayer ----
     function trackEvent(action, category, label){
-      if(typeof gtag === 'function'){
-        gtag('event', action, {
-          event_category: category,
-          event_label: label,
-        });
-      }
+      window.dataLayer = window.dataLayer || [];
+      window.dataLayer.push({
+        event: action,
+        event_category: category,
+        event_label: label,
+      });
     }
   </script>
-  <!-- =========================================== -->
 </head>
 <body>
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-5MXVGPS2"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+
 
 <div class="header">
   <div class="header-left">
