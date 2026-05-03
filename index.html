@@ -174,7 +174,7 @@ tfoot td:not(:first-child){text-align:right;font-family:'DM Mono',monospace;}
   <div class="ex-card">
     <div class="ex-inner">
       <div class="ctx">
-        <strong>Magasin fil rouge :</strong> Tous les exercices sont basés sur <strong>Optique Lensvision</strong>, un magasin fictif indépendant. À chaque nouveau tirage, les chiffres changent aléatoirement mais restent cohérents et réalistes.
+        <strong>Magasin fil rouge :</strong> Tous les exercices sont basés sur <strong>Optique AkVision</strong>, un magasin fictif indépendant. À chaque nouveau tirage, les chiffres changent aléatoirement mais restent cohérents et réalistes.
       </div>
       <div class="intro-grid">
         <div class="ig-item"><div class="ig-icon">⟳</div><div><strong>Nouveau tirage</strong><span>Régénère tous les chiffres de tous les exercices</span></div></div>
@@ -309,7 +309,7 @@ tfoot td:not(:first-child){text-align:right;font-family:'DM Mono',monospace;}
       </div>
       <div class="ws-section">
         <div class="ws-section-title">Question 2 — Commentaire comparaison profession</div>
-        <textarea class="text-answer" id="e2-interp" placeholder="Comparez vos SIG aux ratios de la profession et concluez sur la situation de Lensvision..."></textarea>
+        <textarea class="text-answer" id="e2-interp" placeholder="Comparez vos SIG aux ratios de la profession et concluez sur la situation de AkVision..."></textarea>
       </div>
     </div>
   </div>
@@ -481,7 +481,7 @@ tfoot td:not(:first-child){text-align:right;font-family:'DM Mono',monospace;}
       </div>
       <div class="ws-section">
         <div class="ws-section-title">Question 2 — Commentaire situation financière</div>
-        <textarea class="text-answer" id="e5-interp" placeholder="Commentez la situation financière de Lensvision à partir des trois indicateurs..."></textarea>
+        <textarea class="text-answer" id="e5-interp" placeholder="Commentez la situation financière de AkVision à partir des trois indicateurs..."></textarea>
       </div>
     </div>
   </div>
@@ -825,7 +825,7 @@ function genE8(){
 // ==================== RENDER FUNCTIONS ====================
 
 function renderE1(d){
-  document.getElementById('e1-ctx').innerHTML = `<strong>Mise en situation :</strong> Pour l'exercice 2025, Optique Lensvision a réalisé un chiffre d'affaires HT de <strong>${fmt(d.ca)} €</strong>. Maxime vous remet les données suivantes. Les charges d'énergie sont <strong>${d.pctVar} % variables</strong> et ${100-d.pctVar} % fixes. Le magasin est ouvert <strong>${d.jours} jours</strong> par an.`;
+  document.getElementById('e1-ctx').innerHTML = `<strong>Mise en situation :</strong> Pour l'exercice 2025, Optique AkVision a réalisé un chiffre d'affaires HT de <strong>${fmt(d.ca)} €</strong>. Maxime vous remet les données suivantes. Les charges d'énergie sont <strong>${d.pctVar} % variables</strong> et ${100-d.pctVar} % fixes. Le magasin est ouvert <strong>${d.jours} jours</strong> par an.`;
   document.getElementById('e1-data-table').innerHTML = `
     <thead><tr><th>Élément</th><th>Montant (€ HT)</th><th>Nature</th></tr></thead>
     <tbody>
@@ -844,7 +844,7 @@ function renderE1(d){
 }
 
 function renderE2(d){
-  document.getElementById('e2-ctx').innerHTML = `<strong>Mise en situation :</strong> Voici le compte de résultat 2025 d'Optique Lensvision (CA HT : <strong>${fmt(d.ca)} €</strong>). Maxime veut calculer ses SIG et se comparer aux ratios de la profession.`;
+  document.getElementById('e2-ctx').innerHTML = `<strong>Mise en situation :</strong> Voici le compte de résultat 2025 d'Optique AkVision (CA HT : <strong>${fmt(d.ca)} €</strong>). Maxime veut calculer ses SIG et se comparer aux ratios de la profession.`;
   document.getElementById('e2-data-table').innerHTML = `
     <thead><tr><th>CHARGES</th><th>€</th><th>PRODUITS</th><th>€</th></tr></thead>
     <tbody>
@@ -872,7 +872,7 @@ function renderE2(d){
       <tr><td>Taux de RCAI</td><td>${(parseFloat(trcai)+rng(-4,4,1)).toFixed(0)} %</td></tr>
     </tbody>`;
   document.getElementById('e2-q1').innerHTML = `Calculez les SIG suivants en valeur et en % du CA HT : <strong>marge commerciale, valeur ajoutée, EBE, résultat d'exploitation, RCAI</strong>.`;
-  document.getElementById('e2-q2').innerHTML = `<strong>Commentez</strong> les résultats en les comparant aux ratios de la profession. Concluez sur la performance de Lensvision en 3 lignes.`;
+  document.getElementById('e2-q2').innerHTML = `<strong>Commentez</strong> les résultats en les comparant aux ratios de la profession. Concluez sur la performance de AkVision en 3 lignes.`;
   document.getElementById('e2-trap').textContent = `Attention à la variation de stock : si elle est inscrite en charges avec un signe −, c'est un stockage qui réduit le coût des marchandises vendues. Formule MC = Ventes − (Achats + Variation de stock). La VA se calcule MC − Charges externes uniquement (pas le personnel !).`;
 }
 
@@ -909,7 +909,7 @@ function renderE4(d){
 }
 
 function renderE5(d){
-  document.getElementById('e5-ctx').innerHTML = `<strong>Mise en situation :</strong> Voici le bilan comptable d'Optique Lensvision au 31/12/2025. Construisez le bilan fonctionnel et calculez les indicateurs financiers. Les amortissements totaux s'élèvent à <strong>${fmt(d.totalAmts)} €</strong>.`;
+  document.getElementById('e5-ctx').innerHTML = `<strong>Mise en situation :</strong> Voici le bilan comptable d'Optique AkVision au 31/12/2025. Construisez le bilan fonctionnel et calculez les indicateurs financiers. Les amortissements totaux s'élèvent à <strong>${fmt(d.totalAmts)} €</strong>.`;
   document.getElementById('e5-data-table').innerHTML = `
     <thead><tr><th>ACTIF</th><th>Brut €</th><th>Amort/Prov €</th><th>Net €</th><th>PASSIF</th><th>Montant €</th></tr></thead>
     <tbody>
@@ -922,7 +922,7 @@ function renderE5(d){
       <tr><td>Disponibilités</td><td>${fmt(d.dispo)}</td><td>0</td><td>${fmt(d.dispo)}</td><td>Découvert bancaire</td><td>${fmt(d.decouvert)}</td></tr>
     </tbody>`;
   document.getElementById('e5-q1').innerHTML = `Établissez le <strong>bilan fonctionnel</strong> au 31/12/2025. Calculez ensuite le <strong>FRNG</strong>, le <strong>BFR</strong> et la <strong>trésorerie nette</strong>. Vérifiez la relation TN = FRNG − BFR.`;
-  document.getElementById('e5-q2').innerHTML = `<strong>Commentez</strong> la situation financière de Lensvision à partir des trois indicateurs. La structure est-elle équilibrée ?`;
+  document.getElementById('e5-q2').innerHTML = `<strong>Commentez</strong> la situation financière de AkVision à partir des trois indicateurs. La structure est-elle équilibrée ?`;
   document.getElementById('e5-trap').textContent = `Dans le bilan fonctionnel, tous les postes de l'actif sont pris en valeur BRUTE. Les amortissements cumulés (${fmt(d.totalAmts)} €) rejoignent les ressources stables. Le découvert bancaire va en trésorerie passive, pas dans les passifs circulants.`;
 }
 
