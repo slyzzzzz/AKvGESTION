@@ -2999,15 +2999,16 @@ function corrigerRedac(textareaId, keywords, required){
   else if(pct>=50) html+=`<div style="margin-top:8px;font-size:11px;color:#7d6608;">⚠️ Réponse partielle — complète avec les mots-clés manquants puis consulte la correction type.</div>`;
   else html+=`<div style="margin-top:8px;font-size:11px;color:#922b21;">❌ Réponse insuffisante — relis le cours puis réessaie avant de consulter la correction.</div>`;
   panel.innerHTML=html;
-  <script>
-    
+}
+</script>
+
+<script>
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("./sw.js")
       .then(() => console.log("PWA AKvGestion activée"))
       .catch(err => console.error("Erreur Service Worker:", err));
   }
 </script>
-}
 
 </script>
 </body>
