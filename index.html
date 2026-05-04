@@ -1,7 +1,12 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#D89B00">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="AKvGestion">
+<link rel="apple-touch-icon" href="icon.png">
+  
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>BTS OL — Générateur Gestion v2</title>
@@ -46,7 +51,7 @@ body{font-family:'Barlow',sans-serif;background:var(--paper);color:var(--ink);fo
 .ex-title{font-family:'Libre Baskerville',serif;font-size:18px;font-weight:700;margin-bottom:2px;}
 .ex-sub{font-size:12px;color:var(--ink-soft);}
 .ex-card{background:#fff;border:1px solid var(--border);border-radius:8px;margin-bottom:8px;overflow:hidden;}
-.ex-inner{padding:22px 26px;}
+.ex-inner{padding:22px 26px;overflow-x:auto;}
 
 .ctx{background:var(--paper-warm);border-left:3px solid var(--gold);border-radius:0 6px 6px 0;padding:12px 16px;margin-bottom:16px;font-size:13.5px;line-height:1.7;}
 .ctx strong{color:var(--gold);font-weight:600;}
@@ -73,7 +78,7 @@ tfoot td:not(:first-child){text-align:right;font-family:'DM Mono',monospace;}
 .workspace{background:#f8f6ff;border:1px solid #c8bfe8;border-radius:8px;margin-top:10px;overflow:hidden;}
 .ws-header{background:#4a235a;color:#fff;padding:10px 18px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;}
 .ws-title{font-size:12px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;}
-.ws-body{padding:16px 18px;}
+.ws-body{padding:16px 18px;overflow-x:auto;}
 .ws-section{margin-bottom:18px;}
 .ws-section-title{font-size:11px;font-weight:700;color:#4a235a;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;padding-bottom:5px;border-bottom:1px solid #c8bfe8;}
 
@@ -181,6 +186,38 @@ tfoot td:not(:first-child){text-align:right;font-family:'DM Mono',monospace;}
 .kw-found{display:inline-block;background:#d5f5e3;color:#145a32;border-radius:3px;padding:1px 6px;font-size:11px;font-weight:700;margin:2px;}
 .kw-missing{display:inline-block;background:#fadbd8;color:#922b21;border-radius:3px;padding:1px 6px;font-size:11px;font-weight:700;margin:2px;}
 
+
+/* ===== SCROLL HORIZONTAL TABLEAUX MOBILE ===== */
+.table-scroll-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin-bottom: 10px;
+  border-radius: 4px;
+}
+.table-scroll-wrap table {
+  min-width: 480px;
+  margin-bottom: 0;
+}
+.scroll-hint {
+  display: none;
+  text-align: center;
+  font-size: 11px;
+  color: var(--ink-soft);
+  padding: 4px 0 6px;
+  letter-spacing: 0.5px;
+  animation: hint-fade 2s ease-in-out infinite alternate;
+}
+@keyframes hint-fade {
+  from { opacity: 0.4; }
+  to   { opacity: 1; }
+}
+@media (max-width: 700px) {
+  .scroll-hint { display: block; }
+  .table-scroll-wrap { border: 1px solid var(--border); border-radius: 6px; }
+}
+/* Tableaux éditables aussi */
+.editable-table { min-width: 400px; }
+
 </style>
   <script>
     // ---- Tracking helper — GTM dataLayer ----
@@ -212,6 +249,35 @@ tfoot td:not(:first-child){text-align:right;font-family:'DM Mono',monospace;}
   <!-- Fin Google Analytics -->
 </head>
 <body>
+<script>
+// Proxy functions — permettent aux onclick d'appeler les fonctions
+// avant que le script principal soit chargé
+(function(){
+  var _queue = [];
+  var _ready = false;
+  function makeProxy(name){
+    return function(){
+      var args = arguments;
+      if(_ready && window['_'+name]){
+        window['_'+name].apply(null, args);
+      } else {
+        _queue.push({n:name, a:args});
+      }
+    };
+  }
+  var fns = ['showSection','corriger','buildTable','addRow','clearWorkspace',
+             'newDraw','resetAnswers','exportData','saveAllTables','saveTable',
+             'loadTable','toggleFormules','corrigerRedac'];
+  fns.forEach(function(n){ window[n] = makeProxy(n); });
+  window._registerFunctions = function(obj){
+    Object.keys(obj).forEach(function(k){ window['_'+k] = obj[k]; });
+    _ready = true;
+    _queue.forEach(function(item){ window['_'+item.n] && window['_'+item.n].apply(null, item.a); });
+    _queue = [];
+  };
+})();
+</script>
+
 
 
 <div class="header">
@@ -240,6 +306,8 @@ tfoot td:not(:first-child){text-align:right;font-family:'DM Mono',monospace;}
   <button class="nav-btn" onclick="showSection('e8',this)">E8 · VAN</button>
   <button class="nav-btn" onclick="showSection('e9',this)">E9 · Zone chalandise</button>
   <button class="nav-btn" onclick="showSection('e10',this)">E10 · Moindres carrés</button>
+  <button class="nav-btn" onclick="showSection('e11',this)">E11 · Statut juridique</button>
+  <button class="nav-btn" onclick="showSection('e12',this)">E12 · Prix de vente</button>
 </nav>
 
 <div class="main">
@@ -263,7 +331,7 @@ tfoot td:not(:first-child){text-align:right;font-family:'DM Mono',monospace;}
         <div class="ig-item"><div class="ig-icon">↺</div><div><strong>Réinitialiser</strong><span>Efface tes réponses, garde les mêmes données</span></div></div>
         <div class="ig-item"><div class="ig-icon">🔍</div><div><strong>Corriger</strong><span>Bouton sous chaque exercice — vérifie tes résultats clés automatiquement et t'affiche ✅ ou ❌</span></div></div>
         <div class="ig-item"><div class="ig-icon">⬇</div><div><strong>Exporter mes réponses</strong><span>Génère un fichier JSON avec tout : l'énoncé, les données, tes réponses. Envoie-le à une IA pour correction détaillée si tu bloques.</span></div></div>
-        <div class="ig-item"><div class="ig-icon">🎯</div><div><strong>10 exercices disponibles</strong><span>SR · SIG · Emprunt · Amortissement · FRNG/BFR · CAF · Prix psy. · VAN · Zone chalandise · Moindres carrés</span></div></div>
+        <div class="ig-item"><div class="ig-icon">🎯</div><div><strong>12 exercices disponibles</strong><span>SR · SIG · Emprunt · Amortissement · FRNG/BFR · CAF · Prix psy. · VAN · Zone chalandise · Moindres carrés · Statut juridique · Prix de vente optique</span></div></div>
       </div>
       <div class="export-panel">
         <h3>Comment utiliser l'outil ?</h3>
@@ -745,7 +813,7 @@ tfoot td:not(:first-child){text-align:right;font-family:'DM Mono',monospace;}
       </div>
       <div class="ws-section">
         <div class="ws-section-title">Question 2 — Définition + 2 limites</div>
-        <textarea class="text-answer" id="e7-interp" placeholder="Définissez le prix psychologique et présentez 2 limites de la méthode pour Maxime..."></textarea>
+        <textarea class="text-answer" id="e7-interp" placeholder="Définissez le prix psychologique et présentez 2 limites de la méthode pour Atilla..."></textarea>
       </div>
             <div class="q-redac">
         <div class="q-redac-title">❓ Question de rédaction — réponse en 2-4 lignes</div>
@@ -1046,9 +1114,151 @@ b = (Σy − a·Σx) / n
   </div>
 </div>
 
+
+<!-- E11 — STATUT JURIDIQUE -->
+<div class="section" id="e11">
+  <div class="ex-header">
+    <div class="ex-num">E11</div>
+    <div>
+      <div class="ex-title">Choix du statut juridique</div>
+      <div class="ex-sub">EURL · SASU · SARL — Analyse et argumentation</div>
+    </div>
+  </div>
+  <div class="ex-card">
+    <div class="ex-inner">
+      <div class="ctx" id="e11-ctx"></div>
+      <div class="qs">
+        <div class="qlbl">Questions</div>
+        <div class="q"><div class="qn">1</div><p>Identifiez et justifiez le <strong>statut juridique le plus adapté</strong> à la situation décrite.</p></div>
+        <div class="q"><div class="qn">2</div><p>Rédigez <strong>5 arguments</strong> qui justifient votre choix (un par champ).</p></div>
+        <div class="trap" id="e11-trap"></div>
+      </div>
+      <div class="formula e11-formules" style="display:none;">
+        <strong>EURL</strong> : entrepreneur seul · TNS · charges sociales faibles · IR par défaut · gestion simple<br>
+        <strong>SASU</strong> : entrepreneur seul · assimilé salarié · régime général · IS · meilleure protection sociale<br>
+        <strong>SARL</strong> : plusieurs associés · gérant · parts sociales · décisions collectives · IS
+      </div>
+    </div>
+  </div>
+  <div class="workspace">
+    <div class="ws-header">
+      <span class="ws-title">✏ Zone de travail — E11</span>
+      <button class="btn-sm btn-sm-red" onclick="clearWorkspace('e11')">Effacer</button>
+    </div>
+    <div class="ws-body">
+      <div class="ws-section">
+        <div class="ws-section-title">Question 1 — Votre choix de statut</div>
+        <div class="key-fields">
+          <div class="kf-item" style="flex:0 0 auto;">
+            <label class="kf-label">Statut choisi</label>
+            <select id="e11-choix" class="kf-input" style="font-family:'Barlow',sans-serif;cursor:pointer;">
+              <option value="">-- Choisissez --</option>
+              <option value="EURL">EURL</option>
+              <option value="SASU">SASU</option>
+              <option value="SARL">SARL</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="ws-section">
+        <div class="ws-section-title">Question 2 — Vos 5 arguments</div>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <div class="kf-item"><label class="kf-label">Argument 1</label><input class="kf-input" id="e11-arg1" placeholder="Rédigez votre argument..."></div>
+          <div class="kf-item"><label class="kf-label">Argument 2</label><input class="kf-input" id="e11-arg2" placeholder="Rédigez votre argument..."></div>
+          <div class="kf-item"><label class="kf-label">Argument 3</label><input class="kf-input" id="e11-arg3" placeholder="Rédigez votre argument..."></div>
+          <div class="kf-item"><label class="kf-label">Argument 4</label><input class="kf-input" id="e11-arg4" placeholder="Rédigez votre argument..."></div>
+          <div class="kf-item"><label class="kf-label">Argument 5</label><input class="kf-input" id="e11-arg5" placeholder="Rédigez votre argument..."></div>
+        </div>
+      </div>
+      <button class="corr-btn" onclick="corriger('e11')">🔍 Corriger mes réponses</button>
+      <div class="corr-panel" id="e11-corr"></div>
+    </div>
+  </div>
+</div>
+
+<!-- E12 — PRIX DE VENTE OPTIQUE -->
+<div class="section" id="e12">
+  <div class="ex-header">
+    <div class="ex-num">E12</div>
+    <div>
+      <div class="ex-title">Prix de vente optique</div>
+      <div class="ex-sub">Coût · PV HT/TTC · Marge · Taux de marge · Taux de marque</div>
+    </div>
+  </div>
+  <div class="ex-card">
+    <div class="ex-inner">
+      <div class="ctx" id="e12-ctx"></div>
+      <div class="dtitle">Données de l'équipement</div>
+      <table id="e12-data-table"></table>
+      <div class="formula e12-formules" style="display:none;">
+        Coût total HT = monture + verres + frais annexes<br>
+        Si coefficient : PV TTC = coût total × coefficient · PV HT = PV TTC ÷ 1,20<br>
+        Si taux de marge : PV HT = coût total × (1 + taux de marge)<br>
+        Marge commerciale = PV HT − coût total HT<br>
+        Taux de marge = marge ÷ coût total × 100<br>
+        Taux de marque = marge ÷ PV HT × 100<br>
+        ⚠ Marge ≠ Marque · HT ≠ TTC · Coefficient souvent en TTC
+      </div>
+      <div class="qs">
+        <div class="qlbl">Questions</div>
+        <div class="q"><div class="qn">1</div><p>Calculez le <strong>coût d'achat total HT</strong>.</p></div>
+        <div class="q"><div class="qn">2</div><p>Calculez le <strong>prix de vente HT</strong>.</p></div>
+        <div class="q"><div class="qn">3</div><p>Calculez le <strong>prix de vente TTC</strong>.</p></div>
+        <div class="q"><div class="qn">4</div><p>Calculez la <strong>marge commerciale</strong>.</p></div>
+        <div class="q"><div class="qn">5</div><p>Calculez le <strong>taux de marge</strong>.</p></div>
+        <div class="q"><div class="qn">6</div><p>Calculez le <strong>taux de marque</strong>.</p></div>
+        <div class="trap" id="e12-trap"></div>
+      </div>
+    </div>
+  </div>
+  <div class="workspace">
+    <div class="ws-header">
+      <span class="ws-title">✏ Zone de travail — E12</span>
+      <button class="btn-sm btn-sm-red" onclick="clearWorkspace('e12')">Effacer</button>
+    </div>
+    <div class="ws-body">
+      <div class="ws-section">
+        <div class="ws-section-title">Tableau de calcul</div>
+        <div class="tb-controls">
+          <label>Lignes :</label>
+          <input type="number" id="e12-rows" value="6" min="2" max="12">
+          <button class="btn-sm btn-sm-purple" onclick="buildTable('e12-tbl','e12-rows',2)">Construire (2 colonnes)</button>
+          <button class="btn-sm btn-sm-gray" onclick="addRow('e12-tbl')">+ Ligne</button>
+        </div>
+        <div id="e12-tbl-wrap"></div>
+      </div>
+      <div class="ws-section">
+        <div class="ws-section-title">Résultats clés</div>
+        <div class="key-fields">
+          <div class="kf-item"><label class="kf-label">Coût total HT (€)</label><input class="kf-input" id="e12-cout" placeholder=""></div>
+          <div class="kf-item"><label class="kf-label">Prix de vente HT (€)</label><input class="kf-input" id="e12-pvht" placeholder=""></div>
+          <div class="kf-item"><label class="kf-label">Prix de vente TTC (€)</label><input class="kf-input" id="e12-pvttc" placeholder=""></div>
+          <div class="kf-item"><label class="kf-label">Marge commerciale (€)</label><input class="kf-input" id="e12-marge" placeholder=""></div>
+          <div class="kf-item"><label class="kf-label">Taux de marge (%)</label><input class="kf-input" id="e12-tmarge" placeholder=""></div>
+          <div class="kf-item"><label class="kf-label">Taux de marque (%)</label><input class="kf-input" id="e12-tmarque" placeholder=""></div>
+        </div>
+      </div>
+      <button class="corr-btn" onclick="corriger('e12')">🔍 Corriger mes réponses</button>
+      <div class="corr-panel" id="e12-corr"></div>
+    </div>
+  </div>
+</div>
+
+<!-- BOUTON MODE FORMULES — Global -->
+<div style="position:fixed;bottom:20px;right:20px;z-index:200;">
+  <button id="btn-formules" onclick="toggleFormules()" style="
+    background:var(--purple);color:#fff;border:none;border-radius:30px;
+    padding:10px 20px;font-family:'Barlow',sans-serif;font-size:13px;
+    font-weight:700;cursor:pointer;box-shadow:0 4px 15px rgba(74,35,90,0.4);
+    transition:all 0.2s;display:flex;align-items:center;gap:8px;">
+    📚 Mode formules : <span id="formules-state">OFF</span>
+  </button>
+</div>
+
 </div><!-- /main -->
 
 <script>
+
 // ==================== RANDOM ENGINE ====================
 let SEED = 0;
 let DATA = {};
@@ -1412,36 +1622,36 @@ function maybe(prob=0.5){ return Math.abs(rng(0,100,1))%100 < prob*100; }
 
 const SYN = {
   // E1/E2 — libellés charges
-  achats: ['Achats de marchandises','Coût d\'achat montures et verres','Achats verres correcteurs et montures','Approvisionnements optiques','Achats de produits revendus'],
+  achats: ['Achats de marchandises',"Coût d\'achat montures et verres",'Achats verres correcteurs et montures','Approvisionnements optiques','Achats de produits revendus'],
   varStock: ['Variation de stocks','Variation de stock de marchandises','Variation des stocks optiques','Variation stock montures/verres'],
   personnel: ['Charges de personnel','Salaires bruts et cotisations sociales','Rémunération équipe + charges sociales','Frais de personnel','Salaires et traitements + charges patronales'],
   loyer: ['Loyer et charges locatives','Bail commercial et charges','Loyer commercial + charges de copropriété','Charges locatives et loyer','Loyer du local commercial'],
-  energie: ['Énergie / téléphone','Fluides et communications','Eau, gaz, électricité, téléphone','Charges d\'énergie et télécommunications','Consommables et énergie'],
-  assurance: ['Assurances et abonnements','Primes d\'assurance et cotisations','Honoraires et assurances','Frais d\'assurance et divers','Assurances professionnelles'],
+  energie: ['Énergie / téléphone','Fluides et communications','Eau, gaz, électricité, téléphone',"Charges d\'énergie et télécommunications",'Consommables et énergie'],
+  assurance: ['Assurances et abonnements',"Primes d\'assurance et cotisations",'Honoraires et assurances',"Frais d\'assurance et divers",'Assurances professionnelles'],
   dap: ['Dotations aux amortissements','Dotations aux amortissements (DAP)','Amortissements du matériel et agencements','Dotations amortissements exploitation','Charges calculées — amortissements'],
-  chargesFinanc: ['Charges financières','Intérêts sur emprunts','Charges d\'intérêts bancaires','Frais financiers','Intérêts et agios bancaires'],
+  chargesFinanc: ['Charges financières','Intérêts sur emprunts',"Charges d\'intérêts bancaires",'Frais financiers','Intérêts et agios bancaires'],
   chargesExt: ['Charges externes','Services extérieurs','Frais généraux divers','Charges de fonctionnement externes','Services et fournitures extérieures'],
-  impotsTaxes: ['Impôts et taxes','Taxes et versements assimilés','Cotisations et impôts d\'exploitation','Taxe foncière et CFE','Impôts d\'exploitation'],
+  impotsTaxes: ['Impôts et taxes','Taxes et versements assimilés',"Cotisations et impôts d\'exploitation",'Taxe foncière et CFE',"Impôts d\'exploitation"],
   chargesExcep: ['Charges exceptionnelles','Charges hors exploitation','Pertes exceptionnelles','Charges non récurrentes'],
   // E1 — lignes optionnelles
   optFraisDep: ['Frais de déplacement','Frais kilométriques','Indemnités de déplacement'],
   optFormation: ['Frais de formation','Formation professionnelle continue','Dépenses de formation'],
-  optEntretien: ['Frais d\'entretien et réparations','Entretien matériel optique','Maintenance équipements'],
+  optEntretien: ["Frais d\'entretien et réparations",'Entretien matériel optique','Maintenance équipements'],
   optFournitures: ['Fournitures de bureau','Consommables atelier','Matières consommables'],
-  optHonoraires: ['Honoraires comptable','Frais d\'expertise comptable','Honoraires conseils'],
+  optHonoraires: ['Honoraires comptable',"Frais d\'expertise comptable",'Honoraires conseils'],
   // E3 — objets d'emprunt
-  objetEmprunt: ['un véhicule utilitaire','une tour de prise de mesures','l\'aménagement du nouveau local','du matériel optique de pointe','un réfractomètre automatique et mobilier','l\'acquisition d\'équipements d\'atelier'],
+  objetEmprunt: ['un véhicule utilitaire','une tour de prise de mesures',"l\'aménagement du nouveau local",'du matériel optique de pointe','un réfractomètre automatique et mobilier',"l\'acquisition d\'équipements d\'atelier"],
   // E4 — noms de biens
   bienA: [
     {nom:'Réfractomètre automatique', type:'matériel optique'},
     {nom:'Tour de prise de mesures', type:'équipement de réfraction'},
     {nom:'Auto-kératomètre', type:'matériel de mesure'},
-    {nom:'Lampe à fente', type:'matériel d\'examen'},
+    {nom:'Lampe à fente', type:"matériel d\'examen"},
     {nom:'Véhicule utilitaire', type:'immobilisation corporelle'},
     {nom:'Mobilier de magasin', type:'agencement'},
   ],
   bienB: [
-    {nom:'Aménagement du local', type:'travaux d\'aménagement'},
+    {nom:'Aménagement du local', type:"travaux d\'aménagement"},
     {nom:'Vitrine et présentoirs', type:'matériel commercial'},
     {nom:'Logiciel de gestion optique', type:'immobilisation incorporelle'},
     {nom:'Caisse enregistreuse tactile', type:'matériel informatique'},
@@ -1451,24 +1661,24 @@ const SYN = {
   // E5 — libellés bilan
   fondsComm: ['Fonds commercial','Clientèle et achalandage','Fonds de commerce','Droit au bail + clientèle'],
   materielBilan: ['Matériel et outillage','Équipements optiques','Matériel de réfraction','Immobilisations corporelles — matériel'],
-  agencBilan: ['Agencements et aménagements','Travaux d\'aménagement','Agencements du local','Installations et aménagements'],
+  agencBilan: ['Agencements et aménagements',"Travaux d\'aménagement",'Agencements du local','Installations et aménagements'],
   immobFin: ['Immobilisations financières','Dépôt de garantie','Caution versée au bailleur','Dépôt de garantie loyer'],
   stocksBilan: ['Stocks de marchandises','Stocks de montures et verres','Stocks optiques','Inventaire des produits en stock'],
-  creancesBilan: ['Créances clients','Créances et comptes rattachés','Clients et comptes rattachés','Créances d\'exploitation'],
+  creancesBilan: ['Créances clients','Créances et comptes rattachés','Clients et comptes rattachés',"Créances d\'exploitation"],
   dispoBilan: ['Disponibilités','Banque et caisse','Trésorerie disponible','Soldes bancaires et caisse'],
   capitalBilan: ['Capital social','Capital','Capital personnel'],
   reservesBilan: ['Réserves','Réserves légales et facultatives','Report à nouveau + réserves'],
-  resNetBilan: ['Résultat net','Résultat de l\'exercice','Bénéfice net de l\'exercice'],
+  resNetBilan: ['Résultat net',"Résultat de l\'exercice","Bénéfice net de l\'exercice"],
   empruntBilan: ['Emprunts bancaires LT','Dettes financières à long terme','Emprunts et dettes assimilées','Dettes financières'],
-  fournBilan: ['Dettes fournisseurs','Fournisseurs et comptes rattachés','Dettes d\'exploitation fournisseurs'],
-  fiscSocBilan: ['Dettes fiscales et sociales','Dettes envers l\'État et organismes sociaux','Charges à payer fiscales et sociales'],
+  fournBilan: ['Dettes fournisseurs','Fournisseurs et comptes rattachés',"Dettes d\'exploitation fournisseurs"],
+  fiscSocBilan: ['Dettes fiscales et sociales',"Dettes envers l\'État et organismes sociaux",'Charges à payer fiscales et sociales'],
   decouvertBilan: ['Découvert bancaire','Concours bancaires courants','Solde créditeur banque'],
   // E6 — libellés CAF
-  resNetCAF: ['Résultat net comptable','Résultat de l\'exercice','Bénéfice net de l\'exercice'],
+  resNetCAF: ['Résultat net comptable',"Résultat de l\'exercice","Bénéfice net de l\'exercice"],
   dapCAF: ['Dotations aux amortissements','DAP — amortissements','Charges calculées — amortissements'],
   dappCAF: ['Dotations aux provisions','Dotations aux dépréciations et provisions','Provisions pour risques'],
   reprisesCAF: ['Reprises sur provisions','Reprises sur dépréciations','Reprises de provisions pour risques'],
-  pvCAF: ['Plus-value sur cession d\'immobilisation','Produit de cession d\'actif immobilisé','Plus-value de cession d\'un bien'],
+  pvCAF: ["Plus-value sur cession d\'immobilisation","Produit de cession d\'actif immobilisé","Plus-value de cession d\'un bien"],
   vncCAF: ['VNC du bien cédé','Valeur nette comptable du bien cédé','Valeur résiduelle comptable du bien cédé'],
   // E7 — produits
   produitPrix: [
@@ -1483,10 +1693,10 @@ const SYN = {
   investVAN: [
     'une tour de prise de mesures numérique',
     'un réfractomètre automatique de dernière génération',
-    'un véhicule utilitaire pour l\'optique à domicile',
-    'l\'aménagement complet d\'un espace de réfraction',
+    "un véhicule utilitaire pour l\'optique à domicile",
+    "l\'aménagement complet d\'un espace de réfraction",
     'un système de gestion optique informatisé',
-    'du matériel d\'atelier haute performance',
+    "du matériel d\'atelier haute performance",
   ],
   // E9 — descriptions zones
   zoneADesc: ['Hypercentre — forte attractivité, concurrence directe','Centre-ville historique — zone piétonne très fréquentée','Quartier commercial central — fort trafic quotidien'],
@@ -1494,11 +1704,11 @@ const SYN = {
   zoneCDesc: ['Périphérie — clientèle occasionnelle','Zones rurales et hameaux éloignés','Communes voisines — déplacements ponctuels'],
   // E10 — contextes
   contexteE10: [
-    {metric:'chiffre d\'affaires global', unite:'€'},
-    {metric:'chiffre d\'affaires montures', unite:'€'},
-    {metric:'chiffre d\'affaires verres correcteurs', unite:'€'},
-    {metric:'nombre d\'équipements vendus', unite:'unités'},
-    {metric:'chiffre d\'affaires solaires', unite:'€'},
+    {metric:"chiffre d\'affaires global", unite:'€'},
+    {metric:"chiffre d\'affaires montures", unite:'€'},
+    {metric:"chiffre d\'affaires verres correcteurs", unite:'€'},
+    {metric:"nombre d\'équipements vendus", unite:'unités'},
+    {metric:"chiffre d\'affaires solaires", unite:'€'},
   ],
 };
 
@@ -1540,7 +1750,7 @@ function renderE1(d){
   const tail = shuffle([...fixedLines.slice(2), ...optLines]);
   const allLines = [...head, ...tail];
   // Contexte : préciser quelle charge est mixte
-  document.getElementById('e1-ctx').innerHTML = `<strong>Mise en situation :</strong> Pour l'exercice 2025, Optique AkVision a réalisé un chiffre d'affaires HT de <strong>${fmt(d.ca)} €</strong>. Maxime vous remet les données suivantes. <em>${lEnergie}</em> est une charge mixte : <strong>${pctV}% variable</strong> et ${100-pctV}% fixe. Le magasin est ouvert <strong>${d.jours} jours</strong> par an.`;
+  document.getElementById('e1-ctx').innerHTML = `<strong>Mise en situation :</strong> Pour l'exercice 2025, Optique AkVision a réalisé un chiffre d'affaires HT de <strong>${fmt(d.ca)} €</strong>. Atilla vous remet les données suivantes. <em>${lEnergie}</em> est une charge mixte : <strong>${pctV}% variable</strong> et ${100-pctV}% fixe. Le magasin est ouvert <strong>${d.jours} jours</strong> par an.`;
   const rows = allLines.map(l => {
     const val = l.signed ? `${l.val>=0?'+':''} ${fmt(Math.abs(l.val))}` : fmt(l.val);
     return `<tr><td>${l.lib}</td><td>${val}</td><td>${l.nat}</td></tr>`;
@@ -1570,7 +1780,7 @@ function renderE2(d){
   ]);
   // Produits (fixes)
   const varStockFmt = `${d.varStock>=0?'+':''} ${fmt(Math.abs(d.varStock))}`;
-  document.getElementById('e2-ctx').innerHTML = `<strong>Mise en situation :</strong> Voici le compte de résultat 2025 d'Optique AkVision (CA HT : <strong>${fmt(d.ca)} €</strong>). Maxime veut calculer ses SIG et se comparer aux ratios de la profession en région.`;
+  document.getElementById('e2-ctx').innerHTML = `<strong>Mise en situation :</strong> Voici le compte de résultat 2025 d'Optique AkVision (CA HT : <strong>${fmt(d.ca)} €</strong>). Atilla veut calculer ses SIG et se comparer aux ratios de la profession en région.`;
   const chargesRows = chargesLines.map(l=>`<tr><td>${l.lib}</td><td>${fmt(l.val)}</td><td></td><td></td></tr>`).join('');
   document.getElementById('e2-data-table').innerHTML = `
     <thead><tr><th>CHARGES</th><th>€</th><th>PRODUITS</th><th>€</th></tr></thead>
@@ -1602,9 +1812,9 @@ function renderE3(d){
   const objet = pick(SYN.objetEmprunt);
   const modes = ['Annuités constantes','Remboursement par annuités constantes','Mensualités constantes sur la durée'];
   const modeLabel = pick(modes);
-  document.getElementById('e3-ctx').innerHTML = `<strong>Mise en situation :</strong> Maxime contracte un emprunt de <strong>${fmt(d.capital)} €</strong> pour financer ${objet}. Taux : <strong>${d.taux} %</strong> sur <strong>${d.duree} ans</strong>. Première échéance au 31/12/2025. Frais de dossier : ${fmt(d.frais)} €.`;
+  document.getElementById('e3-ctx').innerHTML = `<strong>Mise en situation :</strong> Atilla contracte un emprunt de <strong>${fmt(d.capital)} €</strong> pour financer ${objet}. Taux : <strong>${d.taux} %</strong> sur <strong>${d.duree} ans</strong>. Première échéance au 31/12/2025. Frais de dossier : ${fmt(d.frais)} €.`;
   const params = shuffle([
-    {lib:'Taux d\'intérêt annuel', val:`${d.taux} %`},
+    {lib:"Taux d\'intérêt annuel", val:`${d.taux} %`},
     {lib:'Durée', val:`${d.duree} ans`},
     {lib:'Frais de dossier', val:`${fmt(d.frais)} €`},
     {lib:'Mode de remboursement', val:modeLabel},
@@ -1626,9 +1836,9 @@ function renderE4(d){
   const bB = pick(SYN.bienB);
   document.getElementById('e4-ctx').innerHTML = `<strong>Mise en situation :</strong> Optique AkVision acquiert deux immobilisations. <strong>${bA.nom}</strong> (${bA.type}) mis en service le 1er ${d.moisA} 2025, durée ${d.dureeA} ans, sans valeur résiduelle. <strong>${bB.nom}</strong> (${bB.type}) mis en service le 15 ${d.moisB} 2025, durée ${d.dureeB} ans, valeur résiduelle ${fmt(d.vrB)} €.`;
   const rows = shuffle([
-    {lib:'Coût d\'achat HT', valA:`${fmt(d.coutA)} €`, valB:`${fmt(d.coutB)} €`},
+    {lib:"Coût d\'achat HT", valA:`${fmt(d.coutA)} €`, valB:`${fmt(d.coutB)} €`},
     {lib:'Date de mise en service', valA:`1er ${d.moisA} 2025`, valB:`15 ${d.moisB} 2025`},
-    {lib:'Durée d\'amortissement', valA:`${d.dureeA} ans`, valB:`${d.dureeB} ans`},
+    {lib:"Durée d\'amortissement", valA:`${d.dureeA} ans`, valB:`${d.dureeB} ans`},
     {lib:'Valeur résiduelle', valA:'0 €', valB:`${fmt(d.vrB)} €`},
 
   ]);
@@ -1693,7 +1903,7 @@ function renderE6(d){
     {lib:lVnc, val:fmt(d.vncCession), signe:'+'},
   ]);
   const investObjet = pick(SYN.investVAN);
-  document.getElementById('e6-ctx').innerHTML = `<strong>Mise en situation :</strong> Maxime envisage d'investir <strong>${fmt(d.invest)} €</strong> dans ${investObjet}. Il souhaite financer ${d.pctAuto} % en autofinancement. Calculez sa CAF 2025 à partir des éléments ci-dessous.`;
+  document.getElementById('e6-ctx').innerHTML = `<strong>Mise en situation :</strong> Atilla envisage d'investir <strong>${fmt(d.invest)} €</strong> dans ${investObjet}. Il souhaite financer ${d.pctAuto} % en autofinancement. Calculez sa CAF 2025 à partir des éléments ci-dessous.`;
   const rows = [
     `<tr><td>${lResNet}</td><td>${fmt(d.resNet)}</td></tr>`,
     ...lines.map(l=>`<tr><td>${l.lib}</td><td>${l.val}</td></tr>`)
@@ -1709,7 +1919,7 @@ function renderE6(d){
 function renderE7(d){
   const produit = pick(SYN.produitPrix);
   const nbSondes = d.nbRepondants;
-  document.getElementById('e7-ctx').innerHTML = `<strong>Mise en situation :</strong> Maxime envisage de commercialiser une nouvelle <strong>${produit.nom}</strong>. Pour fixer son prix, il réalise une enquête auprès de <strong>${nbSondes} clients potentiels</strong>. Q1 : Au-dessus de quel prix la jugeriez-vous trop chère ? Q2 : En dessous de quel prix la jugeriez-vous de mauvaise qualité ?`;
+  document.getElementById('e7-ctx').innerHTML = `<strong>Mise en situation :</strong> Atilla envisage de commercialiser une nouvelle <strong>${produit.nom}</strong>. Pour fixer son prix, il réalise une enquête auprès de <strong>${nbSondes} clients potentiels</strong>. Q1 : Au-dessus de quel prix la jugeriez-vous trop chère ? Q2 : En dessous de quel prix la jugeriez-vous de mauvaise qualité ?`;
   let rows = d.prix.map((p,i)=>`<tr><td>${p} €</td><td>${d.q1[i]}</td><td>${d.q2[i]}</td></tr>`).join('');
   const tq1=d.q1.reduce((a,b)=>a+b,0), tq2=d.q2.reduce((a,b)=>a+b,0);
   document.getElementById('e7-data-table').innerHTML = `
@@ -1731,12 +1941,12 @@ function renderE8(d){
     <td>1 / (1,${String(d.taux/100).replace('0.','0,')})^${i+1} = ${coeffsFmt[i]}</td>
     <td>—</td>
   </tr>`).join('');
-  document.getElementById('e8-ctx').innerHTML = `<strong>Mise en situation :</strong> Maxime envisage d'investir <strong>${fmt(d.invest)} €</strong> dans ${objet}. Il estime les flux nets de trésorerie sur <strong>${d.duree} ans</strong>. Valeur résiduelle fin de période : <strong>${fmt(d.vrResid)} €</strong>. Taux d'actualisation retenu : <strong>${d.taux} %</strong>.`;
+  document.getElementById('e8-ctx').innerHTML = `<strong>Mise en situation :</strong> Atilla envisage d'investir <strong>${fmt(d.invest)} €</strong> dans ${objet}. Il estime les flux nets de trésorerie sur <strong>${d.duree} ans</strong>. Valeur résiduelle fin de période : <strong>${fmt(d.vrResid)} €</strong>. Taux d'actualisation retenu : <strong>${d.taux} %</strong>.`;
   document.getElementById('e8-data-table').innerHTML = `
     <thead><tr><th>Année</th><th>FNT (€)</th><th>Coefficient d'actualisation (${d.taux} %)</th><th>FNT actualisé (€)</th></tr></thead>
     <tbody>${rows}</tbody>`;
   document.getElementById('e8-q1').innerHTML = `Calculez les <strong>FNT actualisés</strong> pour chaque année. Calculez la <strong>VAN</strong> de l'investissement.`;
-  document.getElementById('e8-q2').innerHTML = `Concluez sur la <strong>pertinence de l'investissement</strong> à partir de la VAN. Qu'est-ce qu'une VAN positive signifie concrètement pour Maxime ?`;
+  document.getElementById('e8-q2').innerHTML = `Concluez sur la <strong>pertinence de l'investissement</strong> à partir de la VAN. Qu'est-ce qu'une VAN positive signifie concrètement pour Atilla ?`;
   document.getElementById('e8-trap').textContent = `La valeur résiduelle (${fmt(d.vrResid)} €) est déjà intégrée dans le FNT de la dernière année. VAN = Σ FNT actualisés − Investissement initial (${fmt(d.invest)} €). VAN > 0 → rentable. Ne pas oublier de soustraire l'investissement initial.`;
 }
 
@@ -1747,7 +1957,7 @@ function renderE9(d){
     {prim:'Isochrone 5 min', sec:'Isochrone 15 min', ter:'Isochrone 30 min'},
   ];
   const zl = pick(zonesLabels);
-  document.getElementById('e9-ctx').innerHTML = `<strong>Mise en situation :</strong> Maxime Verdier envisage d'ouvrir un second point de vente <strong>Optique AkVision</strong> à <strong>${d.ville}</strong>. Il analyse le potentiel commercial de sa zone de chalandise, découpée en trois sous-zones concentriques.`;
+  document.getElementById('e9-ctx').innerHTML = `<strong>Mise en situation :</strong> Atilla envisage d'ouvrir un second point de vente <strong>Optique AkVision</strong> à <strong>${d.ville}</strong>. Il analyse le potentiel commercial de sa zone de chalandise, découpée en trois sous-zones concentriques.`;
 
   // Tableau principal — données BTS
   document.getElementById('e9-data-table').innerHTML = `
@@ -1811,7 +2021,7 @@ function renderE10(d){
   const colsDisplay = maybe(0.5)
     ? ['x (rang)','y = '+ctx10.metric+' ('+ctx10.unite+')','x²','x·y']
     : ['Rang x','CA observé ('+ctx10.unite+')','Carré de x','Produit x·y'];
-  document.getElementById('e10-ctx').innerHTML = `<strong>Mise en situation :</strong> Maxime souhaite prévoir le <strong>${ctx10.metric}</strong> d'Optique AkVision pour <strong>${d.yearPrev}</strong>. Il dispose des données de <strong>${yr1}</strong> à <strong>${yrN}</strong> et applique la méthode des moindres carrés.`;
+  document.getElementById('e10-ctx').innerHTML = `<strong>Mise en situation :</strong> Atilla souhaite prévoir le <strong>${ctx10.metric}</strong> d'Optique AkVision pour <strong>${d.yearPrev}</strong>. Il dispose des données de <strong>${yr1}</strong> à <strong>${yrN}</strong> et applique la méthode des moindres carrés.`;
   let rows = d.years.map((y,i)=>`<tr><td>${y}</td><td>${d.xs[i]}</td><td>${fmt(d.ys[i])}</td><td>—</td><td>—</td></tr>`).join('');
   document.getElementById('e10-data-table').innerHTML = `
     <thead><tr><th>Année</th><th>${colsDisplay[0]}</th><th>${colsDisplay[1]}</th><th>${colsDisplay[2]}</th><th>${colsDisplay[3]}</th></tr></thead>
@@ -1829,7 +2039,7 @@ function renderE10(d){
 function makeDeleteCell(tr){
   const td = document.createElement('td');
   td.className = 'del-cell';
-  td.innerHTML = '<button class="del-row-btn" title="Supprimer cette ligne" onclick="this.closest(\'tr\').remove()">✕</button>';
+  td.innerHTML = "<button class=\"del-row-btn\" title=\"Supprimer cette ligne\" onclick=\"this.closest(\'tr\').remove()\">✕</button>";
   return td;
 }
 
@@ -2292,9 +2502,93 @@ function corriger(eid){
     chk('Coefficient b', 'e10-b', e.b, Math.max(500,Math.abs(e.b)*0.01));
     chk('CA prévisionnel', 'e10-prev', e.prev, Math.max(500,e.prev*0.01));
   }
+  else if(eid==='e11' && d.e11){
+    const e=d.e11;
+    const userChoix = (document.getElementById('e11-choix')?.value||'').toUpperCase().trim();
+    const args = [1,2,3,4,5].map(i=>(document.getElementById('e11-arg'+i)?.value||'').toLowerCase().trim());
+
+    // 1. Vérifier le choix du statut
+    total++;
+    if(userChoix === e.statut){
+      score++;
+      rows += `<div class="corr-row" style="background:#eafaf1;border-radius:6px;padding:8px 12px;">
+        <span class="corr-icon corr-ok">✅</span>
+        <span class="corr-label"><strong>Statut choisi : ${userChoix}</strong></span>
+        <span class="corr-expected">Correct — Réponse attendue : ${e.statut}</span>
+      </div>`;
+    } else if(userChoix === ''){
+      rows += `<div class="corr-row"><span class="corr-icon">—</span><span class="corr-label">Statut non sélectionné</span></div>`;
+    } else {
+      rows += `<div class="corr-row" style="background:#fdf2f2;border-radius:6px;padding:8px 12px;">
+        <span class="corr-icon corr-ko">❌</span>
+        <span class="corr-label"><strong>Statut choisi : ${userChoix}</strong></span>
+        <span class="corr-expected">Attendu : ${e.statut}</span>
+      </div>`;
+    }
+
+    // 2. Vérifier les 5 arguments
+    const kwBase = KEYWORDS_E11[e.statut]||[];
+    const validated=[], invalid=[], repeated=[];
+    const usedKw=[];
+    rows += `<div style="font-size:11px;font-weight:700;color:#4a235a;margin:10px 0 4px;text-transform:uppercase;">Arguments :</div>`;
+    args.forEach((arg,i)=>{
+      if(!arg){ rows+=`<div class="corr-row"><span class="corr-icon">—</span><span class="corr-label">Argument ${i+1} — vide</span></div>`; return; }
+      total++;
+      const found = kwBase.find(kw=>arg.includes(kw));
+      if(found && usedKw.includes(found)){
+        repeated.push(arg);
+        rows += `<div class="corr-row" style="background:#fff8e1;border-radius:6px;padding:6px 12px;">
+          <span class="corr-icon" style="color:#f0a500;">🔁</span>
+          <span class="corr-label">Arg. ${i+1} — <em>${arg}</em></span>
+          <span style="font-size:11px;color:#7d6608;">Argument répété (mot-clé déjà utilisé)</span>
+        </div>`;
+      } else if(found){
+        score++;
+        usedKw.push(found);
+        validated.push(arg);
+        rows += `<div class="corr-row" style="background:#eafaf1;border-radius:6px;padding:6px 12px;">
+          <span class="corr-icon corr-ok">✅</span>
+          <span class="corr-label">Arg. ${i+1} — <em>${arg}</em></span>
+          <span class="kw-found">${found}</span>
+        </div>`;
+      } else {
+        invalid.push(arg);
+        rows += `<div class="corr-row" style="background:#fdf2f2;border-radius:6px;padding:6px 12px;">
+          <span class="corr-icon corr-ko">❌</span>
+          <span class="corr-label">Arg. ${i+1} — <em>${arg}</em></span>
+          <span style="font-size:11px;color:#922b21;">Argument non reconnu pour ${e.statut}</span>
+        </div>`;
+      }
+    });
+
+    // Correction type
+    rows += `<div style="margin-top:12px;padding:10px 14px;background:#f5eef8;border:1px solid #c8bfe8;border-radius:6px;font-size:12px;color:#4a235a;">
+      <strong>✏ Correction type — ${e.statut} :</strong><br>
+      ${e.indices.map(k=>`<span class="kw-found">${k}</span>`).join(' ')}
+    </div>`;
+  }
+  else if(eid==='e12' && d.e12){
+    const e=d.e12;
+    const tol=(v)=>Math.max(0.5, Math.abs(v)*0.01);
+    chk('Coût total HT', 'e12-cout', e.coutTotal, tol(e.coutTotal));
+    chk('Prix de vente HT', 'e12-pvht', e.pvHT, tol(e.pvHT));
+    chk('Prix de vente TTC', 'e12-pvttc', e.pvTTC, tol(e.pvTTC));
+    chk('Marge commerciale', 'e12-marge', e.marge, tol(e.marge));
+    chk('Taux de marge (%)', 'e12-tmarge', e.tauxMarge, 0.5, '%');
+    chk('Taux de marque (%)', 'e12-tmarque', e.tauxMarque, 0.5, '%');
+    // Message explicatif
+    rows += `<div style="margin-top:10px;padding:10px 14px;background:#f4f1eb;border-radius:6px;font-size:12px;color:var(--ink);">
+      📊 <strong>Rappel :</strong><br>
+      • Coût total : ${e.monture} + ${e.verres} + ${e.frais} = <strong>${e.coutTotal} € HT</strong><br>
+      • PV HT : <strong>${e.pvHT.toFixed(2)} €</strong> · PV TTC : <strong>${e.pvTTC.toFixed(2)} €</strong><br>
+      • Marge : ${e.pvHT.toFixed(2)} − ${e.coutTotal} = <strong>${e.marge.toFixed(2)} €</strong><br>
+      • Taux de marge : ${e.marge.toFixed(2)} ÷ ${e.coutTotal} × 100 = <strong>${e.tauxMarge.toFixed(2)} %</strong><br>
+      • Taux de marque : ${e.marge.toFixed(2)} ÷ ${e.pvHT.toFixed(2)} × 100 = <strong>${e.tauxMarque.toFixed(2)} %</strong>
+    </div>`;
+  }
 
   if(total===0){
-    rows='<div class="corr-row"><span class="corr-skip">— Remplis d\'abord les champs de résultats clés avant de corriger.</span></div>';
+    rows=`<div class="corr-row"><span class="corr-skip">— Remplis d'abord les champs de résultats clés avant de corriger.</span></div>`;
   }
   renderPanel(eid, rows, score, total);
 }
@@ -2321,14 +2615,14 @@ function clearWorkspace(id){
 }
 
 function resetAnswers(){
-  ['e1','e2','e3','e4','e5','e6','e7','e8','e9','e10'].forEach(clearWorkspace);
+  ['e1','e2','e3','e4','e5','e6','e7','e8','e9','e10','e11','e12'].forEach(clearWorkspace);
 }
 
 // ==================== EXPORT ====================
 
 function exportData(){
   const exercises = {};
-  ['e1','e2','e3','e4','e5','e6','e7','e8','e9','e10'].forEach(id=>{
+  ['e1','e2','e3','e4','e5','e6','e7','e8','e9','e10','e11','e12'].forEach(id=>{
     const el = document.getElementById(id);
     if(!el) return;
     const ex = { exercice:id.toUpperCase(), contexte:'', questions:[], tables:[], champs:{}, interpretations:{} };
@@ -2422,6 +2716,25 @@ function showSection(id, btn){
   // Tracking section
   trackEvent('view_section', 'Navigation', id.toUpperCase());
 }
+// Exposer toutes les fonctions globales sur window
+// pour eviter ReferenceError si le script charge apres les onclick
+// Enregistrer toutes les fonctions — résout ReferenceError onclick
+if(typeof window._registerFunctions === 'function'){
+  window._registerFunctions({
+    showSection, corriger, buildTable, addRow, clearWorkspace,
+    newDraw, resetAnswers, exportData, saveAllTables, saveTable,
+    loadTable, toggleFormules, corrigerRedac
+  });
+} else {
+  // Fallback : exposer directement
+  window.showSection=showSection; window.corriger=corriger;
+  window.buildTable=buildTable; window.addRow=addRow;
+  window.clearWorkspace=clearWorkspace; window.newDraw=newDraw;
+  window.resetAnswers=resetAnswers; window.exportData=exportData;
+  window.saveAllTables=saveAllTables; window.saveTable=saveTable;
+  window.loadTable=loadTable; window.toggleFormules=toggleFormules;
+  window.corrigerRedac=corrigerRedac;
+}
 
 // ==================== INIT ====================
 
@@ -2433,7 +2746,7 @@ function newDraw(){
   trackEvent('nouveau_tirage', 'Actions', 'Seed #' + (SEED % 10000));
   renderAll();
   // On efface seulement les valeurs numériques, pas les en-têtes ni libellés
-  ['e1','e2','e3','e4','e5','e6','e7','e8','e9','e10'].forEach(id=>{
+  ['e1','e2','e3','e4','e5','e6','e7','e8','e9','e10','e11','e12'].forEach(id=>{
     const ws = document.querySelector(`#${id} .workspace`);
     if(!ws) return;
     ws.querySelectorAll('.editable-table tbody tr').forEach(tr=>{
@@ -2450,6 +2763,154 @@ function newDraw(){
   });
 }
 
+
+// ==================== E11 — STATUT JURIDIQUE ====================
+
+const SCENARIOS_E11 = [
+  {
+    id:1,
+    texte: "Atilla souhaite ouvrir un magasin d'optique seul. Il veut limiter ses charges sociales pour maximiser sa rentabilité. Il accorde peu d'importance à la protection sociale mais tient à protéger son patrimoine personnel.",
+    statut: 'EURL',
+    indices: ['entrepreneur seul','charges sociales faibles','protection patrimoine','gestion simple','TNS']
+  },
+  {
+    id:2,
+    texte: "Atilla veut créer son magasin seul mais souhaite bénéficier d'une excellente protection sociale (maladie, retraite). Il est prêt à supporter des charges plus élevées en échange d'une couverture complète.",
+    statut: 'SASU',
+    indices: ['entrepreneur seul','assimilé salarié','meilleure protection sociale','régime général','charges sociales élevées']
+  },
+  {
+    id:3,
+    texte: "Atilla s'associe avec un ami opticien pour ouvrir ensemble un point de vente. Ils souhaitent partager les décisions et les bénéfices. Ils veulent un cadre juridique structuré avec protection du patrimoine.",
+    statut: 'SARL',
+    indices: ['plusieurs associés','parts sociales','décisions collectives','responsabilité limitée','projet à plusieurs']
+  },
+  {
+    id:4,
+    texte: "Atilla lance seul son projet d'optique et veut soigner son image professionnelle pour attirer des investisseurs à terme. Il cherche une structure flexible, avec une bonne protection sociale.",
+    statut: 'SASU',
+    indices: ['entrepreneur seul','président','crédibilité','investisseurs','flexible']
+  },
+  {
+    id:5,
+    texte: "Atilla veut ouvrir un petit magasin d'optique seul, avec un projet simple et peu de formalités. Il préfère payer moins de charges sociales même si cela implique une protection sociale réduite.",
+    statut: 'EURL',
+    indices: ['associé unique','formalités limitées','coût social réduit','IR par défaut','contrôle total']
+  },
+  {
+    id:6,
+    texte: "Atilla et deux associés veulent créer ensemble un réseau de magasins d'optique. Ils souhaitent un cadre juridique permettant la cession encadrée des parts et une gestion collective.",
+    statut: 'SARL',
+    indices: ['plusieurs associés','cession encadrée','capital social','transmission','gestion encadrée']
+  },
+];
+
+const KEYWORDS_E11 = {
+  EURL: ['entrepreneur seul','associé unique','responsabilité limitée','protection patrimoine','patrimoine personnel protégé','gérant','tns','travailleur non salarié','charges sociales plus faibles','charges faibles','protection sociale plus faible','coût social réduit','ir par défaut','option is','gestion simple','formalités limitées','transformation sarl','petite structure','contrôle total','apports'],
+  SASU: ['entrepreneur seul','associé unique','responsabilité limitée','protection patrimoine','président','assimilé salarié','meilleure protection sociale','régime général','charges sociales élevées','charges élevées','is','option ir','flexible','souple','crédibilité','investisseurs','transformation sas','contrôle total'],
+  SARL: ['plusieurs associés','responsabilité limitée','protection patrimoine','gérant','tns','assimilé salarié','is','cadre juridique','parts sociales','cession encadrée','projet à plusieurs','gestion encadrée','capital social','transmission','décisions collectives'],
+};
+
+function genE11(){
+  const idx = Math.abs(rng(0, SCENARIOS_E11.length, 1)) % SCENARIOS_E11.length;
+  const scenario = SCENARIOS_E11[idx];
+  DATA.e11 = {...scenario};
+  return DATA.e11;
+}
+
+function renderE11(d){
+  document.getElementById('e11-ctx').innerHTML = `<strong>Mise en situation :</strong> ${d.texte}`;
+  document.getElementById('e11-trap').textContent = `EURL = TNS (charges faibles, protection sociale réduite). SASU = assimilé salarié (charges élevées, meilleure protection). SARL = plusieurs associés obligatoirement. Ne pas confondre EURL et SASU : les deux sont pour un seul associé mais avec des régimes sociaux opposés.`;
+}
+
+// ==================== E12 — PRIX DE VENTE ====================
+
+function genE12(){
+  // Scénarios aléatoires réalistes
+  const monture  = rng(60,180,5);
+  const verres   = rng(80,200,10);
+  const frais    = rng(10,40,5);
+  const coutTotal = monture + verres + frais;
+
+  // Mode : coefficient OU taux de marge (alternance aléatoire)
+  const useCoeff = maybe(0.5);
+  let pvHT, pvTTC, coeff=null, tauxMargeInput=null;
+
+  if(useCoeff){
+    coeff = [2,2.2,2.5,2.8,3][Math.abs(rng(0,5,1))%5];
+    pvTTC = Math.round(coutTotal * coeff * 100)/100;
+    pvHT  = Math.round(pvTTC / 1.2 * 100)/100;
+  } else {
+    tauxMargeInput = rng(50,120,5); // taux de marge en %
+    pvHT  = Math.round(coutTotal * (1 + tauxMargeInput/100) * 100)/100;
+    pvTTC = Math.round(pvHT * 1.2 * 100)/100;
+  }
+
+  const marge     = Math.round((pvHT - coutTotal)*100)/100;
+  const tauxMarge = Math.round(marge/coutTotal*10000)/100;
+  const tauxMarque= Math.round(marge/pvHT*10000)/100;
+
+  // Noms aléatoires
+  const montures = ['Monture acétate premium','Monture titane ultra-légère','Monture en bois éco-responsable','Monture acier inoxydable','Monture mixte acétate/métal'];
+  const verresTypes = ['Verres progressifs Essilor','Verres unifocaux antireflet','Verres photochromiques','Verres polarisants solaires','Verres haute index 1.67'];
+  const fraisTypes = ['Frais de montage atelier','Frais de livraison fournisseur','Frais d\'adaptation et finition','Frais de transport'];
+
+  DATA.e12 = {
+    monture, verres, frais, coutTotal,
+    pvHT, pvTTC, marge, tauxMarge, tauxMarque,
+    useCoeff, coeff, tauxMargeInput,
+    nomMonture: pick(montures),
+    nomVerres: pick(verresTypes),
+    nomFrais: pick(fraisTypes),
+  };
+  return DATA.e12;
+}
+
+function renderE12(d){
+  const modeLabel = d.useCoeff
+    ? `Coefficient multiplicateur : <strong>${d.coeff}</strong> (appliqué sur le coût total TTC)`
+    : `Taux de marge souhaité : <strong>${d.tauxMargeInput} %</strong>`;
+
+  document.getElementById('e12-ctx').innerHTML = `<strong>Mise en situation :</strong> Atilla vend un équipement optique complet. Voici les éléments de coût et la politique de prix retenue.`;
+
+  document.getElementById('e12-data-table').innerHTML = `
+    <thead><tr><th>Élément</th><th>Montant HT (€)</th></tr></thead>
+    <tbody>
+      <tr><td>${d.nomMonture}</td><td>${d.monture.toFixed(2)}</td></tr>
+      <tr><td>${d.nomVerres}</td><td>${d.verres.toFixed(2)}</td></tr>
+      <tr><td>${d.nomFrais}</td><td>${d.frais.toFixed(2)}</td></tr>
+      <tr><td colspan="2" style="font-size:12px;color:#7d4e00;padding-top:8px;">
+        📌 Politique de prix — ${modeLabel} · TVA : 20 %
+      </td></tr>
+    </tbody>`;
+
+  document.getElementById('e12-trap').textContent = `Taux de MARGE = marge ÷ coût d'achat × 100. Taux de MARQUE = marge ÷ prix de vente HT × 100. Ces deux taux sont différents ! ${d.useCoeff ? "Le coefficient multiplicateur s'applique sur le coût TOTAL pour obtenir le PV TTC." : "Le taux de marge s'applique sur le coût total pour obtenir le PV HT."}`;
+}
+
+// ==================== MODE FORMULES ====================
+
+function toggleFormules(){
+  const isOn = localStorage.getItem('formules_mode') === 'on';
+  const newState = isOn ? 'off' : 'on';
+  localStorage.setItem('formules_mode', newState);
+  applyFormulesMode();
+  trackEvent('toggle_formules', 'UX', 'Mode formules ' + newState.toUpperCase());
+}
+
+function applyFormulesMode(){
+  const isOn = localStorage.getItem('formules_mode') === 'on';
+  // Afficher/masquer tous les blocs .formula et les blocs de formules des nouveaux ex
+  document.querySelectorAll('.formula, .e11-formules, .e12-formules').forEach(el=>{
+    el.style.display = isOn ? 'block' : 'none';
+  });
+  document.getElementById('formules-state').textContent = isOn ? 'ON 📖' : 'OFF';
+  document.getElementById('btn-formules').style.background = isOn ? 'var(--teal)' : 'var(--purple)';
+}
+
+
+
+
+
 function renderAll(){
   renderE1(genE1());
   renderE2(genE2());
@@ -2461,10 +2922,13 @@ function renderAll(){
   renderE8(genE8());
   renderE9(genE9());
   renderE10(genE10());
+  renderE11(genE11());
+  renderE12(genE12());
 }
 
 // update regen button to have spin icon
 document.addEventListener('DOMContentLoaded',()=>{
+  applyFormulesMode(); // Appliquer état mode formules sauvegardé
   document.querySelector('.btn-red').innerHTML = '<span class="spin">⟳</span> Nouveau tirage';
   // Formatage temps réel sur tous les kf-input
   document.querySelectorAll('.kf-input').forEach(inp=>{
@@ -2498,7 +2962,7 @@ function corrigerRedac(textareaId, keywords, required){
   const reponse = ta.value.toLowerCase().trim();
   if(!reponse){ 
     panel.className='q-redac-corr visible ko';
-    panel.innerHTML='❌ Tu n\'as pas encore rédigé ta réponse.';
+    panel.innerHTML="❌ Tu n\'as pas encore rédigé ta réponse.";
     return;
   }
   // Vérifier mots-clés
@@ -2535,7 +2999,16 @@ function corrigerRedac(textareaId, keywords, required){
   else if(pct>=50) html+=`<div style="margin-top:8px;font-size:11px;color:#7d6608;">⚠️ Réponse partielle — complète avec les mots-clés manquants puis consulte la correction type.</div>`;
   else html+=`<div style="margin-top:8px;font-size:11px;color:#922b21;">❌ Réponse insuffisante — relis le cours puis réessaie avant de consulter la correction.</div>`;
   panel.innerHTML=html;
+  <script>
+    
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("./sw.js")
+      .then(() => console.log("PWA AKvGestion activée"))
+      .catch(err => console.error("Erreur Service Worker:", err));
+  }
+</script>
 }
+
 </script>
 </body>
 </html>
