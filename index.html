@@ -219,6 +219,76 @@ tfoot td:not(:first-child){text-align:right;font-family:'DM Mono',monospace;}
 /* Tableaux éditables aussi */
 .editable-table { min-width: 400px; }
 
+
+/* ===== FORMULES PAR EXERCICE ===== */
+.formules-toggle-btn {
+  display: inline-flex;align-items:center;gap:6px;
+  background:none;border:1px solid #c8bfe8;border-radius:20px;
+  padding:5px 14px;font-family:'Barlow',sans-serif;font-size:12px;
+  font-weight:600;color:#4a235a;cursor:pointer;margin-top:14px;transition:all 0.2s;
+}
+.formules-toggle-btn:hover{background:#f5eef8;border-color:#4a235a;}
+.formules-toggle-btn.active{background:#4a235a;color:#fff;border-color:#4a235a;}
+.formules-panel{display:none;background:#f5eef8;border:1px solid #c8bfe8;
+  border-radius:8px;padding:16px 20px;margin-top:10px;}
+.formules-panel.visible{display:block;animation:fadeIn 0.22s ease;}
+.formule-bloc{margin-bottom:14px;}
+.formule-bloc:last-child{margin-bottom:0;}
+.formule-titre{font-size:11px;font-weight:700;color:#4a235a;text-transform:uppercase;
+  letter-spacing:1px;margin-bottom:8px;}
+.formule-ligne{display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+  margin-bottom:6px;font-size:13px;}
+.formule-label{color:var(--ink-soft);min-width:180px;font-size:12.5px;}
+.frac{display:inline-flex;flex-direction:column;align-items:center;
+  vertical-align:middle;margin:0 4px;font-family:'DM Mono',monospace;font-size:12px;}
+.frac-num{border-bottom:1.5px solid var(--ink);padding:0 4px 2px;
+  color:var(--ink);font-weight:600;}
+.frac-den{padding:2px 4px 0;color:var(--ink);font-weight:600;}
+.frac-op{font-family:'DM Mono',monospace;font-size:13px;color:var(--ink);margin:0 3px;}
+.piege-box{background:#fff8e1;border-left:3px solid #f0a500;border-radius:0 6px 6px 0;
+  padding:8px 12px;margin-top:10px;font-size:12px;color:#7d4e00;}
+.piege-box strong{font-weight:700;}
+
+/* ===== E5 DASHBOARD ANALYSE ===== */
+.e5-dashboard{margin-top:16px;}
+.e5-dash-title{font-size:11px;font-weight:700;color:#1a5276;text-transform:uppercase;
+  letter-spacing:1px;margin-bottom:12px;padding-bottom:6px;border-bottom:2px solid #a9cce3;}
+.e5-cards{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:14px;}
+.e5-card{border-radius:8px;padding:12px 16px;display:flex;flex-direction:column;gap:4px;
+  animation:fadeIn 0.3s ease;}
+.e5-card.green{background:#eafaf1;border:1px solid #a9dfbf;}
+.e5-card.orange{background:#fef9e7;border:1px solid #f9e79f;}
+.e5-card.red{background:#fadbd8;border:1px solid #f1948a;}
+.e5-card-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;}
+.e5-card.green .e5-card-label{color:#1e8449;}
+.e5-card.orange .e5-card-label{color:#b7770d;}
+.e5-card.red .e5-card-label{color:#922b21;}
+.e5-card-value{font-size:18px;font-weight:700;font-family:'DM Mono',monospace;}
+.e5-card.green .e5-card-value{color:#1e8449;}
+.e5-card.orange .e5-card-value{color:#b7770d;}
+.e5-card.red .e5-card-value{color:#922b21;}
+.e5-card-msg{font-size:11px;line-height:1.4;}
+.e5-card.green .e5-card-msg{color:#1e8449;}
+.e5-card.orange .e5-card-msg{color:#b7770d;}
+.e5-card.red .e5-card-msg{color:#922b21;}
+.e5-score-bloc{border-radius:8px;padding:14px 18px;text-align:center;
+  margin-bottom:12px;animation:fadeIn 0.4s ease;}
+.e5-score-bloc.green{background:#eafaf1;border:2px solid #27ae60;}
+.e5-score-bloc.orange{background:#fef9e7;border:2px solid #f39c12;}
+.e5-score-bloc.red{background:#fadbd8;border:2px solid #e74c3c;}
+.e5-score-num{font-size:36px;font-weight:700;font-family:'DM Mono',monospace;}
+.e5-score-bloc.green .e5-score-num{color:#1e8449;}
+.e5-score-bloc.orange .e5-score-num{color:#b7770d;}
+.e5-score-bloc.red .e5-score-num{color:#922b21;}
+.e5-score-label{font-size:14px;font-weight:700;margin-top:4px;}
+.e5-interp-list{list-style:none;padding:0;margin:0;}
+.e5-interp-list li{padding:7px 12px;border-radius:6px;font-size:12.5px;
+  margin-bottom:5px;display:flex;align-items:flex-start;gap:8px;}
+.e5-interp-list li.ok{background:#eafaf1;color:#1e8449;}
+.e5-interp-list li.warn{background:#fef9e7;color:#7d6608;}
+.e5-interp-list li.bad{background:#fadbd8;color:#922b21;}
+@media(max-width:650px){.e5-cards{grid-template-columns:1fr;}}
+
 </style>
   <script>
     // ---- Tracking helper — GTM dataLayer ----
@@ -268,7 +338,7 @@ tfoot td:not(:first-child){text-align:right;font-family:'DM Mono',monospace;}
   }
   var fns = ['showSection','corriger','buildTable','addRow','clearWorkspace',
              'newDraw','resetAnswers','exportData','saveAllTables','saveTable',
-             'loadTable','toggleFormules','corrigerRedac'];
+             'loadTable','corrigerRedac','toggleFormEx'];
   fns.forEach(function(n){ window[n] = makeProxy(n); });
   window._registerFunctions = function(obj){
     Object.keys(obj).forEach(function(k){ window['_'+k] = obj[k]; });
@@ -365,7 +435,23 @@ tfoot td:not(:first-child){text-align:right;font-family:'DM Mono',monospace;}
         <div class="qlbl">Questions</div>
         <div class="q"><div class="qn">1</div><p id="e1-q1"></p></div>
         <div class="q"><div class="qn">2</div><p id="e1-q2"></p></div>
-        <div class="trap" id="e1-trap"></div>
+              <button class="formules-toggle-btn" onclick="toggleFormEx('e1')">📐 Afficher les formules</button>
+      <div class="formules-panel" id="e1-formules">
+        <div class="formule-bloc">
+  <div class="formule-titre">Compte de résultat différentiel</div>
+  <div class="formule-ligne"><span class="formule-label">MSCV =</span> CA <span class="frac-op">−</span> Charges variables</div>
+  <div class="formule-ligne"><span class="formule-label">TMCV =</span><span class="frac"><span class="frac-num">MSCV</span><span class="frac-den">CA</span></span><span class="frac-op">× 100</span></div>
+  <div class="formule-ligne"><span class="formule-label">Résultat =</span> MSCV <span class="frac-op">−</span> Charges fixes</div>
+</div>
+<div class="formule-bloc">
+  <div class="formule-titre">Seuil de rentabilité</div>
+  <div class="formule-ligne"><span class="formule-label">SR =</span><span class="frac"><span class="frac-num">Charges fixes</span><span class="frac-den">TMCV</span></span></div>
+  <div class="formule-ligne"><span class="formule-label">Point mort =</span><span class="frac"><span class="frac-num">SR</span><span class="frac-den">CA</span></span><span class="frac-op">× Nb jours</span></div>
+  <div class="formule-ligne"><span class="formule-label">Marge de sécurité =</span> CA <span class="frac-op">−</span> SR</div>
+</div>
+<div class="piege-box"><strong>⚠ Pièges :</strong> Charges mixtes → ventiler avant de classer. Variation de stock + = déstockage = réduit le coût d'achat.</div>
+      </div>
+      <div class="trap" id="e1-trap"></div>
       </div>
     </div>
   </div>
@@ -442,7 +528,22 @@ tfoot td:not(:first-child){text-align:right;font-family:'DM Mono',monospace;}
         <div class="qlbl">Questions</div>
         <div class="q"><div class="qn">1</div><p id="e2-q1"></p></div>
         <div class="q"><div class="qn">2</div><p id="e2-q2"></p></div>
-        <div class="trap" id="e2-trap"></div>
+              <button class="formules-toggle-btn" onclick="toggleFormEx('e2')">📐 Afficher les formules</button>
+      <div class="formules-panel" id="e2-formules">
+        <div class="formule-bloc">
+  <div class="formule-titre">Soldes intermédiaires de gestion</div>
+  <div class="formule-ligne"><span class="formule-label">Marge commerciale =</span> Ventes <span class="frac-op">−</span> Coût d'achat marchandises vendues</div>
+  <div class="formule-ligne"><span class="formule-label">Valeur ajoutée =</span> MC <span class="frac-op">−</span> Charges externes</div>
+  <div class="formule-ligne"><span class="formule-label">EBE =</span> VA <span class="frac-op">−</span> Impôts <span class="frac-op">−</span> Personnel</div>
+  <div class="formule-ligne"><span class="formule-label">RCAI =</span> Résultat exploit. <span class="frac-op">+</span> Prod. fin. <span class="frac-op">−</span> Ch. fin.</div>
+</div>
+<div class="formule-bloc">
+  <div class="formule-titre">Taux (en % du CA)</div>
+  <div class="formule-ligne"><span class="formule-label">Taux MC =</span><span class="frac"><span class="frac-num">MC</span><span class="frac-den">CA</span></span><span class="frac-op">× 100</span></div>
+</div>
+<div class="piege-box"><strong>⚠ Pièges :</strong> VA = MC − Charges EXTERNES seulement (pas personnel). Variation stock − = stockage.</div>
+      </div>
+      <div class="trap" id="e2-trap"></div>
       </div>
     </div>
   </div>
@@ -512,7 +613,18 @@ tfoot td:not(:first-child){text-align:right;font-family:'DM Mono',monospace;}
         <div class="qlbl">Questions</div>
         <div class="q"><div class="qn">1</div><p id="e3-q1"></p></div>
         <div class="q"><div class="qn">2</div><p id="e3-q2"></p></div>
-        <div class="trap" id="e3-trap"></div>
+              <button class="formules-toggle-btn" onclick="toggleFormEx('e3')">📐 Afficher les formules</button>
+      <div class="formules-panel" id="e3-formules">
+        <div class="formule-bloc">
+  <div class="formule-titre">Annuités constantes</div>
+  <div class="formule-ligne"><span class="formule-label">Annuité =</span><span class="frac"><span class="frac-num">C₀ × i</span><span class="frac-den">1 − (1 + i)⁻ⁿ</span></span></div>
+  <div class="formule-ligne"><span class="formule-label">Intérêts =</span> Capital dû <span class="frac-op">×</span> i</div>
+  <div class="formule-ligne"><span class="formule-label">Capital remb. =</span> Annuité <span class="frac-op">−</span> Intérêts</div>
+  <div class="formule-ligne"><span class="formule-label">Coût total =</span> Σ Intérêts <span class="frac-op">+</span> Frais dossier</div>
+</div>
+<div class="piege-box"><strong>⚠ Pièges :</strong> Annuité constante mais intérêts ↘ et capital ↗. Dernière ligne : capital restant = 0. Frais hors tableau.</div>
+      </div>
+      <div class="trap" id="e3-trap"></div>
       </div>
     </div>
   </div>
@@ -583,7 +695,18 @@ tfoot td:not(:first-child){text-align:right;font-family:'DM Mono',monospace;}
         <div class="qlbl">Questions</div>
         <div class="q"><div class="qn">1</div><p id="e4-q1"></p></div>
         <div class="q"><div class="qn">2</div><p id="e4-q2"></p></div>
-        <div class="trap" id="e4-trap"></div>
+              <button class="formules-toggle-btn" onclick="toggleFormEx('e4')">📐 Afficher les formules</button>
+      <div class="formules-panel" id="e4-formules">
+        <div class="formule-bloc">
+  <div class="formule-titre">Amortissement linéaire</div>
+  <div class="formule-ligne"><span class="formule-label">Taux =</span><span class="frac"><span class="frac-num">100</span><span class="frac-den">Durée (ans)</span></span><span class="frac-op">%</span></div>
+  <div class="formule-ligne"><span class="formule-label">Dotation 1ère année =</span> Base <span class="frac-op">×</span> Taux <span class="frac-op">×</span><span class="frac"><span class="frac-num">Nb mois</span><span class="frac-den">12</span></span></div>
+  <div class="formule-ligne"><span class="formule-label">Base amortissable =</span> Coût HT <span class="frac-op">−</span> Valeur résiduelle</div>
+  <div class="formule-ligne"><span class="formule-label">VNC =</span> Coût HT <span class="frac-op">−</span> Amortissements cumulés</div>
+</div>
+<div class="piege-box"><strong>⚠ Pièges :</strong> VR toujours déduite de la base. Bien mis en service le 15 → prorata du mois suivant.</div>
+      </div>
+      <div class="trap" id="e4-trap"></div>
       </div>
     </div>
   </div>
@@ -651,7 +774,18 @@ tfoot td:not(:first-child){text-align:right;font-family:'DM Mono',monospace;}
         <div class="qlbl">Questions</div>
         <div class="q"><div class="qn">1</div><p id="e5-q1"></p></div>
         <div class="q"><div class="qn">2</div><p id="e5-q2"></p></div>
-        <div class="trap" id="e5-trap"></div>
+              <button class="formules-toggle-btn" onclick="toggleFormEx('e5')">📐 Afficher les formules</button>
+      <div class="formules-panel" id="e5-formules">
+        <div class="formule-bloc">
+  <div class="formule-titre">Bilan fonctionnel</div>
+  <div class="formule-ligne"><span class="formule-label">FRNG =</span> Ressources stables <span class="frac-op">−</span> Emplois stables</div>
+  <div class="formule-ligne"><span class="formule-label">BFR =</span> Actifs circulants <span class="frac-op">−</span> Passifs circulants</div>
+  <div class="formule-ligne"><span class="formule-label">TN =</span> Trésorerie active <span class="frac-op">−</span> Trésorerie passive</div>
+  <div class="formule-ligne"><span class="formule-label">Vérification :</span> TN <span class="frac-op">=</span> FRNG <span class="frac-op">−</span> BFR</div>
+</div>
+<div class="piege-box"><strong>⚠ Pièges :</strong> Actif en valeur BRUTE. Amortissements → ressources stables. Découvert → trésorerie passive.</div>
+      </div>
+      <div class="trap" id="e5-trap"></div>
       </div>
     </div>
   </div>
@@ -698,7 +832,9 @@ tfoot td:not(:first-child){text-align:right;font-family:'DM Mono',monospace;}
           <p style="margin-top:6px;padding:8px 12px;background:var(--paper-warm);border-radius:6px;">Le FRNG = Ressources stables − Emplois stables. Un FRNG positif signifie que les ressources stables (capitaux propres + dettes LT) financent l'intégralité des emplois stables ET dégagent un excédent disponible pour le cycle d'exploitation.</p>
         </details>
       </div>
-            <button class="corr-btn" onclick="corriger('e5')">🔍 Corriger mes réponses</button>
+            <!-- ANALYSE AUTOMATIQUE E5 -->
+      <div class="e5-dashboard" id="e5-dashboard" style="display:none;"></div>
+      <button class="corr-btn" onclick="corriger('e5')">🔍 Corriger mes réponses</button>
       <div class="corr-panel" id="e5-corr"></div>
     </div>
   </div>
@@ -722,7 +858,22 @@ tfoot td:not(:first-child){text-align:right;font-family:'DM Mono',monospace;}
         <div class="qlbl">Questions</div>
         <div class="q"><div class="qn">1</div><p id="e6-q1"></p></div>
         <div class="q"><div class="qn">2</div><p id="e6-q2"></p></div>
-        <div class="trap" id="e6-trap"></div>
+              <button class="formules-toggle-btn" onclick="toggleFormEx('e6')">📐 Afficher les formules</button>
+      <div class="formules-panel" id="e6-formules">
+        <div class="formule-bloc">
+  <div class="formule-titre">CAF — Méthode additive</div>
+  <div class="formule-ligne"><span class="formule-label">CAF =</span> Résultat net</div>
+  <div class="formule-ligne"><span class="formule-label"></span><span class="frac-op">+</span> DAP + DAPP</div>
+  <div class="formule-ligne"><span class="formule-label"></span><span class="frac-op">−</span> Reprises sur provisions</div>
+  <div class="formule-ligne"><span class="formule-label"></span><span class="frac-op">−</span> Plus-value nette de cession</div>
+</div>
+<div class="formule-bloc">
+  <div class="formule-titre">PV nette</div>
+  <div class="formule-ligne"><span class="formule-label">PV nette =</span> Prix cession <span class="frac-op">−</span> VNC bien cédé</div>
+</div>
+<div class="piege-box"><strong>⚠ Pièges :</strong> DAP = charge calculée non décaissée → on réintègre. Soustraire PV NETTE seulement.</div>
+      </div>
+      <div class="trap" id="e6-trap"></div>
       </div>
     </div>
   </div>
@@ -788,7 +939,18 @@ tfoot td:not(:first-child){text-align:right;font-family:'DM Mono',monospace;}
         <div class="qlbl">Questions</div>
         <div class="q"><div class="qn">1</div><p id="e7-q1"></p></div>
         <div class="q"><div class="qn">2</div><p id="e7-q2"></p></div>
-        <div class="trap" id="e7-trap"></div>
+              <button class="formules-toggle-btn" onclick="toggleFormEx('e7')">📐 Afficher les formules</button>
+      <div class="formules-panel" id="e7-formules">
+        <div class="formule-bloc">
+  <div class="formule-titre">Prix psychologique</div>
+  <div class="formule-ligne"><span class="formule-label">% Q1 cumulé ↓</span> De haut (prix élevé) → bas (prix bas)</div>
+  <div class="formule-ligne"><span class="formule-label">% Q2 cumulé ↑</span> De bas (prix bas) → haut (prix élevé)</div>
+  <div class="formule-ligne"><span class="formule-label">% Acheteurs =</span> 100 <span class="frac-op">−</span> %Q1 cum. <span class="frac-op">−</span> %Q2 cum.</div>
+  <div class="formule-ligne"><span class="formule-label">Prix optimal =</span> Prix qui maximise % acheteurs</div>
+</div>
+<div class="piege-box"><strong>⚠ Pièges :</strong> Q1 cumul de BAS en HAUT (prix élevé → bas). Q2 cumul de HAUT en BAS (prix bas → élevé).</div>
+      </div>
+      <div class="trap" id="e7-trap"></div>
       </div>
     </div>
   </div>
@@ -851,7 +1013,22 @@ tfoot td:not(:first-child){text-align:right;font-family:'DM Mono',monospace;}
         <div class="qlbl">Questions</div>
         <div class="q"><div class="qn">1</div><p id="e8-q1"></p></div>
         <div class="q"><div class="qn">2</div><p id="e8-q2"></p></div>
-        <div class="trap" id="e8-trap"></div>
+              <button class="formules-toggle-btn" onclick="toggleFormEx('e8')">📐 Afficher les formules</button>
+      <div class="formules-panel" id="e8-formules">
+        <div class="formule-bloc">
+  <div class="formule-titre">Valeur Actuelle Nette</div>
+  <div class="formule-ligne"><span class="formule-label">Coeff. =</span><span class="frac"><span class="frac-num">1</span><span class="frac-den">(1 + i)ⁿ</span></span></div>
+  <div class="formule-ligne"><span class="formule-label">FNT actualisé =</span> FNT <span class="frac-op">×</span> Coefficient</div>
+  <div class="formule-ligne"><span class="formule-label">VAN =</span> Σ FNT actualisés <span class="frac-op">−</span> Investissement initial</div>
+</div>
+<div class="formule-bloc">
+  <div class="formule-titre">Décision</div>
+  <div class="formule-ligne"><span class="formule-label">VAN &gt; 0</span> → Investissement rentable ✅</div>
+  <div class="formule-ligne"><span class="formule-label">VAN &lt; 0</span> → Non rentable ❌</div>
+</div>
+<div class="piege-box"><strong>⚠ Pièges :</strong> VR incluse dans le FNT de la dernière année. Ne pas oublier de soustraire l'investissement initial.</div>
+      </div>
+      <div class="trap" id="e8-trap"></div>
       </div>
     </div>
   </div>
@@ -927,7 +1104,21 @@ CA annuel potentiel = CA potentiel ÷ Fréquence de renouvellement
           <div class="qn" style="background:#1a5276;">⭐</div>
           <p id="e9-q5"></p>
         </div>
-        <div class="trap" id="e9-trap"></div>
+              <button class="formules-toggle-btn" onclick="toggleFormEx('e9')">📐 Afficher les formules</button>
+      <div class="formules-panel" id="e9-formules">
+        <div class="formule-bloc">
+  <div class="formule-titre">Zone de chalandise — BTS</div>
+  <div class="formule-ligne"><span class="formule-label">Clients potentiels =</span> Population <span class="frac-op">×</span> Taux pénétration</div>
+  <div class="formule-ligne"><span class="formule-label">CA potentiel zone =</span> Clients <span class="frac-op">×</span> Panier moyen</div>
+  <div class="formule-ligne"><span class="formule-label">CA annuel =</span><span class="frac"><span class="frac-num">CA potentiel total</span><span class="frac-den">Fréquence renouvellement</span></span></div>
+</div>
+<div class="formule-bloc">
+  <div class="formule-titre">CA prévisionnel (bonus)</div>
+  <div class="formule-ligne"><span class="formule-label">CA prév. =</span><span class="frac"><span class="frac-num">Pop × Taux × (1 − Évasion) × Panier × Richesse</span><span class="frac-den">Fréquence</span></span></div>
+</div>
+<div class="piege-box"><strong>⚠ Pièges :</strong> CA potentiel ≠ CA annuel. CA prévisionnel toujours inférieur au CA potentiel.</div>
+      </div>
+      <div class="trap" id="e9-trap"></div>
       </div>
     </div>
   </div>
@@ -1051,7 +1242,17 @@ b = (Σy − a·Σx) / n
         <div class="q"><div class="qn">2</div><p id="e10-q2"></p></div>
         <div class="q"><div class="qn">3</div><p id="e10-q3"></p></div>
         <div class="q"><div class="qn">4</div><p id="e10-q4"></p></div>
-        <div class="trap" id="e10-trap"></div>
+              <button class="formules-toggle-btn" onclick="toggleFormEx('e10')">📐 Afficher les formules</button>
+      <div class="formules-panel" id="e10-formules">
+        <div class="formule-bloc">
+  <div class="formule-titre">Moindres carrés — y = ax + b</div>
+  <div class="formule-ligne"><span class="formule-label">a =</span><span class="frac"><span class="frac-num">n·Σxy − Σx·Σy</span><span class="frac-den">n·Σx² − (Σx)²</span></span></div>
+  <div class="formule-ligne"><span class="formule-label">b =</span><span class="frac"><span class="frac-num">Σy − a·Σx</span><span class="frac-den">n</span></span></div>
+  <div class="formule-ligne"><span class="formule-label">Prévision =</span> a <span class="frac-op">×</span> x_prévu <span class="frac-op">+</span> b</div>
+</div>
+<div class="piege-box"><strong>⚠ Pièges :</strong> x commence à 1 (pas l'année). Ne pas confondre Σx² et (Σx)².</div>
+      </div>
+      <div class="trap" id="e10-trap"></div>
       </div>
     </div>
   </div>
@@ -1134,10 +1335,12 @@ b = (Σy − a·Σx) / n
         <div class="q"><div class="qn">2</div><p>Rédigez <strong>5 arguments</strong> qui justifient votre choix (un par champ).</p></div>
         <div class="trap" id="e11-trap"></div>
       </div>
-      <div class="formula e11-formules" style="display:none;">
+      <button class="formules-toggle-btn" onclick="toggleFormEx('e11')">📐 Afficher les formules</button>
+      <div class="formules-panel" id="e11-formules">
         <strong>EURL</strong> : entrepreneur seul · TNS · charges sociales faibles · IR par défaut · gestion simple<br>
         <strong>SASU</strong> : entrepreneur seul · assimilé salarié · régime général · IS · meilleure protection sociale<br>
         <strong>SARL</strong> : plusieurs associés · gérant · parts sociales · décisions collectives · IS
+      
       </div>
     </div>
   </div>
@@ -1169,96 +1372,7 @@ b = (Σy − a·Σx) / n
           <div class="kf-item"><label class="kf-label">Argument 3</label><input class="kf-input" id="e11-arg3" placeholder="Rédigez votre argument..."></div>
           <div class="kf-item"><label class="kf-label">Argument 4</label><input class="kf-input" id="e11-arg4" placeholder="Rédigez votre argument..."></div>
           <div class="kf-item"><label class="kf-label">Argument 5</label><input class="kf-input" id="e11-arg5" placeholder="Rédigez votre argument..."></div>
-        </div>
-      </div>
-      <button class="corr-btn" onclick="corriger('e11')">🔍 Corriger mes réponses</button>
-      <div class="corr-panel" id="e11-corr"></div>
-    </div>
-  </div>
-</div>
-
-<!-- E12 — PRIX DE VENTE OPTIQUE -->
-<div class="section" id="e12">
-  <div class="ex-header">
-    <div class="ex-num">E12</div>
-    <div>
-      <div class="ex-title">Prix de vente optique</div>
-      <div class="ex-sub">Coût · PV HT/TTC · Marge · Taux de marge · Taux de marque</div>
-    </div>
-  </div>
-  <div class="ex-card">
-    <div class="ex-inner">
-      <div class="ctx" id="e12-ctx"></div>
-      <div class="dtitle">Données de l'équipement</div>
-      <table id="e12-data-table"></table>
-      <div class="formula e12-formules" style="display:none;">
-        Coût total HT = monture + verres + frais annexes<br>
-        Si coefficient : PV TTC = coût total × coefficient · PV HT = PV TTC ÷ 1,20<br>
-        Si taux de marge : PV HT = coût total × (1 + taux de marge)<br>
-        Marge commerciale = PV HT − coût total HT<br>
-        Taux de marge = marge ÷ coût total × 100<br>
-        Taux de marque = marge ÷ PV HT × 100<br>
-        ⚠ Marge ≠ Marque · HT ≠ TTC · Coefficient souvent en TTC
-      </div>
-      <div class="qs">
-        <div class="qlbl">Questions</div>
-        <div class="q"><div class="qn">1</div><p>Calculez le <strong>coût d'achat total HT</strong>.</p></div>
-        <div class="q"><div class="qn">2</div><p>Calculez le <strong>prix de vente HT</strong>.</p></div>
-        <div class="q"><div class="qn">3</div><p>Calculez le <strong>prix de vente TTC</strong>.</p></div>
-        <div class="q"><div class="qn">4</div><p>Calculez la <strong>marge commerciale</strong>.</p></div>
-        <div class="q"><div class="qn">5</div><p>Calculez le <strong>taux de marge</strong>.</p></div>
-        <div class="q"><div class="qn">6</div><p>Calculez le <strong>taux de marque</strong>.</p></div>
-        <div class="trap" id="e12-trap"></div>
-      </div>
-    </div>
-  </div>
-  <div class="workspace">
-    <div class="ws-header">
-      <span class="ws-title">✏ Zone de travail — E12</span>
-      <button class="btn-sm btn-sm-red" onclick="clearWorkspace('e12')">Effacer</button>
-    </div>
-    <div class="ws-body">
-      <div class="ws-section">
-        <div class="ws-section-title">Tableau de calcul</div>
-        <div class="tb-controls">
-          <label>Lignes :</label>
-          <input type="number" id="e12-rows" value="6" min="2" max="12">
-          <button class="btn-sm btn-sm-purple" onclick="buildTable('e12-tbl','e12-rows',2)">Construire (2 colonnes)</button>
-          <button class="btn-sm btn-sm-gray" onclick="addRow('e12-tbl')">+ Ligne</button>
-        </div>
-        <div id="e12-tbl-wrap"></div>
-      </div>
-      <div class="ws-section">
-        <div class="ws-section-title">Résultats clés</div>
-        <div class="key-fields">
-          <div class="kf-item"><label class="kf-label">Coût total HT (€)</label><input class="kf-input" id="e12-cout" placeholder=""></div>
-          <div class="kf-item"><label class="kf-label">Prix de vente HT (€)</label><input class="kf-input" id="e12-pvht" placeholder=""></div>
-          <div class="kf-item"><label class="kf-label">Prix de vente TTC (€)</label><input class="kf-input" id="e12-pvttc" placeholder=""></div>
-          <div class="kf-item"><label class="kf-label">Marge commerciale (€)</label><input class="kf-input" id="e12-marge" placeholder=""></div>
-          <div class="kf-item"><label class="kf-label">Taux de marge (%)</label><input class="kf-input" id="e12-tmarge" placeholder=""></div>
-          <div class="kf-item"><label class="kf-label">Taux de marque (%)</label><input class="kf-input" id="e12-tmarque" placeholder=""></div>
-        </div>
-      </div>
-      <button class="corr-btn" onclick="corriger('e12')">🔍 Corriger mes réponses</button>
-      <div class="corr-panel" id="e12-corr"></div>
-    </div>
-  </div>
-</div>
-
-<!-- BOUTON MODE FORMULES — Global -->
-<div style="position:fixed;bottom:20px;right:20px;z-index:200;">
-  <button id="btn-formules" onclick="toggleFormules()" style="
-    background:var(--purple);color:#fff;border:none;border-radius:30px;
-    padding:10px 20px;font-family:'Barlow',sans-serif;font-size:13px;
-    font-weight:700;cursor:pointer;box-shadow:0 4px 15px rgba(74,35,90,0.4);
-    transition:all 0.2s;display:flex;align-items:center;gap:8px;">
-    📚 Mode formules : <span id="formules-state">OFF</span>
-  </button>
-</div>
-
-</div><!-- /main -->
-
-<script>
+   <script>
 
 // ==================== RANDOM ENGINE ====================
 let SEED = 0;
@@ -1479,21 +1593,48 @@ function genE6(){
 function genE7(){
   const nbRepondants = rng(150,300,50);
   const prix = [80,110,140,170,200,230,260,290];
-  // generate realistic Q1 (ascending) and Q2 (descending) distributions
-  const q1Raw = [0,0,rng(5,15,1),rng(15,30,1),rng(30,55,1),rng(40,70,1),rng(30,50,1),rng(10,25,1)];
-  const q2Raw = [rng(30,60,1),rng(30,55,1),rng(20,40,1),rng(15,35,1),rng(10,25,1),rng(3,15,1),rng(0,8,1),0];
-  // normalize to nbRepondants
-  const sumQ1 = q1Raw.reduce((a,b)=>a+b,0);
-  const sumQ2 = q2Raw.reduce((a,b)=>a+b,0);
-  const q1 = q1Raw.map(v=>Math.round(v/sumQ1*nbRepondants));
-  const q2 = q2Raw.map(v=>Math.round(v/sumQ2*nbRepondants));
-  // fix totals
-  q1[q1.length-1] += nbRepondants - q1.reduce((a,b)=>a+b,0);
-  q2[0] += nbRepondants - q2.reduce((a,b)=>a+b,0);
-  DATA.e7 = {nbRepondants,prix,q1,q2};
+  const n = nbRepondants;
+
+  // Générer Q1 (trop chère) — croissant avec le prix
+  // et Q2 (trop bon marché) — décroissant avec le prix
+  // EN GARANTISSANT que pour chaque prix : Q1_cum + Q2_cum <= 100%
+
+  // Méthode : générer des distributions normalisées cohérentes
+  // Q1 : répartition pondérée vers les prix élevés
+  const w1 = [0, 0, 2, 5, 15, 25, 30, 23]; // poids Q1
+  const w2 = [25, 20, 18, 12, 10, 8, 5, 2]; // poids Q2
+
+  const s1 = w1.reduce((a,b)=>a+b,0);
+  const s2 = w2.reduce((a,b)=>a+b,0);
+
+  // Convertir en nb de répondants (arrondi)
+  let q1 = w1.map(w=>Math.round(w/s1*n));
+  let q2 = w2.map(w=>Math.round(w/s2*n));
+
+  // Ajuster les totaux pour = n exactement
+  const fix = (arr, target) => {
+    let diff = target - arr.reduce((a,b)=>a+b,0);
+    // Ajouter/retirer sur l'élément max
+    const maxIdx = arr.indexOf(Math.max(...arr));
+    arr[maxIdx] += diff;
+    return arr;
+  };
+  q1 = fix(q1, n);
+  q2 = fix(q2, n);
+
+  // Ajouter un peu de variation aléatoire tout en gardant la cohérence
+  for(let i=0;i<prix.length;i++){
+    const delta1 = Math.floor(rng(-2,3,1));
+    const delta2 = Math.floor(rng(-2,3,1));
+    q1[i] = Math.max(0, q1[i] + delta1);
+    q2[i] = Math.max(0, q2[i] + delta2);
+  }
+  q1 = fix(q1, n);
+  q2 = fix(q2, n);
+
+  DATA.e7 = {nbRepondants, prix, q1, q2};
   return DATA.e7;
 }
-
 function genE8(){
   const invest = rng(15000,40000,1000);
   const taux = [5,6,7,8][rng(0,4,1)];
@@ -2399,9 +2540,7 @@ function corriger(eid){
     chk('BFR', 'e5-bfr', bfr, Math.max(50,Math.abs(bfr)*0.01));
     chk('Trésorerie nette', 'e5-tn', tn, Math.max(20,Math.abs(tn)*0.01));
 
-    // ============================================================
-    // VÉRIFICATION DE COHÉRENCE — TN = FRNG − BFR
-    // ============================================================
+    // VÉRIFICATION COHÉRENCE TN = FRNG − BFR
     const userFRNG = parseNum(document.getElementById('e5-frng')?.value||'');
     const userBFR  = parseNum(document.getElementById('e5-bfr')?.value||'');
     const userTN   = parseNum(document.getElementById('e5-tn')?.value||'');
@@ -2412,40 +2551,153 @@ function corriger(eid){
       if(ecart > 10){
         rows += `<div class="corr-row" style="background:#fdf2f2;border-radius:6px;padding:8px 12px;margin-top:6px;">
           <span class="corr-icon corr-ko">⚠️</span>
-          <span class="corr-label" style="color:#922b21;font-weight:600;">Incohérence détectée — FRNG − BFR ≠ TN</span>
+          <span class="corr-label" style="color:#922b21;font-weight:600;">Incohérence — FRNG − BFR ≠ TN</span>
           <span class="corr-user" style="color:#922b21;">${userFRNG.toLocaleString('fr-FR')} − ${userBFR.toLocaleString('fr-FR')} = ${tnCalc.toLocaleString('fr-FR')} ≠ ${userTN.toLocaleString('fr-FR')}</span>
-        </div>
-        <div style="font-size:12px;color:#7d4e00;background:#fff8e1;border-radius:6px;padding:8px 12px;margin-top:4px;">
-          💡 Vérifie le classement de tes postes. La relation TN = FRNG − BFR doit toujours être vérifiée.
         </div>`;
       } else {
         rows += `<div class="corr-row" style="background:#eafaf1;border-radius:6px;padding:8px 12px;margin-top:6px;">
           <span class="corr-icon corr-ok">✅</span>
-          <span class="corr-label" style="color:#145a32;font-weight:600;">Cohérence vérifiée — TN = FRNG − BFR</span>
-          <span class="corr-expected">${userFRNG.toLocaleString('fr-FR')} − ${userBFR.toLocaleString('fr-FR')} = ${tnCalc.toLocaleString('fr-FR')} ✓</span>
+          <span class="corr-label" style="color:#145a32;font-weight:600;">Cohérence vérifiée — TN = FRNG − BFR ✓</span>
         </div>`;
       }
+    }
+
+    // ============================================================
+    // ANALYSE AUTOMATIQUE E5 — Dashboard financier
+    // ============================================================
+    const dashEl = document.getElementById('e5-dashboard');
+    if(dashEl && frng !== undefined){
+      const uFRNG = userFRNG !== null ? userFRNG : frng;
+      const uBFR  = userBFR  !== null ? userBFR  : bfr;
+      const uTN   = userTN   !== null ? userTN   : tn;
+
+      // Score financier /100
+      let score100 = 0;
+      if(uTN   > 0) score100 += 30;
+      if(uFRNG > 0) score100 += 30;
+      if(uFRNG > uBFR) score100 += 40;
+      const scoreColor = score100 >= 80 ? 'green' : score100 >= 50 ? 'orange' : 'red';
+      const scoreLabel = score100 >= 80 ? 'Structure très saine' : score100 >= 50 ? 'Structure correcte' : 'Structure fragile';
+
+      // Cartes indicateurs
+      const cardFRNG = uFRNG > 0
+        ? {cls:'green', oui:'OUI', msg:"Excédent de ressources stables — les ressources LT couvrent les emplois LT."}
+        : {cls:'red', oui:'NON', msg:"Ressources stables insuffisantes pour couvrir les emplois stables."};
+
+      const cardBFR = uBFR > 0
+        ? {cls:'orange', oui:'OUI', msg:"Besoin de financement lié à l'exploitation à couvrir."}
+        : {cls:'green', oui:'NON', msg:"Pas de besoin de financement — ressources d'exploitation excédentaires."};
+
+      const cardTN = uTN > 0
+        ? {cls:'green', oui:'OUI', msg:"Trésorerie saine et positive."}
+        : {cls:'red', oui:'NON', msg:"Trésorerie insuffisante — risque de difficultés financières."};
+
+      const cardEquil = uFRNG > uBFR
+        ? {cls:'green', oui:'OUI', msg:"Le FRNG couvre le BFR : structure financière équilibrée."}
+        : {cls:'red', oui:'NON', msg:"Le FRNG ne couvre pas le BFR — déséquilibre financier."};
+
+      // Interprétations
+      const interps = [];
+      if(uFRNG > 0) interps.push({cls:'ok', txt:"✅ FRNG positif — L'entreprise dispose d'un excédent de ressources stables."});
+      else interps.push({cls:'bad', txt:"❌ FRNG négatif — Les emplois stables dépassent les ressources stables."});
+      if(uBFR > 0) interps.push({cls:'warn', txt:"⚠️ BFR positif — L'entreprise a un besoin de financement lié à l'exploitation."});
+      else interps.push({cls:'ok', txt:"✅ BFR négatif ou nul — Pas de besoin de financement d'exploitation."});
+      if(uTN > 0) interps.push({cls:'ok', txt:"✅ TN positive — La trésorerie est saine et positive."});
+      else interps.push({cls:'bad', txt:"❌ TN négative — La trésorerie est insuffisante et peut entraîner des difficultés."});
+      if(uFRNG > uBFR) interps.push({cls:'ok', txt:"✅ Équilibre — Le FRNG couvre le BFR : structure financière équilibrée."});
+      else interps.push({cls:'bad', txt:"❌ Déséquilibre — Le FRNG ne couvre pas le BFR."});
+
+      dashEl.style.display = 'block';
+      dashEl.innerHTML = `
+        <div class="e5-dash-title">📊 Analyse automatique — Structure financière</div>
+        <div class="e5-score-bloc ${scoreColor}">
+          <div class="e5-score-num">${score100}<span style="font-size:18px;">/100</span></div>
+          <div class="e5-score-label">${scoreLabel}</div>
+        </div>
+        <div class="e5-cards">
+          <div class="e5-card ${cardFRNG.cls}">
+            <div class="e5-card-label">FRNG positif ?</div>
+            <div class="e5-card-value">${cardFRNG.oui}</div>
+            <div class="e5-card-msg">${cardFRNG.msg}</div>
+          </div>
+          <div class="e5-card ${cardBFR.cls}">
+            <div class="e5-card-label">BFR positif ?</div>
+            <div class="e5-card-value">${cardBFR.oui}</div>
+            <div class="e5-card-msg">${cardBFR.msg}</div>
+          </div>
+          <div class="e5-card ${cardTN.cls}">
+            <div class="e5-card-label">TN positive ?</div>
+            <div class="e5-card-value">${cardTN.oui}</div>
+            <div class="e5-card-msg">${cardTN.msg}</div>
+          </div>
+          <div class="e5-card ${cardEquil.cls}">
+            <div class="e5-card-label">Structure équilibrée ?</div>
+            <div class="e5-card-value">${cardEquil.oui}</div>
+            <div class="e5-card-msg">${cardEquil.msg}</div>
+          </div>
+        </div>
+        <ul class="e5-interp-list">
+          ${interps.map(i=>`<li class="${i.cls}">${i.txt}</li>`).join('')}
+        </ul>
+      `;
     }
   }
   else if(eid==='e6' && d.e6){
     const e=d.e6;
     chk('CAF totale', 'e6-caf', e.caf, Math.max(50,e.caf*0.01));
     chk('Apport autofinancement', 'e6-apport', e.apport, Math.max(20,e.apport*0.01));
+    // Vérification CAF suffisante (champ e6-ok)
+    const okVal = (document.getElementById('e6-ok')?.value||'').toLowerCase().trim();
+    const cafOk = e.caf >= e.apport;
+    const expectedOk = cafOk ? 'oui' : 'non';
+    total++;
+    const userOk = okVal.includes('oui') || okVal.includes('yes') || okVal === 'o';
+    const userNon = okVal.includes('non') || okVal.includes('no') || okVal === 'n';
+    const isCorrect = cafOk ? userOk : userNon;
+    if(okVal === ''){
+      rows += `<div class="corr-row"><span class="corr-icon">—</span><span class="corr-label">CAF suffisante ?</span><span class="corr-expected">Attendu : ${expectedOk.toUpperCase()} (CAF ${fmt(e.caf)} € ${cafOk?'≥':'<'} apport ${fmt(e.apport)} €)</span></div>`;
+    } else if(isCorrect){
+      score++;
+      rows += `<div class="corr-row" style="background:#eafaf1;border-radius:6px;padding:6px 12px;">
+        <span class="corr-icon corr-ok">✅</span>
+        <span class="corr-label">CAF suffisante ?</span>
+        <span class="corr-user">${okVal.toUpperCase()}</span>
+        <span class="corr-expected">Correct — CAF ${fmt(e.caf)} € ${cafOk?'≥':'<'} apport ${fmt(e.apport)} €</span>
+      </div>`;
+    } else {
+      rows += `<div class="corr-row" style="background:#fdf2f2;border-radius:6px;padding:6px 12px;">
+        <span class="corr-icon corr-ko">❌</span>
+        <span class="corr-label">CAF suffisante ?</span>
+        <span class="corr-user">${okVal.toUpperCase()}</span>
+        <span class="corr-expected">Attendu : ${expectedOk.toUpperCase()} — CAF ${fmt(e.caf)} € ${cafOk?'est ≥ à':'est < à'} l'apport ${fmt(e.apport)} €</span>
+      </div>`;
+    }
   }
   else if(eid==='e7' && d.e7){
     const e=d.e7;
-    // compute prix psy
     const n=e.nbRepondants;
-    let cumQ1=0, bestPct=-1, bestPrix=0;
-    let cumQ2arr=[]; let s=0;
-    for(let i=0;i<e.prix.length;i++){s+=e.q2[i]/n*100; cumQ2arr.push(s);}
+    // Q1 cumulé DÉCROISSANT (de haut en bas)
     let cumQ1dec=0;
+    const cumQ1 = new Array(e.prix.length).fill(0);
     for(let i=e.prix.length-1;i>=0;i--){
-      cumQ1dec+=e.q1[i]/n*100;
-      const pct=100-cumQ1dec-cumQ2arr[i];
-      if(pct>bestPct){bestPct=pct;bestPrix=e.prix[i];}
+      cumQ1dec += e.q1[i]/n*100;
+      cumQ1[i] = cumQ1dec;
     }
-    chk('Prix psychologique optimal', 'e7-prix', bestPrix, 15);
+    // Q2 cumulé CROISSANT (de bas en haut)
+    let cumQ2crois=0;
+    const cumQ2 = [];
+    for(let i=0;i<e.prix.length;i++){
+      cumQ2crois += e.q2[i]/n*100;
+      cumQ2.push(cumQ2crois);
+    }
+    // Trouver le prix optimal = max % acheteurs
+    let bestPct=-999, bestPrix=0;
+    for(let i=0;i<e.prix.length;i++){
+      const pct = 100 - cumQ1[i] - cumQ2[i];
+      if(pct > bestPct){ bestPct=pct; bestPrix=e.prix[i]; }
+    }
+    // Tolérance large : ±1 prix (30€)
+    chk('Prix psychologique optimal', 'e7-prix', bestPrix, 30);
   }
   else if(eid==='e8' && d.e8){
     const e=d.e8;
@@ -2724,7 +2976,7 @@ if(typeof window._registerFunctions === 'function'){
   window._registerFunctions({
     showSection, corriger, buildTable, addRow, clearWorkspace,
     newDraw, resetAnswers, exportData, saveAllTables, saveTable,
-    loadTable, toggleFormules, corrigerRedac
+    loadTable, corrigerRedac
   });
 } else {
   // Fallback : exposer directement
@@ -2733,7 +2985,7 @@ if(typeof window._registerFunctions === 'function'){
   window.clearWorkspace=clearWorkspace; window.newDraw=newDraw;
   window.resetAnswers=resetAnswers; window.exportData=exportData;
   window.saveAllTables=saveAllTables; window.saveTable=saveTable;
-  window.loadTable=loadTable; window.toggleFormules=toggleFormules;
+  window.loadTable=loadTable; window.toggleFormEx=toggleFormEx; 
   window.corrigerRedac=corrigerRedac;
 }
 
@@ -2888,29 +3140,25 @@ function renderE12(d){
   document.getElementById('e12-trap').textContent = `Taux de MARGE = marge ÷ coût d'achat × 100. Taux de MARQUE = marge ÷ prix de vente HT × 100. Ces deux taux sont différents ! ${d.useCoeff ? "Le coefficient multiplicateur s'applique sur le coût TOTAL pour obtenir le PV TTC." : "Le taux de marge s'applique sur le coût total pour obtenir le PV HT."}`;
 }
 
-// ==================== MODE FORMULES ====================
 
-function toggleFormules(){
-  const isOn = localStorage.getItem('formules_mode') === 'on';
-  const newState = isOn ? 'off' : 'on';
-  localStorage.setItem('formules_mode', newState);
-  applyFormulesMode();
-  trackEvent('toggle_formules', 'UX', 'Mode formules ' + newState.toUpperCase());
+
+
+
+
+
+
+// ===== TOGGLE FORMULES PAR EXERCICE =====
+function toggleFormEx(eid){
+  const panel = document.getElementById(eid + "-formules");
+  const btn   = panel ? panel.previousElementSibling : null;
+  if(!panel) return;
+  const isVisible = panel.classList.contains("visible");
+  panel.classList.toggle("visible", !isVisible);
+  if(btn){
+    btn.classList.toggle("active", !isVisible);
+    btn.textContent = isVisible ? "📐 Afficher les formules" : "📐 Masquer les formules";
+  }
 }
-
-function applyFormulesMode(){
-  const isOn = localStorage.getItem('formules_mode') === 'on';
-  // Afficher/masquer tous les blocs .formula et les blocs de formules des nouveaux ex
-  document.querySelectorAll('.formula, .e11-formules, .e12-formules').forEach(el=>{
-    el.style.display = isOn ? 'block' : 'none';
-  });
-  document.getElementById('formules-state').textContent = isOn ? 'ON 📖' : 'OFF';
-  document.getElementById('btn-formules').style.background = isOn ? 'var(--teal)' : 'var(--purple)';
-}
-
-
-
-
 
 function renderAll(){
   renderE1(genE1());
@@ -2929,7 +3177,6 @@ function renderAll(){
 
 // update regen button to have spin icon
 document.addEventListener('DOMContentLoaded',()=>{
-  applyFormulesMode(); // Appliquer état mode formules sauvegardé
   document.querySelector('.btn-red').innerHTML = '<span class="spin">⟳</span> Nouveau tirage';
   // Formatage temps réel sur tous les kf-input
   document.querySelectorAll('.kf-input').forEach(inp=>{
@@ -3001,16 +3248,17 @@ function corrigerRedac(textareaId, keywords, required){
   else html+=`<div style="margin-top:8px;font-size:11px;color:#922b21;">❌ Réponse insuffisante — relis le cours puis réessaie avant de consulter la correction.</div>`;
   panel.innerHTML=html;
 }
+
+
 </script>
 
 <script>
-  if ("serviceWorker" in navigator) {
+  if ("serviceWorker" in navigator && location.hostname !== "www.claudeusercontent.com") {
     navigator.serviceWorker.register("./sw.js")
       .then(() => console.log("PWA AKvGestion activée"))
       .catch(err => console.error("Erreur Service Worker:", err));
   }
 </script>
 
-</script>
 </body>
 </html>
