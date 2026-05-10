@@ -1550,7 +1550,7 @@ function genE1(){
   const dap = rng(8000,16000,500);
   const chargesFinanc = rng(1500,4000,500);
   const jours = rng(280,320,10);
-  const cv = achats - varStock + Math.round(energie*pctVar/100);
+  const cv = achats + varStock + Math.round(energie*pctVar/100);
   const cf = personnel + loyer + Math.round(energie*(100-pctVar)/100) + assurance + dap + chargesFinanc;
   const mscv = ca - cv;
   const tmcv = mscv/ca;
