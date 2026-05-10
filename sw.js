@@ -1,4 +1,4 @@
-const CACHE_NAME = "akvgestion-v4.1";
+const CACHE_NAME = "akvgestion-v5";
 const ASSETS = [
   './',
   './index.html',
