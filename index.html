@@ -259,6 +259,7 @@ tfoot td:not(:first-child){text-align:right;font-family:'DM Mono',monospace;}
 .e5-card.green{background:#eafaf1;border:1px solid #a9dfbf;}
 .e5-card.orange{background:#fef9e7;border:1px solid #f9e79f;}
 .e5-card.red{background:#fadbd8;border:1px solid #f1948a;}
+.e5-card.blue{background:#eaf4fb;border:1px solid #85c1e9;}
 .e5-card-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;}
 .e5-card.green .e5-card-label{color:#1e8449;}
 .e5-card.orange .e5-card-label{color:#b7770d;}
@@ -267,10 +268,12 @@ tfoot td:not(:first-child){text-align:right;font-family:'DM Mono',monospace;}
 .e5-card.green .e5-card-value{color:#1e8449;}
 .e5-card.orange .e5-card-value{color:#b7770d;}
 .e5-card.red .e5-card-value{color:#922b21;}
+.e5-card.blue .e5-card-value{color:#1a5276;}
 .e5-card-msg{font-size:11px;line-height:1.4;}
 .e5-card.green .e5-card-msg{color:#1e8449;}
 .e5-card.orange .e5-card-msg{color:#b7770d;}
 .e5-card.red .e5-card-msg{color:#922b21;}
+.e5-card.blue .e5-card-msg{color:#1a5276;}
 .e5-score-bloc{border-radius:8px;padding:14px 18px;text-align:center;
   margin-bottom:12px;animation:fadeIn 0.4s ease;}
 .e5-score-bloc.green{background:#eafaf1;border:2px solid #27ae60;}
@@ -380,6 +383,7 @@ tfoot td:not(:first-child){text-align:right;font-family:'DM Mono',monospace;}
   <button class="nav-btn" onclick="showSection('e10',this)">E10 · Moindres carrés</button>
   <button class="nav-btn" onclick="showSection('e11',this)">E11 · Statut juridique</button>
   <button class="nav-btn" onclick="showSection('e12',this)">E12 · Prix de vente</button>
+  <button class="nav-btn" onclick="showSection('e13',this)">E13 · Régimes matrimoniaux</button>
 </nav>
 
 <div class="main">
@@ -775,6 +779,7 @@ tfoot td:not(:first-child){text-align:right;font-family:'DM Mono',monospace;}
         <div class="qlbl">Questions</div>
         <div class="q"><div class="qn">1</div><p id="e5-q1"></p></div>
         <div class="q"><div class="qn">2</div><p id="e5-q2"></p></div>
+        <div class="q"><div class="qn">3</div><p>Calculez les <strong>ratios de délais</strong> : délai créances clients, délai dettes fournisseurs et délai de rotation des stocks (en jours).</p></div>
               <button class="formules-toggle-btn" onclick="toggleFormEx('e5')">📐 Afficher les formules</button>
       <div class="formules-panel" id="e5-formules">
         <div class="formule-bloc">
@@ -822,7 +827,19 @@ tfoot td:not(:first-child){text-align:right;font-family:'DM Mono',monospace;}
         <div class="ws-section-title">Question 2 — Commentaire situation financière</div>
         <textarea class="text-answer" id="e5-interp" placeholder="Commentez la situation financière de AkVision à partir des trois indicateurs..."></textarea>
       </div>
-            <div class="q-redac">
+            <div class="ws-section">
+        <div class="ws-section-title">Question 3 — Ratios de délais</div>
+        <div id="e5-rappel-delais" style="background:#eaf4fb;border-left:3px solid #1a5276;border-radius:0 6px 6px 0;padding:9px 13px;margin-bottom:10px;font-size:12px;color:#1a5276;">chargement...</div>
+        <div style="background:#fff8f0;border-left:3px solid #f0a500;border-radius:0 6px 6px 0;padding:8px 12px;margin-bottom:10px;font-size:12px;color:#7d4e00;">
+          📌 <strong>Formules :</strong> Délai clients = Créances ÷ CA TTC × 360 &nbsp;|&nbsp; Délai fournisseurs = Dettes fourn. ÷ Achats TTC × 360 &nbsp;|&nbsp; Rotation stocks = Stocks ÷ Achats HT × 360
+        </div>
+        <div class="key-fields">
+          <div class="kf-item"><label class="kf-label">Délai créances clients (jours)</label><input class="kf-input" id="e5-delai-clients" placeholder="ex: 45"></div>
+          <div class="kf-item"><label class="kf-label">Délai dettes fournisseurs (jours)</label><input class="kf-input" id="e5-delai-fourn" placeholder="ex: 30"></div>
+          <div class="kf-item"><label class="kf-label">Délai rotation stocks (jours)</label><input class="kf-input" id="e5-delai-stocks" placeholder="ex: 60"></div>
+        </div>
+      </div>
+      <div class="q-redac">
         <div class="q-redac-title">❓ Question de rédaction — réponse en 2-4 lignes</div>
         <div class="q-redac-enonce">Qu'est-ce que le FRNG et que signifie un FRNG positif pour la santé financière d'un magasin d'optique ?</div>
         <textarea id="e5-redac" placeholder="Rédigez votre réponse ici..."></textarea>
@@ -1410,11 +1427,24 @@ b = (Σy − a·Σx) / n
       <div class="ws-section">
         <div class="ws-section-title">Question 2 — Vos 5 arguments</div>
         <div style="display:flex;flex-direction:column;gap:8px;">
-          <div class="kf-item"><label class="kf-label">Argument 1</label><input class="kf-input" id="e11-arg1" placeholder="Rédigez votre argument..."></div>
-          <div class="kf-item"><label class="kf-label">Argument 2</label><input class="kf-input" id="e11-arg2" placeholder="Rédigez votre argument..."></div>
-          <div class="kf-item"><label class="kf-label">Argument 3</label><input class="kf-input" id="e11-arg3" placeholder="Rédigez votre argument..."></div>
-          <div class="kf-item"><label class="kf-label">Argument 4</label><input class="kf-input" id="e11-arg4" placeholder="Rédigez votre argument..."></div>
-          <div class="kf-item"><label class="kf-label">Argument 5</label><input class="kf-input" id="e11-arg5" placeholder="Rédigez votre argument..."></div>
+          <div id="e11-args-note" style="background:#fff8f0;border-left:3px solid #f0a500;border-radius:0 6px 6px 0;padding:8px 12px;margin-bottom:10px;font-size:12px;color:#7d4e00;">
+            📌 Sélectionnez le statut d'abord — les arguments se mettront à jour.
+          </div>
+          <div class="kf-item"><label class="kf-label">Argument 1</label>
+            <select class="kf-input" id="e11-arg1" style="font-family:'Barlow',sans-serif;cursor:pointer;"><option value="">-- Choisissez --</option></select>
+          </div>
+          <div class="kf-item"><label class="kf-label">Argument 2</label>
+            <select class="kf-input" id="e11-arg2" style="font-family:'Barlow',sans-serif;cursor:pointer;"><option value="">-- Choisissez --</option></select>
+          </div>
+          <div class="kf-item"><label class="kf-label">Argument 3</label>
+            <select class="kf-input" id="e11-arg3" style="font-family:'Barlow',sans-serif;cursor:pointer;"><option value="">-- Choisissez --</option></select>
+          </div>
+          <div class="kf-item"><label class="kf-label">Argument 4</label>
+            <select class="kf-input" id="e11-arg4" style="font-family:'Barlow',sans-serif;cursor:pointer;"><option value="">-- Choisissez --</option></select>
+          </div>
+          <div class="kf-item"><label class="kf-label">Argument 5</label>
+            <select class="kf-input" id="e11-arg5" style="font-family:'Barlow',sans-serif;cursor:pointer;"><option value="">-- Choisissez --</option></select>
+          </div>
 
         </div>
       </div>
@@ -1513,6 +1543,94 @@ b = (Σy − a·Σx) / n
   </div>
 </div>
 
+
+<!-- E13 — RÉGIMES MATRIMONIAUX -->
+<div class="section" id="e13">
+  <div class="ex-header">
+    <div class="ex-num" style="background:#1a5276;">E13</div>
+    <div>
+      <div class="ex-title">Régimes matrimoniaux &amp; protection du conjoint</div>
+      <div class="ex-sub">Communauté réduite aux acquêts · Séparation de biens · Participation aux acquêts</div>
+    </div>
+  </div>
+  <div class="ex-card">
+    <div class="ex-inner">
+      <div class="ctx" id="e13-ctx"></div>
+      <div class="qs">
+        <div class="qlbl">Questions</div>
+        <div class="q"><div class="qn">1</div><p>Identifiez le <strong>régime matrimonial le plus adapté</strong> à la situation. Justifiez avec 3 arguments.</p></div>
+        <div class="q"><div class="qn">2</div><p id="e13-q2"></p></div>
+        <div class="q"><div class="qn">3</div><p>Quels sont les <strong>risques pour le conjoint</strong> en cas de difficultés financières ? Proposez une mesure de protection.</p></div>
+        <div class="trap" id="e13-trap"></div>
+      </div>
+      <button class="formules-toggle-btn" onclick="toggleFormEx('e13')">📐 Afficher les formules</button>
+      <div class="formules-panel" id="e13-formules">
+        <div class="formule-bloc">
+          <div class="formule-titre">Les 3 régimes principaux</div>
+          <div class="formule-ligne"><span class="formule-label">Communauté réduite aux acquêts (légal)</span> → Régime par DÉFAUT sans contrat. Biens acquis pendant le mariage = communs. Biens propres (avant mariage, héritage) = personnels.</div>
+          <div class="formule-ligne"><span class="formule-label">Séparation de biens</span> → Chaque époux conserve ses biens propres et acquis. Pas de patrimoine commun. Protection optimale pour l'entrepreneur. Nécessite un acte notarié.</div>
+          <div class="formule-ligne"><span class="formule-label">Participation aux acquêts</span> → Fonctionne comme séparation de biens pendant le mariage. Au divorce : partage de l'enrichissement réalisé pendant le mariage.</div>
+        </div>
+        <div class="formule-bloc">
+          <div class="formule-titre">Protections supplémentaires</div>
+          <div class="formule-ligne"><span class="formule-label">Déclaration d'insaisissabilité</span> → Protège la résidence principale des créanciers professionnels.</div>
+          <div class="formule-ligne"><span class="formule-label">Contrat de mariage</span> → Acte notarié obligatoire pour tout régime autre que la communauté légale.</div>
+          <div class="formule-ligne"><span class="formule-label">Changement de régime</span> → Possible après 2 ans, par acte notarié.</div>
+        </div>
+        <div class="piege-box"><strong>⚠ Pièges :</strong> La communauté légale est le régime par DÉFAUT. Participation aux acquêts ≠ séparation totale : il y a compensation au divorce. Un bien acheté ensemble reste en indivision même en séparation de biens.</div>
+      </div>
+    </div>
+  </div>
+  <div class="workspace">
+    <div class="ws-header">
+      <span class="ws-title">✏ Zone de travail — E13</span>
+      <button class="btn-sm btn-sm-red" onclick="clearWorkspace('e13')">Effacer</button>
+    </div>
+    <div class="ws-body">
+      <div class="ws-section">
+        <div class="ws-section-title">Question 1 — Régime choisi</div>
+        <div class="key-fields">
+          <div class="kf-item" style="flex:0 0 auto;">
+            <label class="kf-label">Régime matrimonial choisi</label>
+            <select id="e13-choix" class="kf-input" style="font-family:'Barlow',sans-serif;cursor:pointer;">
+              <option value="">-- Choisissez --</option>
+              <option value="CRA">Communauté réduite aux acquêts</option>
+              <option value="SB">Séparation de biens</option>
+              <option value="PA">Participation aux acquêts</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="ws-section">
+        <div class="ws-section-title">Question 1 — Vos 3 arguments</div>
+        <div id="e13-args-note" style="background:#fff8f0;border-left:3px solid #f0a500;border-radius:0 6px 6px 0;padding:8px 12px;margin-bottom:10px;font-size:12px;color:#7d4e00;">
+          📌 Sélectionnez le régime d'abord — les arguments se mettront à jour automatiquement.
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <div class="kf-item"><label class="kf-label">Argument 1</label>
+            <select class="kf-input" id="e13-arg1" style="font-family:'Barlow',sans-serif;cursor:pointer;"><option value="">-- Choisissez --</option></select>
+          </div>
+          <div class="kf-item"><label class="kf-label">Argument 2</label>
+            <select class="kf-input" id="e13-arg2" style="font-family:'Barlow',sans-serif;cursor:pointer;"><option value="">-- Choisissez --</option></select>
+          </div>
+          <div class="kf-item"><label class="kf-label">Argument 3</label>
+            <select class="kf-input" id="e13-arg3" style="font-family:'Barlow',sans-serif;cursor:pointer;"><option value="">-- Choisissez --</option></select>
+          </div>
+        </div>
+      </div>
+      <div class="ws-section">
+        <div class="ws-section-title">Question 2 — Analyse de situation</div>
+        <textarea class="text-answer" id="e13-analyse" placeholder="Rédigez votre analyse en 3-4 lignes..."></textarea>
+      </div>
+      <div class="ws-section">
+        <div class="ws-section-title">Question 3 — Risques et protection du conjoint</div>
+        <textarea class="text-answer" id="e13-protection" placeholder="Identifiez les risques et proposez une mesure de protection..."></textarea>
+      </div>
+      <button class="corr-btn" onclick="corriger('e13')">🔍 Corriger mes réponses</button>
+      <div class="corr-panel" id="e13-corr"></div>
+    </div>
+  </div>
+</div>
 </div><!-- /main -->
    <script>
 
@@ -1528,7 +1646,7 @@ function rng(min,max,step=1){
   return val;
 }
 
-function fmt(n){ return Math.round(n).toLocaleString('fr-FR'); }
+function fmt(n){ return Math.round(n).toLocaleString('fr-FR').replace(/\u202f/g,' ').replace(/\u00a0/g,' '); }
 function fmtPct(n){ return n.toFixed(1).replace('.',',') + ' %'; }
 
 function initSeed(){
@@ -1704,14 +1822,21 @@ function genE5(){
   const tnCheck   = frngCheck - bfr;
   // console.log('E5 check — FRNG:', frngCheck, 'BFR:', bfr, 'TN:', tnCheck, 'dispo−décou:', tn);
 
+  const caE5      = rng(300000,520000,10000);
+  const achatsE5  = Math.round(caE5*rng(30,42,1)/100/1000)*1000;
+  const caTTC     = Math.round(caE5*1.20);
+  const achatsTTC = Math.round(achatsE5*1.20);
+  const delaiClients = Math.round((creances/caTTC)*360);
+  const delaiFourn   = Math.round((detteFourn/achatsTTC)*360);
+  const delaiStocks  = Math.round((stocks/achatsE5)*360);
   DATA.e5 = {
     fonds,materiel,amtMateriel,agenc,amtAgenc,immobFin,
     stocks,provStocks,creances,provCreances,dispo,
     capital,reserves,resNet,emprunt,
     detteFourn,detteFiscSoc,decouvert,
     totalAmts,actifBrut,actifNet,
-    // Valeurs fonctionnelles pré-calculées (pour correction)
-    es,rs,ac,pc,bfr,frng,tn
+    es,rs,ac,pc,bfr,frng,tn,
+    caE5,achatsE5,caTTC,achatsTTC,delaiClients,delaiFourn,delaiStocks
   };
   return DATA.e5;
 }
@@ -2128,6 +2253,10 @@ function renderE4(d){
 }
 
 function renderE5(d){
+  setTimeout(()=>{
+    const rd = document.getElementById('e5-rappel-delais');
+    if(rd) rd.innerHTML = 'CA HT : <strong>'+fmt(d.caE5)+' €</strong> → CA TTC : <strong>'+fmt(d.caTTC)+' €</strong> &nbsp;|&nbsp; Achats HT : <strong>'+fmt(d.achatsE5)+' €</strong> → Achats TTC : <strong>'+fmt(d.achatsTTC)+' €</strong> &nbsp;|&nbsp; Stocks : <strong>'+fmt(d.stocks)+' €</strong> &nbsp;|&nbsp; Créances clients : <strong>'+fmt(d.creances)+' €</strong> &nbsp;|&nbsp; Dettes fourn. : <strong>'+fmt(d.detteFourn)+' €</strong>';
+  },50);
   const lFonds=pick(SYN.fondsComm), lMateriel=pick(SYN.materielBilan);
   const lAgenc=pick(SYN.agencBilan), lImmobFin=pick(SYN.immobFin);
   const lStocks=pick(SYN.stocksBilan), lCreances=pick(SYN.creancesBilan);
@@ -2577,7 +2706,7 @@ function correctionRow(label, userVal, expected, tol, unit='€'){
   const status = checkVal(userVal, expected, tol);
   const icon = status==='ok'?'✅': status==='ko'?'❌':'—';
   const cls = status==='ok'?'corr-ok': status==='ko'?'corr-ko':'corr-skip';
-  const expFmt = unit==='%' ? expected.toFixed(1)+' %' : Math.round(expected).toLocaleString('fr-FR')+' €';
+  const expFmt = unit==='%' ? expected.toFixed(1)+' %' : unit==='j' ? Math.round(expected)+' j' : Math.round(expected).toLocaleString('fr-FR').replace(/\u202f/g,' ')+' €';
   const userFmt = userVal ? (userVal||'—') : '—';
   return `<div class="corr-row">
     <span class="corr-icon ${cls}">${icon}</span>
@@ -2676,6 +2805,13 @@ function corriger(eid){
     chk('BFR', 'e5-bfr', bfr, Math.max(50,Math.abs(bfr)*0.01));
     chk('Trésorerie nette', 'e5-tn', tn, Math.max(20,Math.abs(tn)*0.01));
 
+    // Q3 — Ratios de délais
+    if(d.e5.delaiClients !== undefined){
+      chk('Délai créances clients (j)', 'e5-delai-clients', d.e5.delaiClients, 3, 'j');
+      chk('Délai dettes fournisseurs (j)', 'e5-delai-fourn', d.e5.delaiFourn, 3, 'j');
+      chk('Délai rotation stocks (j)', 'e5-delai-stocks', d.e5.delaiStocks, 3, 'j');
+    }
+
     // VÉRIFICATION COHÉRENCE TN = FRNG − BFR
     const userFRNG = parseNum(document.getElementById('e5-frng')?.value||'');
     const userBFR  = parseNum(document.getElementById('e5-bfr')?.value||'');
@@ -2721,7 +2857,7 @@ function corriger(eid){
         : {cls:'red', oui:'NON', msg:"Ressources stables insuffisantes pour couvrir les emplois stables."};
 
       const cardBFR = uBFR > 0
-        ? {cls:'orange', oui:'OUI', msg:"Besoin de financement lié à l'exploitation à couvrir."}
+        ? {cls:'blue', oui:'OUI', msg:"Besoin de financement lié à l'exploitation — normal en optique (stocks importants)."}
         : {cls:'green', oui:'NON', msg:"Pas de besoin de financement — ressources d'exploitation excédentaires."};
 
       const cardTN = uTN > 0
@@ -2736,7 +2872,7 @@ function corriger(eid){
       const interps = [];
       if(uFRNG > 0) interps.push({cls:'ok', txt:"✅ FRNG positif — L'entreprise dispose d'un excédent de ressources stables."});
       else interps.push({cls:'bad', txt:"❌ FRNG négatif — Les emplois stables dépassent les ressources stables."});
-      if(uBFR > 0) interps.push({cls:'warn', txt:"⚠️ BFR positif — L'entreprise a un besoin de financement lié à l'exploitation."});
+      if(uBFR > 0) interps.push({cls:'ok', txt:"ℹ️ BFR positif — Besoin de financement d'exploitation normal en optique (stocks et créances élevés)."});
       else interps.push({cls:'ok', txt:"✅ BFR négatif ou nul — Pas de besoin de financement d'exploitation."});
       if(uTN > 0) interps.push({cls:'ok', txt:"✅ TN positive — La trésorerie est saine et positive."});
       else interps.push({cls:'bad', txt:"❌ TN négative — La trésorerie est insuffisante et peut entraîner des difficultés."});
@@ -2929,68 +3065,106 @@ function corriger(eid){
   }
   else if(eid==='e11' && d.e11){
     const e=d.e11;
+    const LABELS11 = {EURL:'EURL', SASU:'SASU', SARL:'SARL'};
     const userChoix = (document.getElementById('e11-choix')?.value||'').toUpperCase().trim();
-    const args = [1,2,3,4,5].map(i=>(document.getElementById('e11-arg'+i)?.value||'').toLowerCase().trim());
+    const argVals = [1,2,3,4,5].map(i=>document.getElementById('e11-arg'+i)?.value||'');
+    const pool = ARGS_E11[e.statut]||{corrects:[],leurres:[]};
+    const correctVals = pool.corrects.map(a=>a.val);
 
-    // 1. Vérifier le choix du statut
+    // Choix statut
     total++;
-    if(userChoix === e.statut){
+    if(userChoix===e.statut){
       score++;
-      rows += `<div class="corr-row" style="background:#eafaf1;border-radius:6px;padding:8px 12px;">
-        <span class="corr-icon corr-ok">✅</span>
-        <span class="corr-label"><strong>Statut choisi : ${userChoix}</strong></span>
-        <span class="corr-expected">Correct — Réponse attendue : ${e.statut}</span>
-      </div>`;
-    } else if(userChoix === ''){
-      rows += `<div class="corr-row"><span class="corr-icon">—</span><span class="corr-label">Statut non sélectionné</span></div>`;
+      rows+=`<div class="corr-row" style="background:#eafaf1;border-radius:6px;padding:8px 12px;">✅ <strong>Statut choisi : ${userChoix}</strong> — Correct</div>`;
+    } else if(!userChoix){
+      rows+=`<div class="corr-row"><span class="corr-icon">—</span> Statut non sélectionné — Attendu : <strong>${e.statut}</strong></div>`;
     } else {
-      rows += `<div class="corr-row" style="background:#fdf2f2;border-radius:6px;padding:8px 12px;">
-        <span class="corr-icon corr-ko">❌</span>
-        <span class="corr-label"><strong>Statut choisi : ${userChoix}</strong></span>
-        <span class="corr-expected">Attendu : ${e.statut}</span>
-      </div>`;
+      rows+=`<div class="corr-row" style="background:#fdf2f2;border-radius:6px;padding:8px 12px;">❌ <strong>Statut choisi : ${userChoix}</strong> — Attendu : <strong>${e.statut}</strong></div>`;
     }
 
-    // 2. Vérifier les 5 arguments
-    const kwBase = KEYWORDS_E11[e.statut]||[];
-    const validated=[], invalid=[], repeated=[];
-    const usedKw=[];
-    rows += `<div style="font-size:11px;font-weight:700;color:#4a235a;margin:10px 0 4px;text-transform:uppercase;">Arguments :</div>`;
-    args.forEach((arg,i)=>{
-      if(!arg){ rows+=`<div class="corr-row"><span class="corr-icon">—</span><span class="corr-label">Argument ${i+1} — vide</span></div>`; return; }
+    // Arguments
+    rows+=`<div style="font-size:11px;font-weight:700;color:#4a235a;margin:10px 0 4px;text-transform:uppercase;">Arguments (5 attendus) :</div>`;
+    const usedVals=[];
+    argVals.forEach((val,i)=>{
       total++;
-      const found = kwBase.find(kw=>arg.includes(kw));
-      if(found && usedKw.includes(found)){
-        repeated.push(arg);
-        rows += `<div class="corr-row" style="background:#fff8e1;border-radius:6px;padding:6px 12px;">
-          <span class="corr-icon" style="color:#f0a500;">🔁</span>
-          <span class="corr-label">Arg. ${i+1} — <em>${arg}</em></span>
-          <span style="font-size:11px;color:#7d6608;">Argument répété (mot-clé déjà utilisé)</span>
-        </div>`;
-      } else if(found){
-        score++;
-        usedKw.push(found);
-        validated.push(arg);
-        rows += `<div class="corr-row" style="background:#eafaf1;border-radius:6px;padding:6px 12px;">
-          <span class="corr-icon corr-ok">✅</span>
-          <span class="corr-label">Arg. ${i+1} — <em>${arg}</em></span>
-          <span class="kw-found">${found}</span>
-        </div>`;
-      } else {
-        invalid.push(arg);
-        rows += `<div class="corr-row" style="background:#fdf2f2;border-radius:6px;padding:6px 12px;">
-          <span class="corr-icon corr-ko">❌</span>
-          <span class="corr-label">Arg. ${i+1} — <em>${arg}</em></span>
-          <span style="font-size:11px;color:#922b21;">Argument non reconnu pour ${e.statut}</span>
-        </div>`;
+      if(!val){
+        rows+=`<div class="corr-row"><span class="corr-icon">—</span> Argument ${i+1} — non sélectionné</div>`;
+        return;
       }
+      const allPool = [...(ARGS_E11['EURL']?.corrects||[]),...(ARGS_E11['SASU']?.corrects||[]),...(ARGS_E11['SARL']?.corrects||[]),
+                       ...(ARGS_E11['EURL']?.leurres||[]),...(ARGS_E11['SASU']?.leurres||[]),...(ARGS_E11['SARL']?.leurres||[])];
+      const argObj = allPool.find(a=>a.val===val)||{txt:val};
+      const isCorrect = correctVals.includes(val);
+      const isRepeat = usedVals.includes(val);
+      if(isRepeat){
+        rows+=`<div class="corr-row" style="background:#fff8e1;border-radius:6px;padding:6px 12px;">🔁 Arg. ${i+1} — <em>${argObj.txt}</em> <span style="font-size:11px;color:#7d6608;">(répété)</span></div>`;
+      } else if(isCorrect){
+        score++; usedVals.push(val);
+        rows+=`<div class="corr-row" style="background:#eafaf1;border-radius:6px;padding:6px 12px;">✅ Arg. ${i+1} — <em>${argObj.txt}</em></div>`;
+      } else {
+        rows+=`<div class="corr-row" style="background:#fdf2f2;border-radius:6px;padding:6px 12px;">❌ Arg. ${i+1} — <em>${argObj.txt}</em> <span style="font-size:11px;color:#922b21;">(non adapté à ${e.statut})</span></div>`;
+      }
+      if(!isRepeat) usedVals.push(val);
     });
 
     // Correction type
-    rows += `<div style="margin-top:12px;padding:10px 14px;background:#f5eef8;border:1px solid #c8bfe8;border-radius:6px;font-size:12px;color:#4a235a;">
-      <strong>✏ Correction type — ${e.statut} :</strong><br>
-      ${e.indices.map(k=>`<span class="kw-found">${k}</span>`).join(' ')}
+    rows+=`<div style="margin-top:12px;padding:10px 14px;background:#f5eef8;border:1px solid #c8bfe8;border-radius:6px;font-size:12px;color:#4a235a;">
+      <strong>✏ Arguments corrects — ${e.statut} :</strong><br>
+      ${pool.corrects.map(a=>'<span class="kw-found">'+a.txt+'</span>').join('<br>')}
     </div>`;
+    renderPanel(eid, rows, score, total);
+  }
+  else if(eid==='e13' && d.e13){
+    const e = d.e13;
+    const LABELS = {SB:'Séparation de biens', CRA:'Communauté réduite aux acquêts', PA:'Participation aux acquêts'};
+    const userChoix = (document.getElementById('e13-choix')?.value||'');
+    const argVals = [1,2,3].map(i=>document.getElementById('e13-arg'+i)?.value||'');
+    const pool = ARGS_E13[e.regime]||{corrects:[],leurres:[]};
+    const correctVals = pool.corrects.map(a=>a.val);
+
+    // Choix régime
+    total++;
+    if(userChoix===e.regime){
+      score++;
+      rows+=`<div class="corr-row" style="background:#eafaf1;border-radius:6px;padding:8px 12px;">✅ <strong>Régime choisi : ${LABELS[userChoix]||userChoix}</strong> — Correct</div>`;
+    } else if(!userChoix){
+      rows+=`<div class="corr-row"><span class="corr-icon">—</span> Régime non sélectionné — Attendu : <strong>${LABELS[e.regime]}</strong></div>`;
+    } else {
+      rows+=`<div class="corr-row" style="background:#fdf2f2;border-radius:6px;padding:8px 12px;">❌ <strong>Régime choisi : ${LABELS[userChoix]||userChoix}</strong> — Attendu : <strong>${LABELS[e.regime]}</strong></div>`;
+    }
+
+    // Arguments
+    rows+=`<div style="font-size:11px;font-weight:700;color:#4a235a;margin:10px 0 4px;text-transform:uppercase;">Arguments :</div>`;
+    const usedVals=[];
+    argVals.forEach((val,i)=>{
+      total++;
+      if(!val){
+        rows+=`<div class="corr-row"><span class="corr-icon">—</span> Argument ${i+1} — non sélectionné</div>`;
+        return;
+      }
+      // Trouver le texte de l'argument
+      const allArgs = [...(ARGS_E13[e.regime]?.corrects||[]), ...(ARGS_E13[e.regime]?.leurres||[]),
+                       ...(ARGS_E13['SB']?.corrects||[]), ...(ARGS_E13['CRA']?.corrects||[]), ...(ARGS_E13['PA']?.corrects||[])];
+      const argObj = allArgs.find(a=>a.val===val)||{txt:val};
+      const isCorrect = correctVals.includes(val);
+      const isRepeat = usedVals.includes(val);
+      if(isRepeat){
+        rows+=`<div class="corr-row" style="background:#fff8e1;border-radius:6px;padding:6px 12px;">🔁 Arg. ${i+1} — <em>${argObj.txt}</em> <span style="font-size:11px;color:#7d6608;">(répété)</span></div>`;
+      } else if(isCorrect){
+        score++; usedVals.push(val);
+        rows+=`<div class="corr-row" style="background:#eafaf1;border-radius:6px;padding:6px 12px;">✅ Arg. ${i+1} — <em>${argObj.txt}</em></div>`;
+      } else {
+        rows+=`<div class="corr-row" style="background:#fdf2f2;border-radius:6px;padding:6px 12px;">❌ Arg. ${i+1} — <em>${argObj.txt}</em> <span style="font-size:11px;color:#922b21;">(argument non adapté à ce régime)</span></div>`;
+      }
+      if(!isRepeat) usedVals.push(val);
+    });
+
+    // Correction type
+    rows+=`<div style="margin-top:12px;padding:10px 14px;background:#f5eef8;border:1px solid #c8bfe8;border-radius:6px;font-size:12px;color:#4a235a;">
+      <strong>✏ Arguments corrects — ${LABELS[e.regime]} :</strong><br>
+      ${pool.corrects.map(a=>'<span class="kw-found">'+a.txt+'</span>').join('<br>')}
+    </div>`;
+    renderPanel(eid, rows, score, total);
   }
   else if(eid==='e12' && d.e12){
     const e=d.e12;
@@ -3026,9 +3200,8 @@ function clearWorkspace(id){
   // Effacer seulement les valeurs numériques (pas les en-têtes ni libellés)
   ws.querySelectorAll('.editable-table tbody tr').forEach(tr=>{
     Array.from(tr.cells).forEach((td,ci)=>{
-      if(ci===0) return; // garder libellé col 1
       const inp=td.querySelector('input');
-      if(inp && td.className!=='del-cell') inp.value='';
+      if(inp && td.className!=='del-cell') inp.value='0';
     });
   });
   // Effacer les champs résultats clés et textareas
@@ -3040,14 +3213,14 @@ function clearWorkspace(id){
 }
 
 function resetAnswers(){
-  ['e1','e2','e3','e4','e5','e6','e7','e8','e9','e10','e11','e12'].forEach(clearWorkspace);
+  ['e1','e2','e3','e4','e5','e6','e7','e8','e9','e10','e11','e12','e13'].forEach(clearWorkspace);
 }
 
 // ==================== EXPORT ====================
 
 function exportData(){
   const exercises = {};
-  ['e1','e2','e3','e4','e5','e6','e7','e8','e9','e10','e11','e12'].forEach(id=>{
+  ['e1','e2','e3','e4','e5','e6','e7','e8','e9','e10','e11','e12','e13'].forEach(id=>{
     const el = document.getElementById(id);
     if(!el) return;
     const ex = { exercice:id.toUpperCase(), contexte:'', questions:[], tables:[], champs:{}, interpretations:{} };
@@ -3171,7 +3344,7 @@ function newDraw(){
   trackEvent('nouveau_tirage', 'Actions', 'Seed #' + (SEED % 10000));
   renderAll();
   // On efface seulement les valeurs numériques, pas les en-têtes ni libellés
-  ['e1','e2','e3','e4','e5','e6','e7','e8','e9','e10','e11','e12'].forEach(id=>{
+  ['e1','e2','e3','e4','e5','e6','e7','e8','e9','e10','e11','e12','e13'].forEach(id=>{
     const ws = document.querySelector(`#${id} .workspace`);
     if(!ws) return;
     ws.querySelectorAll('.editable-table tbody tr').forEach(tr=>{
@@ -3191,6 +3364,66 @@ function newDraw(){
 
 // ==================== E11 — STATUT JURIDIQUE ====================
 
+
+const ARGS_E11 = {
+  EURL: {
+    corrects: [
+      {val:"eurl-1", txt:"Entrepreneur seul — associé unique, contrôle total de la gestion"},
+      {val:"eurl-2", txt:"Régime TNS (travailleur non salarié) — charges sociales plus faibles"},
+      {val:"eurl-3", txt:"IR par défaut avec option possible à l'IS"},
+      {val:"eurl-4", txt:"Responsabilité limitée aux apports — patrimoine personnel protégé"},
+      {val:"eurl-5", txt:"Gestion simple avec moins de formalités administratives"},
+      {val:"eurl-6", txt:"Protection sociale plus faible mais coût réduit — adapté si peu de charges"},
+      {val:"eurl-7", txt:"Transformable en SARL si ajout d'associés ultérieurement"},
+    ],
+    leurres: [
+      {val:"l-1", txt:"Plusieurs associés possibles avec parts sociales"},
+      {val:"l-2", txt:"Président assimilé salarié au régime général"},
+      {val:"l-3", txt:"Meilleure protection sociale grâce au régime général"},
+      {val:"l-4", txt:"Charges sociales élevées mais couverture maladie optimale"},
+      {val:"l-5", txt:"Idéal pour accueillir des investisseurs ou lever des fonds"},
+      {val:"l-6", txt:"Décisions prises collectivement entre associés"},
+    ]
+  },
+  SASU: {
+    corrects: [
+      {val:"sasu-1", txt:"Entrepreneur seul — associé unique, contrôle total"},
+      {val:"sasu-2", txt:"Président assimilé salarié — régime général de la sécurité sociale"},
+      {val:"sasu-3", txt:"Meilleure protection sociale (maladie, retraite, prévoyance)"},
+      {val:"sasu-4", txt:"IS de droit, avec option IR possible pendant 5 ans"},
+      {val:"sasu-5", txt:"Structure flexible et crédible pour attirer des investisseurs"},
+      {val:"sasu-6", txt:"Responsabilité limitée aux apports"},
+      {val:"sasu-7", txt:"Transformable en SAS si entrée d'autres associés"},
+    ],
+    leurres: [
+      {val:"l-1", txt:"Charges sociales faibles grâce au statut TNS"},
+      {val:"l-2", txt:"IR par défaut sans option possible"},
+      {val:"l-3", txt:"Plusieurs associés obligatoires pour constituer la société"},
+      {val:"l-4", txt:"Gérant TNS avec cotisations réduites"},
+      {val:"l-5", txt:"Parts sociales à cession encadrée"},
+      {val:"l-6", txt:"Décisions collectives entre associés à la majorité"},
+    ]
+  },
+  SARL: {
+    corrects: [
+      {val:"sarl-1", txt:"Plusieurs associés — structure adaptée aux projets en commun"},
+      {val:"sarl-2", txt:"Parts sociales avec cession encadrée — protection contre les entrées non désirées"},
+      {val:"sarl-3", txt:"Gérant majoritaire au régime TNS, gérant minoritaire assimilé salarié"},
+      {val:"sarl-4", txt:"Responsabilité limitée aux apports pour tous les associés"},
+      {val:"sarl-5", txt:"IS de droit avec option IR pendant 5 ans"},
+      {val:"sarl-6", txt:"Cadre juridique structuré — décisions collectives entre associés"},
+      {val:"sarl-7", txt:"Transmission facilitée via cession de parts sociales"},
+    ],
+    leurres: [
+      {val:"l-1", txt:"Associé unique uniquement — contrôle total d'un seul entrepreneur"},
+      {val:"l-2", txt:"Président assimilé salarié au régime général"},
+      {val:"l-3", txt:"Actions librement cessibles en bourse ou entre tiers"},
+      {val:"l-4", txt:"Pas de capital social minimum requis"},
+      {val:"l-5", txt:"Charges sociales très faibles quel que soit le statut du gérant"},
+      {val:"l-6", txt:"Idéal si on cherche à éviter toute formalité administrative"},
+    ]
+  }
+};
 const SCENARIOS_E11 = [
   {
     id:1,
@@ -3246,6 +3479,30 @@ function genE11(){
 function renderE11(d){
   document.getElementById('e11-ctx').innerHTML = `<strong>Mise en situation :</strong> ${d.texte}`;
   document.getElementById('e11-trap').textContent = `EURL = TNS (charges faibles, protection sociale réduite). SASU = assimilé salarié (charges élevées, meilleure protection). SARL = plusieurs associés obligatoirement. Ne pas confondre EURL et SASU : les deux sont pour un seul associé mais avec des régimes sociaux opposés.`;
+
+  function peuplerArgs11(statut){
+    const pool = ARGS_E11[statut];
+    if(!pool) return;
+    const tous = [...pool.corrects, ...pool.leurres].sort(()=>Math.random()-0.5);
+    [1,2,3,4,5].forEach(i=>{
+      const sel = document.getElementById('e11-arg'+i);
+      if(!sel) return;
+      const cur = sel.value;
+      sel.innerHTML = '<option value="">-- Choisissez un argument --</option>';
+      tous.forEach(opt=>{
+        const o = document.createElement('option');
+        o.value = opt.val; o.textContent = opt.txt;
+        sel.appendChild(o);
+      });
+      if(cur) sel.value = cur;
+    });
+  }
+
+  const selStatut = document.getElementById('e11-choix');
+  if(selStatut){
+    selStatut.addEventListener('change', function(){ peuplerArgs11(this.value); });
+    if(selStatut.value) peuplerArgs11(selStatut.value);
+  }
 }
 
 // ==================== E12 — PRIX DE VENTE ====================
@@ -3421,6 +3678,114 @@ function toggleFormEx(eid){
   }
 }
 
+
+// Arguments prédéfinis par régime (corrects + leurres mélangés)
+const ARGS_E13 = {
+  SB: {
+    corrects: [
+      {val:'sb-1', txt:"Protège le patrimoine du conjoint des créanciers professionnels"},
+      {val:'sb-2', txt:"Chaque époux conserve ses biens propres acquis pendant le mariage"},
+      {val:'sb-3', txt:"Les dettes professionnelles n'engagent pas les biens du conjoint"},
+      {val:'sb-4', txt:"Nécessite un acte notarié (contrat de mariage)"},
+      {val:'sb-5', txt:"Idéal pour l'entrepreneur souhaitant protéger la résidence principale"},
+    ],
+    leurres: [
+      {val:'l-1', txt:"Les salaires sont des biens communs automatiquement"},
+      {val:'l-2', txt:"Applicable sans acte notarié"},
+      {val:'l-3', txt:"Partage de l'enrichissement en cas de divorce"},
+      {val:'l-4', txt:"Régime appliqué par défaut sans contrat"},
+    ]
+  },
+  CRA: {
+    corrects: [
+      {val:'cra-1', txt:"Régime légal applicable sans acte notarié"},
+      {val:'cra-2', txt:"Les biens acquis pendant le mariage sont communs"},
+      {val:'cra-3', txt:"Les biens propres (avant mariage, héritage, donation) restent personnels"},
+      {val:'cra-4', txt:"Les salaires gagnés pendant le mariage sont des biens communs"},
+      {val:'cra-5', txt:"Adapté quand le conjoint n'a pas de patrimoine à protéger"},
+    ],
+    leurres: [
+      {val:'l-1', txt:"Protège totalement le patrimoine du conjoint des créanciers"},
+      {val:'l-2', txt:"Nécessite un acte notarié"},
+      {val:'l-3', txt:"Chaque époux conserve ses biens acquis pendant le mariage"},
+      {val:'l-4', txt:"Partage équitable uniquement au divorce"},
+    ]
+  },
+  PA: {
+    corrects: [
+      {val:'pa-1', txt:"Fonctionne comme une séparation de biens pendant le mariage"},
+      {val:'pa-2', txt:"Autonomie financière totale pendant l'activité professionnelle"},
+      {val:'pa-3', txt:"En cas de divorce, l'enrichissement réalisé pendant le mariage est partagé"},
+      {val:'pa-4', txt:"Protège le conjoint en cas de forte disparité d'enrichissement"},
+      {val:'pa-5', txt:"Combine autonomie et solidarité au moment de la dissolution"},
+    ],
+    leurres: [
+      {val:'l-1', txt:"Les biens sont communs dès l'acquisition pendant le mariage"},
+      {val:'l-2', txt:"Régime appliqué par défaut sans contrat"},
+      {val:'l-3', txt:"Les dettes professionnelles engagent les biens du conjoint"},
+      {val:'l-4', txt:"Identique à la séparation de biens même en cas de divorce"},
+    ]
+  }
+};
+
+const SCENARIOS_E13 = [
+  { regime:'SB', ctx:"Atilla est opticien lunetier indépendant (EURL). Il est marié et souhaite protéger les biens personnels de son conjoint, notamment la résidence principale acquise avant le mariage. Il envisage de contracter un emprunt professionnel de 150 000 €.", q2:"Quels biens constituent le patrimoine propre d'Atilla sous ce régime ? Donnez 2 exemples concrets.", indices:['protection conjoint','biens propres','emprunt professionnel','résidence principale','patrimoine séparé','acte notarié','créanciers professionnels'], piege:"Sous séparation de biens, les dettes professionnelles d'Atilla n'engagent pas les biens de son conjoint. Mais un bien acheté ensemble reste en indivision." },
+  { regime:'SB', ctx:"Atilla ouvre Optique AkVision en SARL. Son conjoint travaille dans un autre secteur. Ils souhaitent que les difficultés éventuelles du magasin n'impactent pas le patrimoine familial. Ils n'ont pas encore signé de contrat de mariage.", q2:"Quelles démarches sont nécessaires pour adopter ce régime ? Y a-t-il un délai si le mariage est déjà contracté ?", indices:['protection patrimoine','acte notarié','contrat mariage','créanciers','dettes sociales','2 ans','homologation'], piege:"Sans contrat de mariage, le couple est automatiquement sous le régime légal (communauté réduite aux acquêts). Changer de régime après le mariage nécessite un acte notarié et 2 ans minimum sous le régime actuel." },
+  { regime:'PA', ctx:"Atilla et son conjoint sont tous les deux actifs professionnellement. Atilla souhaite ouvrir Optique AkVision. Ils veulent rester autonomes financièrement pendant l'activité, tout en garantissant un partage équitable si leur union se terminait.", q2:"En cas de divorce, comment se calcule la créance de participation ? Qui paie quoi ?", indices:['autonomie financière','acquêts','enrichissement','divorce','créance de participation','partage équitable','dissolution'], piege:"La participation aux acquêts fonctionne COMME une séparation de biens pendant le mariage. C'est uniquement en cas de dissolution que l'enrichissement est partagé. Ne pas confondre avec la communauté légale." },
+  { regime:'CRA', ctx:"Atilla vient de se marier sans contrat. Il souhaite comprendre son régime matrimonial actuel avant d'ouvrir son magasin d'optique. Son conjoint ne travaille pas et ne possède aucun patrimoine personnel.", q2:"Quels sont les biens propres d'Atilla sous ce régime légal ? Donnez 3 exemples (biens avant mariage, héritage, etc.).", indices:['régime légal','sans contrat','biens communs','biens propres','avant mariage','héritage','donation','salaires communs'], piege:"Les salaires gagnés pendant le mariage sont des biens COMMUNS même versés sur un compte personnel. Les biens reçus par héritage ou donation restent propres même pendant le mariage." },
+  { regime:'SB', ctx:"Atilla est marié depuis 3 ans sous le régime légal. Il veut changer de régime avant de racheter un fonds de commerce d'optique avec un emprunt important. Son conjoint est d'accord avec ce changement.", q2:"Quel est le délai minimum pour changer de régime matrimonial ? Dans quel cas faut-il une homologation par le tribunal ?", indices:['changement régime','acte notarié','2 ans minimum','homologation tribunal','protection entrepreneur','créanciers professionnels'], piege:"On ne peut changer de régime qu'après 2 ans sous le régime actuel. Si des enfants mineurs sont impliqués ou si des créanciers s'y opposent, une homologation par le tribunal judiciaire est nécessaire." },
+];
+
+const KEYWORDS_E13 = {
+  SB:  ['séparation','biens propres','protection','créanciers','notarié','patrimoine séparé','acte notarié','emprunt','résidence','autonomie','contrat'],
+  CRA: ['communauté','légal','acquêts','salaires communs','biens propres','avant mariage','héritage','donation','sans contrat'],
+  PA:  ['participation','acquêts','enrichissement','divorce','dissolution','autonomie','créance','partage','équitable'],
+};
+
+function genE13(){
+  const idx = Math.abs(rng(0,SCENARIOS_E13.length,1)) % SCENARIOS_E13.length;
+  DATA.e13 = {...SCENARIOS_E13[idx]};
+  return DATA.e13;
+}
+
+function renderE13(d){
+  const el = id => document.getElementById(id);
+  if(el('e13-ctx'))  el('e13-ctx').innerHTML  = d.ctx;
+  if(el('e13-q2'))   el('e13-q2').innerHTML   = d.q2;
+  if(el('e13-trap')) el('e13-trap').textContent = d.piege;
+
+  // Peupler les selects arguments selon le régime sélectionné
+  function peuplerArgs(regime){
+    const pool = ARGS_E13[regime];
+    if(!pool) return;
+    // Mélanger corrects + leurres
+    const tous = [...pool.corrects, ...pool.leurres].sort(()=>Math.random()-0.5);
+    [1,2,3].forEach(i=>{
+      const sel = el('e13-arg'+i);
+      if(!sel) return;
+      const currentVal = sel.value;
+      sel.innerHTML = '<option value="">-- Choisissez un argument --</option>';
+      tous.forEach(opt=>{
+        const o = document.createElement('option');
+        o.value = opt.val;
+        o.textContent = opt.txt;
+        sel.appendChild(o);
+      });
+      if(currentVal) sel.value = currentVal;
+    });
+  }
+
+  // Au changement de régime → repeupler
+  const selectRegime = el('e13-choix');
+  if(selectRegime){
+    selectRegime.addEventListener('change', function(){
+      peuplerArgs(this.value);
+    });
+    // Peupler avec le régime actuel si déjà sélectionné
+    if(selectRegime.value) peuplerArgs(selectRegime.value);
+  }
+}
+
 function renderAll(){
   renderE1(genE1());
   renderE2(genE2());
@@ -3434,6 +3799,7 @@ function renderAll(){
   renderE10(genE10());
   renderE11(genE11());
   renderE12(genE12());
+  renderE13(genE13());
 }
 
 // update regen button to have spin icon
@@ -3514,13 +3880,7 @@ function corrigerRedac(textareaId, keywords, required){
 
 </script>
 
-<script>
-  if ("serviceWorker" in navigator && location.hostname !== "www.claudeusercontent.com") {
-    navigator.serviceWorker.register("./sw.js")
-      .then(() => console.log("PWA AKvGestion activée"))
-      .catch(err => console.error("Erreur Service Worker:", err));
-  }
-</script>
+<!-- Service Worker désactivé (sw.js absent) -->
 
 </body>
 </html>
