@@ -2453,9 +2453,12 @@ function makeDeleteCell(tr){
 
 
 function fmtInput(inp){
-  const raw=inp.value.replace(/\s/g,'').replace(',','.');
+  const raw=inp.value.replace(/[\u00a0\u202f\s]/g,'').replace(',','.');
   const n=parseFloat(raw);
-  if(!isNaN(n)){ inp.value=n.toLocaleString('fr-FR',{maximumFractionDigits:2}); }
+  if(!isNaN(n)){
+    inp.value=n.toLocaleString('fr-FR',{maximumFractionDigits:2})
+               .replace(/\u202f/g,' ').replace(/\u00a0/g,' ');
+  }
 }
 
 function attachFormat(inp, isFirst){
@@ -2577,8 +2580,9 @@ function buildTable(id, rowsInputId, nbCols){
         inp.placeholder='Libellé...';
         inp.style.fontFamily="'Barlow',sans-serif";
         inp.style.textAlign='left';
-        // Restaurer libellé si existait
         if(savedRowLabels[r]) inp.value=savedRowLabels[r];
+        inp.addEventListener('focus',()=>{ if(inp.value==='0') inp.value=''; });
+        inp.addEventListener('blur',()=>{ if(inp.value.trim()==='') inp.value='0'; });
       } else {
         inp.placeholder='0';
         attachFormat(inp,false);
@@ -2632,8 +2636,11 @@ function addRow(id){
     const td = tr.insertCell();
     const inp = document.createElement('input');
     inp.type='text';
-    if(c===0){ inp.placeholder='Libellé...'; inp.style.fontFamily="'Barlow',sans-serif"; inp.style.textAlign='left'; }
-    else { inp.placeholder='0'; attachFormat(inp,false); }
+    if(c===0){
+      inp.placeholder='Libellé...'; inp.style.fontFamily="'Barlow',sans-serif"; inp.style.textAlign='left';
+      inp.addEventListener('focus',()=>{ if(inp.value==='0') inp.value=''; });
+      inp.addEventListener('blur',()=>{ if(inp.value.trim()==='') inp.value='0'; });
+    } else { inp.placeholder='0'; attachFormat(inp,false); }
     td.appendChild(inp);
   }
   tr.appendChild(makeDeleteCell());
@@ -3816,6 +3823,20 @@ function renderAll(){
 // update regen button to have spin icon
 document.addEventListener('DOMContentLoaded',()=>{
   document.querySelector('.btn-red').innerHTML = '<span class="spin">⟳</span> Nouveau tirage';
+
+  // ── SANITIZER PASTE GLOBAL ──
+  // Nettoie TOUS les caractères invisibles sur n'importe quel input du site
+  document.addEventListener('paste', function(e){
+    const target = e.target;
+    if(target.tagName !== 'INPUT' && target.tagName !== 'TEXTAREA') return;
+    e.preventDefault();
+    const raw = (e.clipboardData || window.clipboardData).getData('text');
+    // Supprimer : espace fine  , insécable  , zero-width ​, BOM ﻿, etc.
+    const clean = raw
+      .replace(/[\u00a0\u202f\u2009\u2008\u200b\u200c\u200d\u200e\u200f\u2060\ufeff]/g, '')
+      .trim();
+    document.execCommand('insertText', false, clean);
+  }, true);
   // Formatage temps réel sur tous les kf-input
   document.querySelectorAll('.kf-input').forEach(inp=>{
     inp.addEventListener('input',()=>{
