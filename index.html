@@ -709,7 +709,7 @@ tfoot td:not(:first-child){text-align:right;font-family:'DM Mono',monospace;}
   <div class="formule-ligne"><span class="formule-label">Base amortissable =</span> Coût HT <span class="frac-op">−</span> Valeur résiduelle</div>
   <div class="formule-ligne"><span class="formule-label">VNC =</span> Coût HT <span class="frac-op">−</span> Amortissements cumulés</div>
 </div>
-<div class="piege-box"><strong>⚠ Pièges :</strong> VR toujours déduite de la base. Bien mis en service le 15 → prorata du mois suivant.</div>
+<div class="piege-box"><strong>⚠ Pièges :</strong> VR toujours déduite de la base amortissable. Prorata en <strong>jours comptables</strong> : 1 an = 360 j, 1 mois = 30 j. Mis en service le <strong>15 juillet</strong> → jours écoulés = 6×30+15 = 195 j → jours restants = <strong>165 j</strong>. Dotation = Base × Taux × jours/360.</div>
       </div>
       <div class="trap" id="e4-trap"></div>
       </div>
@@ -1712,26 +1712,84 @@ function genE3(){
 }
 
 function genE4(){
-  const coutA = rng(12000,30000,1000);
-  const dureeA = rng(4,8,1);
-  const moisDebutA = rng(2,9,1);
   const moisNames = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre'];
-  const moisA = moisNames[moisDebutA-1];
-  const prorataMoisA = 12 - moisDebutA + 1;
-  const tauxA = 100/dureeA;
-  const dotA1 = Math.round(coutA * tauxA/100 * prorataMoisA/12);
 
-  const coutB = rng(15000,40000,1000);
-  const vrB = rng(1000,5000,500);
-  const dureeB = rng(3,6,1);
-  const moisDebutB = rng(1,8,1);
-  const moisB = moisNames[moisDebutB-1];
-  const prorataMoisB = 12 - moisDebutB + 1;
-  const baseB = coutB - vrB;
-  const tauxB = 100/dureeB;
-  const dotB1 = Math.round(baseB * tauxB/100 * prorataMoisB/12);
+  // ── Scénario aléatoire parmi 4 types ──
+  const scenario = Math.abs(rng(0,4,1)) % 4;
 
-  DATA.e4 = {coutA,dureeA,moisA,moisDebutA,prorataMoisA,tauxA,dotA1,coutB,vrB,dureeB,moisB,moisDebutB,prorataMoisB,baseB,tauxB,dotB1};
+  // Bien A
+  const coutA   = rng(12000,30000,1000);
+  const dureeA  = rng(4,8,1);
+  const tauxA   = 100/dureeA;
+  const moisDebutA = rng(2,9,1);
+  const moisA   = moisNames[moisDebutA-1];
+  const joursEcoulsA = (moisDebutA-1)*30; // 1er du mois
+  const joursA  = 360 - joursEcoulsA;
+
+  // Bien B
+  const coutB  = rng(15000,45000,1000);
+  const dureeB = rng(3,7,1);
+  const tauxB  = 100/dureeB;
+  const moisDebutB = rng(2,9,1);
+  const moisB  = moisNames[moisDebutB-1];
+
+  let vrA=0, vrB=0, baseA, baseB, dotA1, dotB1;
+  let jourDebA, jourDebB, joursEcoulsB, joursB;
+  let methodeA, methodeB; // 'lineaire' ou 'degressif'
+
+  // Scénario 0 : A linéaire sans VR (1er mois), B linéaire avec VR (15 mois)
+  // Scénario 1 : A linéaire avec VR (1er mois), B linéaire sans VR (15 mois)
+  // Scénario 2 : A linéaire sans VR (15 mois), B linéaire avec VR (1er mois)
+  // Scénario 3 : A linéaire avec VR (15 mois), B linéaire sans VR (15 mois)
+
+  if(scenario===0){
+    vrA=0; vrB=rng(1000,5000,500);
+    jourDebA=1; jourDebB=15;
+    joursEcoulsB=(moisDebutB-1)*30+15; joursB=360-joursEcoulsB;
+    baseA=coutA; baseB=coutB-vrB;
+    dotA1=Math.round(baseA*tauxA/100*joursA/360);
+    dotB1=Math.round(baseB*tauxB/100*joursB/360);
+  } else if(scenario===1){
+    vrA=rng(500,3000,500); vrB=0;
+    jourDebA=1; jourDebB=15;
+    joursEcoulsB=(moisDebutB-1)*30+15; joursB=360-joursEcoulsB;
+    baseA=coutA-vrA; baseB=coutB;
+    dotA1=Math.round(baseA*tauxA/100*joursA/360);
+    dotB1=Math.round(baseB*tauxB/100*joursB/360);
+  } else if(scenario===2){
+    vrA=0; vrB=rng(1000,5000,500);
+    jourDebA=15; jourDebB=1;
+    const joursEcoulsA15=(moisDebutA-1)*30+15;
+    const joursA15=360-joursEcoulsA15;
+    joursEcoulsB=(moisDebutB-1)*30; joursB=360-joursEcoulsB;
+    baseA=coutA; baseB=coutB-vrB;
+    dotA1=Math.round(baseA*tauxA/100*joursA15/360);
+    dotB1=Math.round(baseB*tauxB/100*joursB/360);
+    // Override joursA pour affichage
+    const _jea15=(moisDebutA-1)*30+15;
+    DATA._e4_joursEcoulsA=_jea15; DATA._e4_joursA=360-_jea15;
+  } else {
+    vrA=rng(500,3000,500); vrB=0;
+    jourDebA=15; jourDebB=15;
+    const joursEcoulsA15=(moisDebutA-1)*30+15;
+    const joursA15=360-joursEcoulsA15;
+    joursEcoulsB=(moisDebutB-1)*30+15; joursB=360-joursEcoulsB;
+    baseA=coutA-vrA; baseB=coutB;
+    dotA1=Math.round(baseA*tauxA/100*joursA15/360);
+    dotB1=Math.round(baseB*tauxB/100*joursB/360);
+    DATA._e4_joursEcoulsA=(moisDebutA-1)*30+15; DATA._e4_joursA=360-DATA._e4_joursEcoulsA;
+  }
+
+  // Jours A standard (scenario 0 et 1 : 1er du mois)
+  const joursEcoulsAFinal = (scenario<=1) ? joursEcoulsA : (DATA._e4_joursEcoulsA||joursEcoulsA);
+  const joursAFinal       = (scenario<=1) ? joursA       : (DATA._e4_joursA||joursA);
+
+  DATA.e4 = {
+    scenario, coutA, dureeA, moisA, moisDebutA, tauxA, vrA, baseA: baseA||coutA, dotA1, jourDebA: jourDebA||1,
+    joursEcoulsA: joursEcoulsAFinal, joursA: joursAFinal,
+    coutB, dureeB, moisB, moisDebutB, tauxB, vrB, baseB: baseB||coutB, dotB1, jourDebB: jourDebB||15,
+    joursEcoulsB: joursEcoulsB||(moisDebutB-1)*30+15, joursB: joursB||(360-((moisDebutB-1)*30+15))
+  };
   return DATA.e4;
 }
 
@@ -2236,20 +2294,36 @@ function renderE3(d){
 function renderE4(d){
   const bA = pick(SYN.bienA);
   const bB = pick(SYN.bienB);
-  document.getElementById('e4-ctx').innerHTML = `<strong>Mise en situation :</strong> Optique AkVision acquiert deux immobilisations. <strong>${bA.nom}</strong> (${bA.type}) mis en service le 1er ${d.moisA} 2025, durée ${d.dureeA} ans, sans valeur résiduelle. <strong>${bB.nom}</strong> (${bB.type}) mis en service le 15 ${d.moisB} 2025, durée ${d.dureeB} ans, valeur résiduelle ${fmt(d.vrB)} €.`;
-  const rows = shuffle([
-    {lib:"Coût d\'achat HT", valA:`${fmt(d.coutA)} €`, valB:`${fmt(d.coutB)} €`},
-    {lib:'Date de mise en service', valA:`1er ${d.moisA} 2025`, valB:`15 ${d.moisB} 2025`},
-    {lib:"Durée d\'amortissement", valA:`${d.dureeA} ans`, valB:`${d.dureeB} ans`},
-    {lib:'Valeur résiduelle', valA:'0 €', valB:`${fmt(d.vrB)} €`},
 
+  const dateA = d.jourDebA===1 ? `1er ${d.moisA} 2025` : `15 ${d.moisA} 2025`;
+  const dateB = d.jourDebB===1 ? `1er ${d.moisB} 2025` : `15 ${d.moisB} 2025`;
+  const vrALib = d.vrA>0 ? `${fmt(d.vrA)} €` : 'Aucune';
+  const vrBLib = d.vrB>0 ? `${fmt(d.vrB)} €` : 'Aucune';
+
+  document.getElementById('e4-ctx').innerHTML = `<strong>Mise en situation :</strong> Optique AkVision acquiert deux immobilisations en 2025.<br>
+    <strong>${bA.nom}</strong> (${bA.type}) — mis en service le ${dateA}, durée ${d.dureeA} ans${d.vrA>0?', valeur résiduelle '+fmt(d.vrA)+' €':', sans valeur résiduelle'}.<br>
+    <strong>${bB.nom}</strong> (${bB.type}) — mis en service le ${dateB}, durée ${d.dureeB} ans${d.vrB>0?', valeur résiduelle '+fmt(d.vrB)+' €':', sans valeur résiduelle'}.`;
+
+  const rows = shuffle([
+    {lib:"Coût d'achat HT",         valA:`${fmt(d.coutA)} €`,  valB:`${fmt(d.coutB)} €`},
+    {lib:'Date de mise en service',  valA:`${dateA} (${d.joursA} j)`, valB:`${dateB} (${d.joursB} j)`},
+    {lib:"Durée d'amortissement",    valA:`${d.dureeA} ans`,    valB:`${d.dureeB} ans`},
+    {lib:'Valeur résiduelle',        valA:vrALib,               valB:vrBLib},
   ]);
   document.getElementById('e4-data-table').innerHTML = `
     <thead><tr><th>Paramètre</th><th>${bA.nom}</th><th>${bB.nom}</th></tr></thead>
     <tbody>${rows.map(r=>`<tr><td>${r.lib}</td><td>${r.valA}</td><td>${r.valB}</td></tr>`).join('')}</tbody>`;
-  document.getElementById('e4-q1').innerHTML = `Dressez le <strong>plan d'amortissement complet du "${bA.nom}"</strong> avec prorata temporis pour 2025. Colonnes : année, base amortissable, taux, dotation, amortissements cumulés, VNC.`;
-  document.getElementById('e4-q2').innerHTML = `Calculez la <strong>dotation 2025 du "${bB.nom}"</strong> avec prorata temporis (règle : pour un bien mis en service le 15 du mois, retenir le 1er du mois suivant). Justifiez votre calcul.`;
-  document.getElementById('e4-trap').textContent = `"${bB.nom}" : la valeur résiduelle (${fmt(d.vrB)} €) se déduit de la base amortissable → base = ${fmt(d.coutB)} − ${fmt(d.vrB)} = ${fmt(d.baseB)} €. Prorata : mis en service le 15 ${d.moisB} → ${12-d.moisDebutB} mois (du mois suivant à décembre).`;
+
+  document.getElementById('e4-q1').innerHTML = `Dressez le <strong>plan d'amortissement complet du "${bA.nom}"</strong> avec prorata temporis pour 2025. Colonnes : année, base amortissable, taux, dotation annuelle, amortissements cumulés, VNC.`;
+  document.getElementById('e4-q2').innerHTML = `Calculez la <strong>dotation 2025 du "${bB.nom}"</strong>${d.vrB>0?' (pensez à déduire la VR de la base)':''}. Justifiez le prorata en jours comptables (1 an = 360 j, 1 mois = 30 j).`;
+
+  // Piège dynamique selon scénario
+  let traps = [];
+  if(d.vrA>0) traps.push(`"${bA.nom}" : VR ${fmt(d.vrA)} € → base = ${fmt(d.coutA)} − ${fmt(d.vrA)} = ${fmt(d.baseA)} €`);
+  if(d.vrB>0) traps.push(`"${bB.nom}" : VR ${fmt(d.vrB)} € → base = ${fmt(d.coutB)} − ${fmt(d.vrB)} = ${fmt(d.baseB)} €`);
+  traps.push(`Prorata A : ${d.joursEcoulsA} j écoulés → ${d.joursA} j restants → dotation × ${d.joursA}/360`);
+  traps.push(`Prorata B : ${d.joursEcoulsB} j écoulés → ${d.joursB} j restants → dotation × ${d.joursB}/360`);
+  document.getElementById('e4-trap').textContent = traps.join(' | ');
 }
 
 function renderE5(d){
