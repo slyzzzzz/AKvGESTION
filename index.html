@@ -2460,12 +2460,21 @@ function fmtInput(inp){
 
 function attachFormat(inp, isFirst){
   if(isFirst){ inp.dataset.numeric='false'; return; }
-  inp.addEventListener('blur',()=>fmtInput(inp));
+  // Focus : vider si valeur est 0 ou vide pour saisie directe
+  inp.addEventListener('focus',()=>{
+    const v = inp.value.replace(/[\u00a0\u202f\s]/g,'').replace(',','.');
+    if(v==='0' || v==='') inp.value='';
+  });
+  inp.addEventListener('blur',()=>{
+    if(inp.value.trim()==='') inp.value='0';
+    fmtInput(inp);
+  });
   inp.addEventListener('input',()=>{
-    const v=inp.value.replace(/\s/g,'');
+    const v=inp.value.replace(/[\u00a0\u202f\s]/g,'');
     if(/^-?[\d]{4,}$/.test(v)){
       const n=parseInt(v);
-      inp.value=n.toLocaleString('fr-FR');
+      // Utiliser espace normal (pas  )
+      inp.value=n.toLocaleString('fr-FR').replace(/\u202f/g,'\u0020').replace(/\u00a0/g,'\u0020');
       try{ inp.setSelectionRange(inp.value.length,inp.value.length); }catch(e){}
     }
   });
@@ -3197,14 +3206,16 @@ function corriger(eid){
 function clearWorkspace(id){
   const ws = document.querySelector(`#${id} .workspace`);
   if(!ws) return;
-  // Effacer seulement les valeurs numériques (pas les en-têtes ni libellés)
+  // Remettre à 0 les cellules numériques du tbody
   ws.querySelectorAll('.editable-table tbody tr').forEach(tr=>{
-    Array.from(tr.cells).forEach((td,ci)=>{
+    Array.from(tr.cells).forEach((td)=>{
       const inp=td.querySelector('input');
       if(inp && td.className!=='del-cell') inp.value='0';
     });
   });
-  // Effacer les champs résultats clés et textareas
+  // Vider les headers (colonne violette / thead)
+  ws.querySelectorAll('.editable-table thead input').forEach(inp=>{ inp.value=''; });
+  // Vider les champs résultats clés et textareas
   ws.querySelectorAll('.kf-input').forEach(el=>el.value='');
   ws.querySelectorAll('textarea').forEach(el=>el.value='');
   // Effacer les panneaux de correction
